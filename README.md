@@ -39,10 +39,17 @@ I built this just to go over the top of neovim's builtin terminal not to do a bu
 
 ### Usage
 
-```
-Coming soon...
-```
+```vim
+" set
+let g:toggleterm_terminal_mapping = '<C-\>'
+" or
+autocmd TermEnter term://*toggleterm#*
+      \ tnoremap <silent><c-t> <C-\><C-n>:exe v:count1 . "ToggleTerm"<CR>
 
-### Todo
+" By applying the mappings this way you can pass a count to your
+" mapping to open a specific window.
+" For example: 2<C-t> will open terminal 2
+nnoremap <silent><c-t> :<c-u>exe v:count1 . "ToggleTerm"<CR>
+inoremap <silent><c-t> <Esc>:<c-u>exe v:count1 . "ToggleTerm"<CR>
 
-- [ ] Remove default mappings
+```

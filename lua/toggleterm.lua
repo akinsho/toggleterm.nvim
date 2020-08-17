@@ -4,9 +4,7 @@ local colors = require("toggleterm/colors")
 -----------------------------------------------------------
 -- Export
 -----------------------------------------------------------
-local M = {
-  darken_terminal = colors.darken_terminal,
-}
+local M = {}
 
 -----------------------------------------------------------
 -- Constants
@@ -43,6 +41,20 @@ function open_split(size)
     vim.cmd(size .. 'sp')
     -- move horizontal split to the bottom
     vim.cmd('wincmd J')
+  end
+end
+
+--- Source: https://teukka.tech/luanvim.html
+--- @param definitions table<string,table>
+local function create_augroups(definitions)
+  for group_name, definition in pairs(definitions) do
+    vim.cmd('augroup '..group_name)
+    vim.cmd('autocmd!')
+    for _,def in pairs(definition) do
+      local command = table.concat(vim.tbl_flatten{'autocmd', def}, ' ')
+      vim.cmd(command)
+    end
+    vim.cmd('augroup END')
   end
 end
 
@@ -97,13 +109,15 @@ function set_opts(num, bufnr, win_id)
   api.nvim_buf_set_var(bufnr, "toggle_number", num)
 end
 
---- @param num string
---- @param bufnr string
-function add_autocommands(num, bufnr)
-  vim.cmd('augroup ToggleTerm'..num)
-  vim.cmd('au!')
-  vim.cmd(string.format('autocmd TermClose <buffer=%d> lua require"toggle_term".delete(%d)', bufnr, num))
-  vim.cmd('augroup END')
+--- @param bufnr number
+function setup_mappings(bufnr)
+  local mapping = vim.g.toggleterm_terminal_mapping
+  if mapping then
+    api.nvim_buf_set_keymap(bufnr,'t', mapping, '<C-\\><C-n>:exe v:count1 . "ToggleTerm"<CR>', {
+        silent = true,
+        noremap = true,
+      })
+  end
 end
 
 --- @param bufnr number
@@ -241,7 +255,16 @@ function M.open(num, size)
     local name = vim.o.shell..';#'..term_ft..'#'..num
     term.job_id = fn.termopen(name, { detach = 1 })
 
-    add_autocommands(num, term.bufnr)
+    create_augroups({
+      ["ToggleTerm"..term.bufnr] = {
+        {
+          "TermClose",
+          string.format("<buffer=%d>", term.bufnr),
+          string.format('lua require"toggleterm".delete(%d)', num),
+        };
+      }
+    })
+    setup_mappings(term.bufnr)
     terminals[num] = term
   else
     open_split(size)
@@ -287,6 +310,15 @@ function M.close(num)
   end
 end
 
+-- FIXME normal terminals have no filetype. The only other type of terminal
+-- we should color is toggleterm. This can be done in a clear way though.
+function M.__apply_colors()
+  local ft = vim.bo.filetype
+  if vim.bo.buftype == 'terminal' and (ft == '' or ft == 'toggleterm') then
+    colors.darken_terminal(-30)
+  end
+end
+
 --- If a count is provided we operate on the specific terminal buffer
 --- i.e. 2ToggleTerm => open or close Term 2
 --- if the count is 1 we use a heuristic which is as follows
@@ -309,6 +341,32 @@ function M.toggle(count, size)
   end
 end
 
+function M.setup()
+  local autocommands = {
+    {
+      "BufEnter",
+      "term://*toggleterm#*",
+      "lua require'toggleterm'.close_last_window()",
+    },
+    {
+      "TermOpen",
+      "term://*toggleterm#*",
+      "lua require'toggleterm'.on_term_open()",
+    }
+  }
+  if vim.g.toggleterm_shade_terminals then
+    vim.list_extend(autocommands ,{
+        {
+          "TermOpen,BufEnter,ColorScheme",
+          "term://*zsh*,term://*bash*,term://*toggleterm#*",
+          "lua require('toggleterm').__apply_colors()"
+        },
+      })
+  end
+  create_augroups({ ToggleTerminal = autocommands})
+end
+
+--- FIXME this shows a cached version of the terminals
 function M.introspect()
   print('All terminals: '..vim.inspect(terminals))
 end
