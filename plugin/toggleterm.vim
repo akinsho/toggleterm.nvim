@@ -15,7 +15,4 @@ lua require"toggleterm".setup()
 "--------------------------------------------------------------------------------
 " count defaults to 1
 command! -count=1 -complete=shellcmd -nargs=* TermExec lua require'toggleterm'.exec(<q-args>, <count>, 12)
-command! -count=1 TermGitPush lua require'toggleterm'.exec("git push", <count>, 12)
-command! -count=1 TermGitPushF lua require'toggleterm'.exec("git push -f", <count>, 12)
-
 command! -count=1 ToggleTerm lua require'toggleterm'.toggle(<count>, 12)

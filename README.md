@@ -7,11 +7,12 @@ A _neovim_ plugin to persist and toggle multiple terminals during an editing ses
 ## Why?
 
 Neovim's terminal is a very cool, but not super ergonomic tool to use. I find that I often want to
-set a process going and leave it continue to run in the background. I don't need to see it all the time though
-just be able to refer back to it at intervals. I also sometimes want to create a new terminal and run a few commands.
+set a process going and leave it continue to run in the background. I don't need to see it all the time though.
+I just need to be able to refer back to it at intervals. I also sometimes want to create a new terminal and run a few commands.
+Which may or may not be related to the ongoing process.
 
-Sometimes I want these side by side and I _really_ want these terminals to be easy to access and not clutter my buffer list.
-I also want my terminal to look different from non terminal buffers so I use `winhighlight` to darken them based on the `Normal`
+Sometimes I want these side by side, and I _really_ want these terminals to be easy to access and not clutter my buffer list.
+I also want my terminal to look different from non-terminal buffers so I use `winhighlight` to darken them based on the `Normal`
 background colour.
 
 This is the exact use case this was designed for. If that's your use case this might work for you. If not there are a lot of
@@ -24,25 +25,32 @@ but didn't want to end up maintaining a bunch of vimscript I had just managed to
 
 **Status: Alpha**
 
-It sort of works fine for the exact use case above, but there are undoubtedly some niggling bugs
+It sort of works fine for the exact use case above, but there are undoubtedly some niggling bugs.
 
 ## Roadmap
 
 All I really want this plugin to be is what I described above. A wrapper around the terminal functionality.
 
-It basically almost does all that I need it to.
+It basically (almost) does all that I need it to.
 
-I won't be turning this into a REPL plugin or doing a bunch of more complex stuff.
-If you find any issues _please_ consider **pull request** not an issue. I won't be breaking my back to maintain
+I won't be turning this into a REPL plugin or doing a bunch complex stuff.
+If you find any issues, _please_ consider a _pull request_ not an issue. I won't be breaking my back to maintain
 this especially if it isn't broken "on my machine". I'm also going to be pretty conservative about what I add,
-I built this just to go over the top of neovim's builtin terminal not to do a bunch more extra stuff that it doesn't do.
+I built this a thin layer over the neovim terminal, not to do a bunch more extra stuff that it doesn't do.
 
 ### Usage
 
+Setting the key to use for toggling the buffer will setup mapping for _insert, normal and terminal_ modes
+If you prefix the mapping with a number that particular terminal will be opened.
+
+`let g:toggleterm_terminal_mapping = '<C-\>'`
+
+alternatively you can do this manually (not recommended but, your prerogative)
+
 ```vim
 " set
-let g:toggleterm_terminal_mapping = '<C-\>'
-" or
+let g:toggleterm_terminal_mapping = '<C-t>'
+" or manually...
 autocmd TermEnter term://*toggleterm#*
       \ tnoremap <silent><c-t> <C-\><C-n>:exe v:count1 . "ToggleTerm"<CR>
 
@@ -52,4 +60,25 @@ autocmd TermEnter term://*toggleterm#*
 nnoremap <silent><c-t> :<c-u>exe v:count1 . "ToggleTerm"<CR>
 inoremap <silent><c-t> <Esc>:<c-u>exe v:count1 . "ToggleTerm"<CR>
 
+```
+
+This plugin provides 2 commands
+
+### `ToggleTerm`
+
+This is the command the mappings call under the hood. You can use it directly
+and prefix it with a count to target a specific terminal.
+
+### `TermExec`
+
+This command allows you to open a terminal with a specific action.
+e.g. `2TermExec git status` will run git status in terminal 2.
+
+### Custom commands
+
+You can create your on commands by using the lua functions this plugin provides directly
+
+```vim
+-command! -count=1 TermGitPush lua require'toggleterm'.exec("git push", <count>, 12)
+-command! -count=1 TermGitPushF lua require'toggleterm'.exec("git push -f", <count>, 12)
 ```

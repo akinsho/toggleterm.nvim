@@ -112,7 +112,7 @@ function set_opts(num, bufnr, win_id)
 end
 
 --- @param bufnr number
-function setup_mappings(bufnr)
+function setup_buffer_mappings(bufnr)
   local mapping = vim.g.toggleterm_terminal_mapping
   if mapping then
     api.nvim_buf_set_keymap(bufnr,'t', mapping, '<C-\\><C-n>:exe v:count1 . "ToggleTerm"<CR>', {
@@ -120,6 +120,20 @@ function setup_mappings(bufnr)
         noremap = true,
       })
   end
+end
+
+function setup_global_mappings()
+  local mapping = vim.g.toggleterm_terminal_mapping
+  -- v:count1 defaults the count to 1 but if a count is passed in uses that instead
+  -- <c-u> allows passing along the count
+  api.nvim_set_keymap('n', mapping, ':<c-u>exe v:count1 . "ToggleTerm"<CR>', {
+      silent = true,
+      noremap = true,
+    })
+  api.nvim_set_keymap('i', mapping, '<Esc>:<c-u>exe v:count1 . "ToggleTerm"<CR>', {
+      silent = true,
+      noremap = true,
+    })
 end
 
 --- @param bufnr number
@@ -266,7 +280,7 @@ function M.open(num, size)
         };
       }
     })
-    setup_mappings(term.bufnr)
+    setup_buffer_mappings(term.bufnr)
     terminals[num] = term
   else
     open_split(size)
@@ -344,6 +358,7 @@ function M.toggle(count, size)
 end
 
 function M.setup()
+  setup_global_mappings()
   local autocommands = {
     {
       "BufEnter",
