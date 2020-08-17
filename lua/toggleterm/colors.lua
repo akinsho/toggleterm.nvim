@@ -44,7 +44,6 @@ end
 -- Darken Terminal
 -----------------------------------------------------------
 function M.set_highlights(amount)
-  print("setting highlights")
   local bg_color = fn.synIDattr(fn.hlID('Normal'), 'bg')
   local darkened_bg = shade_color(bg_color, amount)
   vim.cmd('highlight DarkenedPanel guibg='..darkened_bg)

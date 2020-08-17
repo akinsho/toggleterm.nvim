@@ -2,7 +2,7 @@
 
 A _neovim_ plugin to persist and toggle multiple terminals during an editing session
 
-![screenshot](./github/toggleterm.png "Toggleterm in action")
+![screenshot](./github/toggleterm.gif "Toggleterm in action")
 
 ## Why?
 
@@ -22,7 +22,7 @@ much more stable alternatives.
 I wrote this initially in vimscript as part of my `init.vim`. I then realised I wanted to extend the functionality
 but didn't want to end up maintaining a bunch of vimscript I had just managed to hack into place 🤷.
 
-**Status**: Alpha
+**Status: Alpha**
 
 It sort of works fine for the exact use case above, but there are undoubtedly some niggling bugs
 
