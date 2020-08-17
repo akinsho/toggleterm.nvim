@@ -20,7 +20,7 @@ much more stable alternatives.
 
 ## Why Lua?
 
-I wrote this initially in vimscript as part of my `init.vim`. I then realised I wanted to extend the functionality
+I wrote this initially in vimscript as part of my `init.vim`. I then realised I wanted to extend the functionality,
 but didn't want to end up maintaining a bunch of vimscript I had just managed to hack into place 🤷.
 
 **Status: Alpha**
@@ -35,8 +35,7 @@ It basically (almost) does all that I need it to.
 
 I won't be turning this into a REPL plugin or doing a bunch complex stuff.
 If you find any issues, _please_ consider a _pull request_ not an issue. I won't be breaking my back to maintain
-this especially if it isn't broken "on my machine". I'm also going to be pretty conservative about what I add,
-I built this a thin layer over the neovim terminal, not to do a bunch more extra stuff that it doesn't do.
+this especially if it isn't broken "on my machine". I'm also going to be pretty conservative about what I add.
 
 ### Usage
 
