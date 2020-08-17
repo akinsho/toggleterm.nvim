@@ -4,7 +4,9 @@ local colors = require("toggleterm/colors")
 -----------------------------------------------------------
 -- Export
 -----------------------------------------------------------
-local M = {}
+local M = {
+  __set_highlights = colors.set_highlights
+}
 
 -----------------------------------------------------------
 -- Constants
@@ -315,7 +317,7 @@ end
 function M.__apply_colors()
   local ft = vim.bo.filetype
   if vim.bo.buftype == 'terminal' and (ft == '' or ft == 'toggleterm') then
-    colors.darken_terminal(-30)
+    colors.darken_terminal()
   end
 end
 
@@ -355,9 +357,19 @@ function M.setup()
     }
   }
   if vim.g.toggleterm_shade_terminals then
-    vim.list_extend(autocommands ,{
+    vim.list_extend(autocommands, {
         {
-          "TermOpen,BufEnter,ColorScheme",
+          -- call set highlights once on vim start
+          -- as this plugin might not be initialised till
+          -- after the colorscheme autocommand has fired
+          -- reapply highlights when the colorscheme
+          -- is re-applied
+          "VimEnter,ColorScheme",
+          "*",
+          "lua require'toggleterm'.__set_highlights(-30)"
+        },
+        {
+          "TermOpen",
           "term://*zsh*,term://*bash*,term://*toggleterm#*",
           "lua require('toggleterm').__apply_colors()"
         },

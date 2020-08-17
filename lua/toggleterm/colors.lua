@@ -43,14 +43,17 @@ end
 -----------------------------------------------------------
 -- Darken Terminal
 -----------------------------------------------------------
-function M.darken_terminal(amount)
+function M.set_highlights(amount)
+  print("setting highlights")
   local bg_color = fn.synIDattr(fn.hlID('Normal'), 'bg')
   local darkened_bg = shade_color(bg_color, amount)
   vim.cmd('highlight DarkenedPanel guibg='..darkened_bg)
   vim.cmd('highlight DarkenendStatusline gui=NONE guibg='..darkened_bg)
   -- setting ctermbg to black is a hack to prevent the statusline caret issue
   vim.cmd('highlight DarkenendStatuslineNC ctermbg=black gui=NONE guibg='..darkened_bg)
+end
 
+function M.darken_terminal()
   local highlights = {
     "Normal:DarkenedPanel",
     "VertSplit:DarkenedPanel",
