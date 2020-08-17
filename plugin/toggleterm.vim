@@ -7,7 +7,6 @@ endif
 
 let g:toggleterm_shade_terminals = 1
 
-
 lua require"toggleterm".setup()
 
 "--------------------------------------------------------------------------------
