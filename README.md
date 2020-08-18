@@ -9,7 +9,6 @@ A _neovim_ plugin to persist and toggle multiple terminals during an editing ses
 Neovim's terminal is a very cool, but not super ergonomic tool to use. I find that I often want to
 set a process going and leave it continue to run in the background. I don't need to see it all the time though.
 I just need to be able to refer back to it at intervals. I also sometimes want to create a new terminal and run a few commands.
-Which may or may not be related to the ongoing process.
 
 Sometimes I want these side by side, and I _really_ want these terminals to be easy to access and not clutter my buffer list.
 I also want my terminal to look different from non-terminal buffers so I use `winhighlight` to darken them based on the `Normal`
@@ -17,6 +16,8 @@ background colour.
 
 This is the exact use case this was designed for. If that's your use case this might work for you. If not there are a lot of
 much more stable alternatives.
+
+- [neoterm](https://github.com/kassio/neoterm)
 
 ## Why Lua?
 
@@ -33,13 +34,13 @@ All I really want this plugin to be is what I described above. A wrapper around 
 
 It basically (almost) does all that I need it to.
 
-I won't be turning this into a REPL plugin or doing a bunch complex stuff.
+I won't be turning this into a REPL plugin or doing a bunch of complex stuff.
 If you find any issues, _please_ consider a _pull request_ not an issue. I won't be breaking my back to maintain
 this especially if it isn't broken "on my machine". I'm also going to be pretty conservative about what I add.
 
 ### Usage
 
-Setting the key to use for toggling the buffer will setup mapping for _insert, normal and terminal_ modes
+Setting the key to use for toggling the terminal(s) will setup mappings for _insert, normal and terminal_ modes
 If you prefix the mapping with a number that particular terminal will be opened.
 
 `let g:toggleterm_terminal_mapping = '<C-\>'`
