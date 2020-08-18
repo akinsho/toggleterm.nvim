@@ -62,6 +62,16 @@ inoremap <silent><c-t> <Esc>:<c-u>exe v:count1 . "ToggleTerm"<CR>
 
 ```
 
+### Statusline
+
+In order to tell each terminal apart you can use the terminal buffer variable `b:toggle_number`
+in your statusline
+
+```vim
+" this is pseudo code
+let statusline .= '%{&ft == "toggleterm" ? "terminal (".b:toggle_number.")" : ""}'
+```
+
 This plugin provides 2 commands
 
 ### `ToggleTerm`
