@@ -59,8 +59,22 @@ autocmd TermEnter term://*toggleterm#*
 " For example: 2<C-t> will open terminal 2
 nnoremap <silent><c-t> :<c-u>exe v:count1 . "ToggleTerm"<CR>
 inoremap <silent><c-t> <Esc>:<c-u>exe v:count1 . "ToggleTerm"<CR>
+```
+
+### Set terminal shading
+
+This plugin automatically shades terminal filetypes to be darker than other window
+you can disable this by setting `g:toggleterm_shade_terminals = 0`
+
+alternatively you can set _which_ filetypes should be shaded by setting
 
 ```
+" fzf is just an example
+let g:toggleterm_shade_filetypes = ["none", "fzf"]
+
+```
+
+setting `"none"` will allow normal terminal buffers to be highlighted.
 
 ### Statusline
 

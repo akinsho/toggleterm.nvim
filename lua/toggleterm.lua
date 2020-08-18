@@ -36,7 +36,7 @@ function open_split(size)
   local has_open, win_ids = find_open_windows()
   if has_open then
     -- we need to be in the terminal window most recently opened
-    -- terminal in order to split to the right of it
+    -- in order to split to the right of it
     fn.win_gotoid(win_ids[#win_ids])
     vim.cmd('vsp')
   else
@@ -83,7 +83,9 @@ end
 
 --- Find the the first open terminal window
 --- by iterating all windows and matching the
---- containing buffers filetype
+--- containing buffers filetype with the passed in
+--- comparator function or the default which matches
+--- the filetype
 --- @param comparator function
 function find_open_windows(comparator)
   comparator = comparator or function (buf) return vim.bo[buf].filetype == term_ft end
@@ -179,10 +181,8 @@ function toggle_nth_term(num, size)
   end
 end
 
---- FIXME
---- we lose all state and windows can't be reconciled
---- NOTE try checking if the buffer is a terminal with a matching
---- name if so see if we have it's number stored
+--- FIXME DEV only issue, on reloading/sourcing this file
+--- we lose all state and term windows can't be reconciled
 --- 1. Find out if the name matches
 --- 2. Check if the number is the list of terminals if not add it
 --- 3. If it is not the correct type make it so
@@ -225,7 +225,8 @@ function M.close_last_window()
         end
     end
     -- FIXME switching causes the buffer
-    -- switch to to have highlighting
+    -- switched to to have no highlighting
+    -- no idea why
     vim.cmd('keepalt bnext')
   end
 end
@@ -326,11 +327,25 @@ function M.close(num)
   end
 end
 
--- FIXME normal terminals have no filetype. The only other type of terminal
--- we should color is toggleterm. This can be done in a clear way though.
+--- only shade explicitly specified filetypes
 function M.__apply_colors()
   local ft = vim.bo.filetype
-  if vim.bo.buftype == 'terminal' and (ft == '' or ft == 'toggleterm') then
+
+  if not vim.bo.filetype or vim.bo.filetype == '' then
+    ft = 'none'
+  end
+
+  local allow_list = vim.g.toggleterm_shade_filetypes or {}
+  table.insert(allow_list, term_ft)
+
+  local is_enabled_ft = false
+  for _, filetype in ipairs(allow_list) do
+      if ft == filetype then
+        is_enabled_ft = true
+        break
+      end
+  end
+  if vim.bo.buftype == 'terminal' and is_enabled_ft then
     colors.darken_terminal()
   end
 end
