@@ -103,6 +103,6 @@ e.g. `2TermExec git status` will run git status in terminal 2.
 You can create your on commands by using the lua functions this plugin provides directly
 
 ```vim
--command! -count=1 TermGitPush lua require'toggleterm'.exec("git push", <count>, 12)
--command! -count=1 TermGitPushF lua require'toggleterm'.exec("git push -f", <count>, 12)
+command! -count=1 TermGitPush  lua require'toggleterm'.exec("git push",    <count>, 12)
+command! -count=1 TermGitPushF lua require'toggleterm'.exec("git push -f", <count>, 12)
 ```
