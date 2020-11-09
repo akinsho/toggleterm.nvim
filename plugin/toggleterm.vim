@@ -5,13 +5,9 @@ if !has('nvim-0.5')
   finish
 endif
 
-let g:toggleterm_shade_terminals = 1
-
-lua require"toggleterm".setup()
-
 "--------------------------------------------------------------------------------
 " Commands
 "--------------------------------------------------------------------------------
 " count defaults to 1
-command! -count=1 -complete=shellcmd -nargs=* TermExec lua require'toggleterm'.exec(<q-args>, <count>, 12)
-command! -count=1 ToggleTerm lua require'toggleterm'.toggle(<count>, 12)
+command! -count=1 -complete=shellcmd -nargs=* TermExec lua require'toggleterm'.exec(<q-args>, <count>)
+command! -count=1 ToggleTerm lua require'toggleterm'.toggle(<count>)

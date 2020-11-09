@@ -24,8 +24,6 @@ much more stable alternatives.
 I wrote this initially in vimscript as part of my `init.vim`. I then realised I wanted to extend the functionality,
 but didn't want to end up maintaining a bunch of vimscript I had just managed to hack into place 🤷.
 
-**Status: Alpha**
-
 It sort of works fine for the exact use case above, but there are undoubtedly some niggling bugs.
 
 ## Roadmap
@@ -40,10 +38,21 @@ this especially if it isn't broken "on my machine". I'm also going to be pretty 
 
 ### Usage
 
+## NOTE:
+
+This plugin must now be explicitly enabled by using `require"toggleterm".setup{}`
+
 Setting the key to use for toggling the terminal(s) will setup mappings for _insert, normal and terminal_ modes
 If you prefix the mapping with a number that particular terminal will be opened.
 
-`let g:toggleterm_terminal_mapping = '<C-\>'`
+```lua
+require"toggleterm".setup{
+  size = 20,
+  open_mapping = [[<c-\>]],
+  shade_filetypes = {},
+  shade_terminals = true
+}
+```
 
 alternatively you can do this manually (not recommended but, your prerogative)
 
@@ -64,13 +73,21 @@ inoremap <silent><c-t> <Esc>:<c-u>exe v:count1 . "ToggleTerm"<CR>
 ### Set terminal shading
 
 This plugin automatically shades terminal filetypes to be darker than other window
-you can disable this by setting `g:toggleterm_shade_terminals = 0`
+you can disable this by setting `shade_terminals = false` in the setup object
+
+```lua
+require'toggleterm'.setup{
+  shade_terminals = false
+}
+```
 
 alternatively you can set _which_ filetypes should be shaded by setting
 
-```
-" fzf is just an example
-let g:toggleterm_shade_filetypes = ["none", "fzf"]
+```lua
+-- fzf is just an example
+require'toggleterm'.setup{
+  shade_filetypes = { "none", "fzf" }
+}
 
 ```
 
