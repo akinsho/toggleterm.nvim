@@ -16,7 +16,8 @@ local term_ft = "toggleterm"
 local preferences = {
   size = 12,
   shade_filetypes = {},
-  shade_terminals = true
+  shade_terminals = true,
+  direction = "horizontal"
 }
 
 -----------------------------------------------------------
@@ -105,19 +106,40 @@ local function set_opts(num, bufnr, win_id)
   api.nvim_buf_set_var(bufnr, "toggle_number", num)
 end
 
+local function resize(size)
+  local cmd =
+    preferences.direction == "vertical" and "vertical resize" or "resize"
+
+  vim.cmd(cmd .. " " .. size)
+end
+
 --- @param size number
 local function open_split(size)
   local has_open, win_ids = find_open_windows()
+  local commands =
+    preferences.direction == "horizontal" and
+    {
+      "vsplit",
+      "split",
+      "wincmd J"
+    } or
+    {
+      "split",
+      "vsplit",
+      "wincmd L"
+    }
+
   if has_open then
     -- we need to be in the terminal window most recently opened
     -- in order to split to the right of it
     fn.win_gotoid(win_ids[#win_ids])
-    vim.cmd("vsp")
+    vim.cmd(commands[1])
   else
-    vim.cmd(size .. "sp")
+    vim.cmd(size .. commands[2])
     -- move horizontal split to the bottom
-    vim.cmd("wincmd J")
+    vim.cmd(commands[3])
   end
+  resize(size)
 end
 
 --- @param bufnr number
@@ -268,7 +290,7 @@ function M.on_term_open()
     term.job_id = vim.b.terminal_job_id
     terminals[num] = term
 
-    vim.cmd("resize " .. preferences.size)
+    resize(preferences.size)
     set_opts(num, term.bufnr, term.window)
   end
 end
@@ -316,7 +338,6 @@ function M.open(num, size)
     terminals[num] = term
   else
     open_split(size)
-    vim.cmd("resize " .. size)
     vim.cmd("keepalt buffer " .. term.bufnr)
     vim.wo.winfixheight = true
     term.window = fn.win_getid()

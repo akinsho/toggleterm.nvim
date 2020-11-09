@@ -4,6 +4,10 @@ A _neovim_ plugin to persist and toggle multiple terminals during an editing ses
 
 ![screenshot](./github/toggleterm.gif "Toggleterm in action")
 
+### Orientation (vertical or horizontal)
+
+![vertical orientation](./github/vertical-terms.png)
+
 ## Why?
 
 Neovim's terminal is a very cool, but not super ergonomic tool to use. I find that I often want to
@@ -51,6 +55,7 @@ require"toggleterm".setup{
   open_mapping = [[<c-\>]],
   shade_filetypes = {},
   shade_terminals = true
+  direction = 'vertical' | 'horizontal'
 }
 ```
 
