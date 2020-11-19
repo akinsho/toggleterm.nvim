@@ -27,6 +27,12 @@ local preferences = {
 local terminals = {}
 local persistent = {}
 
+function M.save_window_size()
+  -- Save the size of the split before it is hidden
+  persistent.width = vim.fn.winwidth(0)
+  persistent.height = vim.fn.winheight(0)
+end
+
 --- Get the size of the split. Order of priority is as follows:
 ---   1. The size argument is a valid number > 0
 ---   2. There is persistent width/height information from prev open state
@@ -41,7 +47,9 @@ local function get_size(size)
     return valid_size and size or preferences.size
   end
 
-  local psize = preferences.direction == "horizontal" and persistent['height'] or persistent['width']
+  local psize =
+    preferences.direction == "horizontal" and persistent.height or
+    persistent.width
   return valid_size and size or psize or preferences.size
 end
 
@@ -344,17 +352,21 @@ function M.open(num, size)
     local name = vim.o.shell .. ";#" .. term_ft .. "#" .. num
     term.job_id = fn.termopen(name, {detach = 1})
 
-    create_augroups(
+    local commands = {
       {
-        ["ToggleTerm" .. term.bufnr] = {
-          {
-            "TermClose",
-            string.format("<buffer=%d>", term.bufnr),
-            string.format('lua require"toggleterm".delete(%d)', num)
-          }
-        }
-      }
-    )
+        "TermClose",
+        string.format("<buffer=%d>", term.bufnr),
+        string.format('lua require"toggleterm".delete(%d)', num)
+      },
+    }
+    if preferences.persist_size then
+      table.insert(commands, {
+        "CursorHold",
+        string.format("<buffer=%d>", term.bufnr),
+        "lua require'toggleterm'.save_window_size()"
+      })
+    end
+    create_augroups({["ToggleTerm" .. term.bufnr] = commands})
     setup_buffer_mappings(term.bufnr)
     terminals[num] = term
   else
@@ -391,9 +403,7 @@ end
 function M.close(num)
   local term = find_term(num)
   if find_window(term.window) then
-    -- Save the size of the split before it is hidden
-    persistent['width'] = vim.fn.winwidth(0)
-    persistent['height'] = vim.fn.winheight(0)
+    M.save_window_size()
 
     vim.cmd("hide")
   else
