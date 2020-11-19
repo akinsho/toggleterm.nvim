@@ -17,6 +17,7 @@ local preferences = {
   size = 12,
   shade_filetypes = {},
   shade_terminals = true,
+  persist_size = true,
   direction = "horizontal"
 }
 
@@ -30,10 +31,17 @@ local persistent = {}
 ---   1. The size argument is a valid number > 0
 ---   2. There is persistent width/height information from prev open state
 ---   3. Default/base case perference size
+---
+--- If `preferences.persist_size = false` then option `2` in the
+--- list is skipped.
 --- @param size number
 local function get_size(size)
-  local persist_size = preferences.direction == "horizontal" and persistent['height'] or persistent['width']
-  return (size and size > 0) and size or persist_size and persist_size or preferences.size
+  if not preferences.persist_size then
+    return (size and size > 0) or preferences.size
+  end
+
+  local psize = preferences.direction == "horizontal" and persistent['height'] or persistent['width']
+  return (size and size > 0) and size or psize or preferences.size
 end
 
 local function create_term()
@@ -123,6 +131,7 @@ local function resize(size)
 
   vim.cmd(cmd .. " " .. size)
 end
+
 --- @param size number
 local function open_split(size)
   size = get_size(size)
