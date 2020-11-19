@@ -36,12 +36,13 @@ local persistent = {}
 --- list is skipped.
 --- @param size number
 local function get_size(size)
+  local valid_size = size ~= nil and size > 0
   if not preferences.persist_size then
-    return (size and size > 0) or preferences.size
+    return valid_size and size or preferences.size
   end
 
   local psize = preferences.direction == "horizontal" and persistent['height'] or persistent['width']
-  return (size and size > 0) and size or psize or preferences.size
+  return valid_size and size or psize or preferences.size
 end
 
 local function create_term()
