@@ -55,6 +55,7 @@ require"toggleterm".setup{
   open_mapping = [[<c-\>]],
   shade_filetypes = {},
   shade_terminals = true
+  persist_size = true
   direction = 'vertical' | 'horizontal'
 }
 ```
@@ -97,6 +98,18 @@ require'toggleterm'.setup{
 ```
 
 setting `"none"` will allow normal terminal buffers to be highlighted.
+
+### Set persistent size
+
+By default, this plugin will persist the size of the terminal split. You can disable
+this behaviour by setting `persist_size = false` in the setup object. Disabling this
+behaviour forces the opening terminal size to the `size` defined in the setup object.
+
+```lua
+require'toggleterm'.setup{
+  persist_size = false
+}
+```
 
 ### Statusline
 

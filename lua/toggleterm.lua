@@ -17,6 +17,7 @@ local preferences = {
   size = 12,
   shade_filetypes = {},
   shade_terminals = true,
+  persist_size = true,
   direction = "horizontal"
 }
 
@@ -24,6 +25,25 @@ local preferences = {
 -- State
 -----------------------------------------------------------
 local terminals = {}
+local persistent = {}
+
+--- Get the size of the split. Order of priority is as follows:
+---   1. The size argument is a valid number > 0
+---   2. There is persistent width/height information from prev open state
+---   3. Default/base case perference size
+---
+--- If `preferences.persist_size = false` then option `2` in the
+--- list is skipped.
+--- @param size number
+local function get_size(size)
+  local valid_size = size ~= nil and size > 0
+  if not preferences.persist_size then
+    return valid_size and size or preferences.size
+  end
+
+  local psize = preferences.direction == "horizontal" and persistent['height'] or persistent['width']
+  return valid_size and size or psize or preferences.size
+end
 
 local function create_term()
   local no_of_terms = table.getn(terminals)
@@ -115,6 +135,8 @@ end
 
 --- @param size number
 local function open_split(size)
+  size = get_size(size)
+
   local has_open, win_ids = find_open_windows()
   local commands =
     preferences.direction == "horizontal" and
@@ -290,7 +312,7 @@ function M.on_term_open()
     term.job_id = vim.b.terminal_job_id
     terminals[num] = term
 
-    resize(preferences.size)
+    resize(get_size())
     set_opts(num, term.bufnr, term.window)
   end
 end
@@ -308,7 +330,6 @@ end
 function M.open(num, size)
   vim.validate {num = {num, "number"}, size = {size, "number", true}}
 
-  size = (size and size > 0) and size or preferences.size
   local term = find_term(num)
 
   if vim.fn.bufexists(term.bufnr) == 0 then
@@ -370,6 +391,10 @@ end
 function M.close(num)
   local term = find_term(num)
   if find_window(term.window) then
+    -- Save the size of the split before it is hidden
+    persistent['width'] = vim.fn.winwidth(0)
+    persistent['height'] = vim.fn.winheight(0)
+
     vim.cmd("hide")
   else
     if num then
