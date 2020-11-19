@@ -49,12 +49,11 @@ function M.set_highlights(amount)
   local bg_color = fn.synIDattr(fn.hlID("Normal"), "bg")
   local darkened_bg = shade_color(bg_color, amount)
   vim.cmd("highlight DarkenedPanel guibg=" .. darkened_bg)
-  vim.cmd("highlight DarkenendStatusline gui=NONE guibg=" .. darkened_bg)
+  vim.cmd("highlight DarkenedStatusline gui=NONE guibg=" .. darkened_bg)
   -- setting cterm to italic is a hack
   -- to prevent the statusline caret issue
   vim.cmd(
-    "highlight DarkenendStatuslineNC cterm=italic gui=NONE guibg=" ..
-      darkened_bg
+    "highlight DarkenedStatuslineNC cterm=italic gui=NONE guibg=" .. darkened_bg
   )
 end
 
@@ -62,8 +61,8 @@ function M.darken_terminal()
   local highlights = {
     "Normal:DarkenedPanel",
     "VertSplit:DarkenedPanel",
-    "StatusLine:DarkenendStatusline",
-    "StatusLineNC:DarkenendStatuslineNC",
+    "StatusLine:DarkenedStatusline",
+    "StatusLineNC:DarkenedStatuslineNC",
     "SignColumn:DarkenedPanel"
   }
   vim.cmd("setlocal winhighlight=" .. table.concat(highlights, ","))
