@@ -406,6 +406,7 @@ function M.close(num)
     M.save_window_size()
 
     vim.cmd("hide")
+    vim.cmd("stopinsert!")
   else
     if num then
       vim.cmd(
