@@ -26,6 +26,7 @@ local preferences = {
 -----------------------------------------------------------
 local terminals = {}
 local persistent = {}
+local origin_win
 
 function M.save_window_size()
   -- Save the size of the split before it is hidden
@@ -213,6 +214,13 @@ local function setup_global_mappings()
   )
 end
 
+local function update_origin_win(term_window)
+  local curr_win = api.nvim_get_current_win()
+  if term_window ~= curr_win then
+    origin_win = curr_win
+  end
+end
+
 --- @param bufnr number
 local function find_windows_by_bufnr(bufnr)
   return fn.win_findbuf(bufnr)
@@ -248,6 +256,9 @@ end
 --- @param size number
 local function toggle_nth_term(num, size)
   local term = find_term(num)
+
+  update_origin_win(term.window)
+
   if find_window(term.window) then
     M.close(num)
   else
@@ -339,6 +350,7 @@ function M.open(num, size)
   vim.validate {num = {num, "number"}, size = {size, "number", true}}
 
   local term = find_term(num)
+  origin_win = api.nvim_get_current_win();
 
   if vim.fn.bufexists(term.bufnr) == 0 then
     open_split(size)
@@ -402,10 +414,20 @@ end
 --- @param num number
 function M.close(num)
   local term = find_term(num)
+
+  update_origin_win(term.window)
+
   if find_window(term.window) then
     M.save_window_size()
 
     vim.cmd("hide")
+
+    if api.nvim_win_is_valid(origin_win) then
+      api.nvim_set_current_win(origin_win)
+    else
+      origin_win = nil
+    end
+
     vim.cmd("stopinsert!")
   else
     if num then
