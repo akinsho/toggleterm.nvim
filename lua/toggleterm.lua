@@ -48,14 +48,12 @@ local function get_size(size)
     return valid_size and size or preferences.size
   end
 
-  local psize =
-    preferences.direction == "horizontal" and persistent.height or
-    persistent.width
+  local psize = preferences.direction == "horizontal" and persistent.height or persistent.width
   return valid_size and size or psize or preferences.size
 end
 
 local function create_term()
-  local no_of_terms = table.getn(terminals)
+  local no_of_terms = #terminals
   local next_num = no_of_terms == 0 and 1 or no_of_terms + 1
   return {
     window = -1,
@@ -136,8 +134,7 @@ local function set_opts(num, bufnr, win_id)
 end
 
 local function resize(size)
-  local cmd =
-    preferences.direction == "vertical" and "vertical resize" or "resize"
+  local cmd = preferences.direction == "vertical" and "vertical resize" or "resize"
 
   vim.cmd(cmd .. " " .. size)
 end
@@ -237,13 +234,11 @@ local function smart_toggle(_, size)
     for i = #terminals, 1, -1 do
       local term = terminals[i]
       if not term then
-        vim.cmd(
-          string.format('echomsg "Term does not exist %s"', vim.inspect(term))
-        )
+        vim.cmd(string.format('echomsg "Term does not exist %s"', vim.inspect(term)))
         break
       end
       local wins = find_windows_by_bufnr(term.bufnr)
-      if table.getn(wins) > 0 then
+      if #wins > 0 then
         target = i
         break
       end
@@ -263,42 +258,6 @@ local function toggle_nth_term(num, size)
     M.close(num)
   else
     M.open(num, size)
-  end
-end
-
---- FIXME DEV only issue, on reloading/sourcing this file
---- we lose all state and term windows can't be reconciled
---- 1. Find out if the name matches
---- 2. Check if the number is the list of terminals if not add it
---- 3. If it is not the correct type make it so
-function M.reconcile_terminals()
-  local has_open, windows =
-    find_open_windows(
-    function(buf)
-      return string.match(api.nvim_buf_get_name(buf), term_ft) ~= nil
-    end
-  )
-  if not has_open then
-    return
-  end
-  local set = {}
-  for _, t in ipairs(terminals) do
-    set[t.window] = true
-  end
-  for _, win in pairs(windows) do
-    if not set[win] then
-      local buf = api.nvim_win_get_buf(win)
-      local name = api.nvim_buf_get_name(buf)
-      local num = get_number_from_name(name)
-      local term = {
-        bufnr = fn.bufnr(),
-        window = fn.win_getid(),
-        job_id = vim.b.terminal_job_id,
-        number = num,
-        dir = fn.getcwd()
-      }
-      terminals[num] = term
-    end
   end
 end
 
@@ -350,7 +309,7 @@ function M.open(num, size)
   vim.validate {num = {num, "number"}, size = {size, "number", true}}
 
   local term = find_term(num)
-  origin_win = api.nvim_get_current_win();
+  origin_win = api.nvim_get_current_win()
 
   if vim.fn.bufexists(term.bufnr) == 0 then
     open_split(size)
@@ -369,14 +328,17 @@ function M.open(num, size)
         "TermClose",
         string.format("<buffer=%d>", term.bufnr),
         string.format('lua require"toggleterm".delete(%d)', num)
-      },
+      }
     }
     if preferences.persist_size then
-      table.insert(commands, {
-        "CursorHold",
-        string.format("<buffer=%d>", term.bufnr),
-        "lua require'toggleterm'.save_window_size()"
-      })
+      table.insert(
+        commands,
+        {
+          "CursorHold",
+          string.format("<buffer=%d>", term.bufnr),
+          "lua require'toggleterm'.save_window_size()"
+        }
+      )
     end
     create_augroups({["ToggleTerm" .. term.bufnr] = commands})
     setup_buffer_mappings(term.bufnr)
@@ -431,12 +393,7 @@ function M.close(num)
     vim.cmd("stopinsert!")
   else
     if num then
-      vim.cmd(
-        string.format(
-          'echoerr "Failed to close window: %d does not exist"',
-          num
-        )
-      )
+      vim.cmd(string.format('echoerr "Failed to close window: %d does not exist"', num))
     else
       vim.cmd('echoerr "Failed to close window: invalid term number"')
     end
@@ -480,7 +437,6 @@ function M.toggle(count, size)
     count = {count, "number", true},
     size = {size, "number", true}
   }
-  -- reconcile_terminals()
   if count > 1 then
     toggle_nth_term(count, size)
   else
