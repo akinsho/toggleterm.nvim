@@ -52,9 +52,7 @@ function M.set_highlights(amount)
   vim.cmd("highlight DarkenedStatusline gui=NONE guibg=" .. darkened_bg)
   -- setting cterm to italic is a hack
   -- to prevent the statusline caret issue
-  vim.cmd(
-    "highlight DarkenedStatuslineNC cterm=italic gui=NONE guibg=" .. darkened_bg
-  )
+  vim.cmd("highlight DarkenedStatuslineNC cterm=italic gui=NONE guibg=" .. darkened_bg)
 end
 
 function M.darken_terminal()

@@ -463,6 +463,7 @@ function M.setup(user_prefs)
     }
   }
   if preferences.shade_terminals then
+    colors.set_highlights(-30)
     vim.list_extend(
       autocommands,
       {
@@ -472,7 +473,7 @@ function M.setup(user_prefs)
           -- after the colorscheme autocommand has fired
           -- reapply highlights when the colorscheme
           -- is re-applied
-          "VimEnter,ColorScheme",
+          "ColorScheme",
           "*",
           "lua require'toggleterm'.__set_highlights(-30)"
         },
