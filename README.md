@@ -11,7 +11,7 @@ A _neovim_ plugin to persist and toggle multiple terminals during an editing ses
 ## Why?
 
 Neovim's terminal is a very cool, but not super ergonomic tool to use. I find that I often want to
-set a process going and leave it continue to run in the background. I don't need to see it all the time though.
+set a process going and leave it to continue to run in the background. I don't need to see it all the time.
 I just need to be able to refer back to it at intervals. I also sometimes want to create a new terminal and run a few commands.
 
 Sometimes I want these side by side, and I _really_ want these terminals to be easy to access and not clutter my buffer list.
@@ -54,9 +54,10 @@ require"toggleterm".setup{
   size = 20,
   open_mapping = [[<c-\>]],
   shade_filetypes = {},
-  shade_terminals = true
-  persist_size = true
-  direction = 'vertical' | 'horizontal'
+  shade_terminals = true,
+  start_in_insert = true,
+  persist_size = true,
+  direction = 'vertical' | 'horizontal',
 }
 ```
 

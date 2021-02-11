@@ -17,6 +17,7 @@ local preferences = {
   size = 12,
   shade_filetypes = {},
   shade_terminals = true,
+  start_in_insert = true,
   persist_size = true,
   direction = "horizontal"
 }
@@ -330,6 +331,17 @@ function M.open(num, size)
         string.format('lua require"toggleterm".delete(%d)', num)
       }
     }
+    if preferences.start_in_insert then
+      vim.cmd("startinsert!")
+      table.insert(
+        commands,
+        {
+          "BufEnter",
+          "<buffer>",
+          "startinsert!"
+        }
+      )
+    end
     if preferences.persist_size then
       table.insert(
         commands,
