@@ -12,6 +12,8 @@ local M = {
 -- Constants
 -----------------------------------------------------------
 local term_ft = "toggleterm"
+-- -30 is a magic number based on manual testing of what looks good
+local SHADING_AMOUNT = -30
 
 local preferences = {
   size = 12,
@@ -19,7 +21,8 @@ local preferences = {
   shade_terminals = true,
   start_in_insert = true,
   persist_size = true,
-  direction = "horizontal"
+  direction = "horizontal",
+  shading_factor = nil
 }
 
 -----------------------------------------------------------
@@ -475,7 +478,17 @@ function M.setup(user_prefs)
     }
   }
   if preferences.shade_terminals then
-    colors.set_highlights(-30)
+    local is_bright = colors.is_bright_background()
+
+    -- if background is light then darken the terminal a lot more to increase contrast
+    local factor =
+      preferences.shading_factor and type(preferences.shading_factor) == "number" and
+      preferences.shading_factor or
+      (is_bright and 3 or 1)
+
+    local amount = factor * SHADING_AMOUNT
+    colors.set_highlights(amount)
+
     vim.list_extend(
       autocommands,
       {
@@ -487,7 +500,7 @@ function M.setup(user_prefs)
           -- is re-applied
           "ColorScheme",
           "*",
-          "lua require'toggleterm'.__set_highlights(-30)"
+          string.format("lua require'toggleterm'.__set_highlights(%d)", amount)
         },
         {
           "TermOpen",

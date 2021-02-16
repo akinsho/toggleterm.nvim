@@ -42,6 +42,33 @@ local function shade_color(color, percent)
   return "#" .. rr .. gg .. bb
 end
 
+--- Determine whether to use black or white text
+--- Ref:
+--- 1. https://stackoverflow.com/a/1855903/837964
+--- 2. https://stackoverflow.com/a/596243
+function M.color_is_bright(hex)
+  if not hex then
+    return false
+  end
+  local r, g, b = to_rgb(hex)
+  -- If any of the colors are missing return false
+  if not r or not g or not b then
+    return false
+  end
+  -- Counting the perceptive luminance - human eye favors green color
+  local luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+  if luminance > 0.5 then
+    return true -- Bright colors, black font
+  else
+    return false -- Dark colors, white font
+  end
+end
+
+function M.is_bright_background()
+  local bg_color = fn.synIDattr(fn.hlID("Normal"), "bg")
+  return M.color_is_bright(bg_color)
+end
+
 -----------------------------------------------------------
 -- Darken Terminal
 -----------------------------------------------------------
