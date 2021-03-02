@@ -387,23 +387,34 @@ function M.open(num, size, directory)
   end
 end
 
---- @param args string
-function M.exec(args)
+function M.exec_command(args)
   vim.validate {args = {args, "string"}}
   local num = vim.v.count
   local parsed = parse_args(args)
   vim.validate {
     cmd = {parsed.cmd, "string"},
-    dir = {parsed.dir, "string", true},
+    dir = {parsed.dir, "string", true}
+  }
+  M.exec(parsed.cmd, num, parsed.size, parsed.dir)
+end
+
+--- @param cmd string
+--- @param num number
+--- @param size number
+function M.exec(cmd, num, size, dir)
+  vim.validate {
+    cmd = {cmd, "string"},
+    num = {num, "number"},
+    size = {size, "number", true}
   }
   -- count
   num = num < 1 and 1 or num
   local term = find_term(num)
   if not find_window(term.window) then
-    M.open(num, parsed.size, parsed.dir)
+    M.open(num, size, dir)
   end
   term = find_term(num)
-  fn.chansend(term.job_id, "clear" .. "\n" .. parsed.cmd .. "\n")
+  fn.chansend(term.job_id, "clear" .. "\n" .. cmd .. "\n")
   vim.cmd("normal! G")
   vim.cmd("wincmd p")
   vim.cmd("stopinsert!")
@@ -459,15 +470,7 @@ function M.__apply_colors()
   end
 end
 
---- If a count is provided we operate on the specific terminal buffer
---- i.e. 2ToggleTerm => open or close Term 2
---- if the count is 1 we use a heuristic which is as follows
---- if there is no open terminal window we toggle the first one i.e. assumed
---- to be the primary. However if several are open we close them.
---- this can be used with the count commands to allow specific operations
---- per term or mass actions
---- @param args string
-function M.toggle(args)
+function M.toggle_command(args)
   local count = vim.v.count < 1 and 1 or vim.v.count
   local parsed = parse_args(args)
   vim.validate {
@@ -477,10 +480,28 @@ function M.toggle(args)
   if parsed.size then
     parsed.size = tonumber(parsed.size)
   end
+  M.toggle(count, parsed.size, parsed.dir)
+end
+
+--- If a count is provided we operate on the specific terminal buffer
+--- i.e. 2ToggleTerm => open or close Term 2
+--- if the count is 1 we use a heuristic which is as follows
+--- if there is no open terminal window we toggle the first one i.e. assumed
+--- to be the primary. However if several are open we close them.
+--- this can be used with the count commands to allow specific operations
+--- per term or mass actions
+--- @param count number
+--- @param size number
+--- @param dir string
+function M.toggle(count, size, dir)
+  vim.validate {
+    count = {count, "number", true},
+    size = {size, "number", true}
+  }
   if count > 1 then
-    toggle_nth_term(count, parsed.size, parsed.dir)
+    toggle_nth_term(count, size, dir)
   else
-    smart_toggle(count, parsed.size, parsed.dir)
+    smart_toggle(count, size, dir)
   end
 end
 

@@ -99,7 +99,9 @@ remain in that dir
 ### `TermExec`
 
 This command allows you to open a terminal with a specific action.
-e.g. `2TermExec git status` will run git status in terminal 2.
+e.g. `2TermExec cmd="git status" dir=~/<my-repo-path>` will run git status in terminal 2.
+note that the `cmd` argument is quoted so that can it can be distinguished from the `dir`
+argument.
 
 ### Set terminal shading
 
@@ -153,4 +155,14 @@ You can create your on commands by using the lua functions this plugin provides 
 ```vim
 command! -count=1 TermGitPush  lua require'toggleterm'.exec("git push",    <count>, 12)
 command! -count=1 TermGitPushF lua require'toggleterm'.exec("git push -f", <count>, 12)
+```
+
+or in lua:
+
+```lua
+function _G.term_git_push()
+  require('toggleterm').exec("git push", vim.v.count, 20)
+end
+
+vim.api.nvim_set_keymap("n", "<map>", [[<cmd>lua _G.term_git_push()]], {silent = true, noremap = true})
 ```
