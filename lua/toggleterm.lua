@@ -68,6 +68,20 @@ local function create_term()
   }
 end
 
+local function parse_args(args)
+  local result = {}
+  if args then
+    local parts = vim.split(args, " ")
+    for _, part in pairs(parts) do
+      local arg = vim.split(part, "=")
+      if #arg > 1 then
+        result[arg[1]] = arg[2]
+      end
+    end
+  end
+  return result
+end
+
 --- Source: https://teukka.tech/luanvim.html
 --- @param definitions table<string,table>
 local function create_augroups(definitions)
@@ -313,7 +327,7 @@ end
 --- @param num number
 --- @param size number
 function M.open(num, size, directory)
-  directory = directory or fn.getcwd()
+  directory = directory and vim.fn.expand(directory) or fn.getcwd()
   vim.validate {
     num = {num, "number"},
     size = {size, "number", true},
@@ -331,7 +345,6 @@ function M.open(num, size, directory)
     api.nvim_set_current_buf(term.bufnr)
     api.nvim_win_set_buf(term.window, term.bufnr)
 
-    -- TODO add ability to set directory to open from
     local name = vim.o.shell .. ";#" .. term_ft .. "#" .. num
     term.job_id = fn.termopen(name, {detach = 1, cwd = directory})
 
@@ -374,24 +387,23 @@ function M.open(num, size, directory)
   end
 end
 
---- @param cmd string
---- @param num number
---- @param size number
-function M.exec(cmd, num, size)
+--- @param args string
+function M.exec(args)
+  vim.validate {args = {args, "string"}}
+  local num = vim.v.count
+  local parsed = parse_args(args)
   vim.validate {
-    cmd = {cmd, "string"},
-    num = {num, "number"},
-    size = {size, "number", true}
+    cmd = {parsed.cmd, "string"},
+    dir = {parsed.dir, "string", true},
   }
-  print("cmd: " .. vim.inspect(cmd))
   -- count
   num = num < 1 and 1 or num
   local term = find_term(num)
   if not find_window(term.window) then
-    M.open(num, size, nil)
+    M.open(num, parsed.size, parsed.dir)
   end
   term = find_term(num)
-  fn.chansend(term.job_id, "clear" .. "\n" .. cmd .. "\n")
+  fn.chansend(term.job_id, "clear" .. "\n" .. parsed.cmd .. "\n")
   vim.cmd("normal! G")
   vim.cmd("wincmd p")
   vim.cmd("stopinsert!")
@@ -447,20 +459,6 @@ function M.__apply_colors()
   end
 end
 
-local function parse_args(args)
-  local result = {}
-  if args then
-    local parts = vim.split(args, " ")
-    for _, part in ipairs(parts) do
-      local arg = vim.split(part, "=")
-      if #arg > 1 then
-        result[arg[1]] = result[arg[2]]
-      end
-    end
-  end
-  return result
-end
-
 --- If a count is provided we operate on the specific terminal buffer
 --- i.e. 2ToggleTerm => open or close Term 2
 --- if the count is 1 we use a heuristic which is as follows
@@ -470,15 +468,19 @@ end
 --- per term or mass actions
 --- @param args string
 function M.toggle(args)
-  vim.validate {
-    args = {args, "string", true}
-  }
-  local count = vim.v.count
+  local count = vim.v.count < 1 and 1 or vim.v.count
   local parsed = parse_args(args)
+  vim.validate {
+    size = {parsed.size, "string", true},
+    directory = {parsed.dir, "string", true}
+  }
+  if parsed.size then
+    parsed.size = tonumber(parsed.size)
+  end
   if count > 1 then
-    toggle_nth_term(count, parsed.size, parsed.cwd)
+    toggle_nth_term(count, parsed.size, parsed.dir)
   else
-    smart_toggle(count, parsed.size, parsed.cwd)
+    smart_toggle(count, parsed.size, parsed.dir)
   end
 end
 

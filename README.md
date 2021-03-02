@@ -40,11 +40,9 @@ I won't be turning this into a REPL plugin or doing a bunch of complex stuff.
 If you find any issues, _please_ consider a _pull request_ not an issue. I won't be breaking my back to maintain
 this especially if it isn't broken "on my machine". I'm also going to be pretty conservative about what I add.
 
-### Usage
+### Setup
 
-## NOTE:
-
-This plugin must now be explicitly enabled by using `require"toggleterm".setup{}`
+This plugin must be explicitly enabled by using `require"toggleterm".setup{}`
 
 Setting the key to use for toggling the terminal(s) will setup mappings for _insert, normal and terminal_ modes
 If you prefix the mapping with a number that particular terminal will be opened.
@@ -77,6 +75,31 @@ autocmd TermEnter term://*toggleterm#*
 nnoremap <silent><c-t> :<c-u>exe v:count1 . "ToggleTerm"<CR>
 inoremap <silent><c-t> <Esc>:<c-u>exe v:count1 . "ToggleTerm"<CR>
 ```
+
+### Usage
+
+This plugin provides 2 commands
+
+### `ToggleTerm`
+
+This is the command the mappings call under the hood. You can use it directly
+and prefix it with a count to target a specific terminal. This function also takes
+a the `size` and `dir` as an argument e.g.
+
+```vim
+:ToggleTerm size=40 dir=~/Desktop
+```
+
+If specified on creation toggle term will open at the specified directory at the
+specified height.
+
+_NOTE_: If the terminal has already been opened at a particular directory it will
+remain in that dir
+
+### `TermExec`
+
+This command allows you to open a terminal with a specific action.
+e.g. `2TermExec git status` will run git status in terminal 2.
 
 ### Set terminal shading
 
@@ -122,18 +145,6 @@ in your statusline
 " this is pseudo code
 let statusline .= '%{&ft == "toggleterm" ? "terminal (".b:toggle_number.")" : ""}'
 ```
-
-This plugin provides 2 commands
-
-### `ToggleTerm`
-
-This is the command the mappings call under the hood. You can use it directly
-and prefix it with a count to target a specific terminal.
-
-### `TermExec`
-
-This command allows you to open a terminal with a specific action.
-e.g. `2TermExec git status` will run git status in terminal 2.
 
 ### Custom commands
 
