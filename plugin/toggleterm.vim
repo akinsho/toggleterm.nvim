@@ -10,4 +10,4 @@ endif
 "--------------------------------------------------------------------------------
 " count defaults to 1
 command! -count=1 -complete=shellcmd -nargs=* TermExec lua require'toggleterm'.exec(<q-args>, <count>)
-command! -count=1 ToggleTerm lua require'toggleterm'.toggle(<count>)
+command! -count=1 -nargs=* ToggleTerm lua require'toggleterm'.toggle(<f-args>)

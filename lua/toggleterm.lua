@@ -227,11 +227,14 @@ local function find_windows_by_bufnr(bufnr)
   return fn.win_findbuf(bufnr)
 end
 
---- @param size number
-local function smart_toggle(_, size)
+--Create a new terminal or close beginning from the last opened
+---@param _ number
+---@param size number
+---@param directory string
+local function smart_toggle(_, size, directory)
   local already_open = find_open_windows()
   if not already_open then
-    M.open(1, size)
+    M.open(1, size, directory)
   else
     local target = #terminals
     -- count backwards from the end of the list
@@ -253,7 +256,7 @@ end
 
 --- @param num number
 --- @param size number
-local function toggle_nth_term(num, size)
+local function toggle_nth_term(num, size, directory)
   local term = find_term(num)
 
   update_origin_win(term.window)
@@ -261,7 +264,7 @@ local function toggle_nth_term(num, size)
   if find_window(term.window) then
     M.close(num)
   else
-    M.open(num, size)
+    M.open(num, size, directory)
   end
 end
 
@@ -309,8 +312,13 @@ end
 
 --- @param num number
 --- @param size number
-function M.open(num, size)
-  vim.validate {num = {num, "number"}, size = {size, "number", true}}
+function M.open(num, size, directory)
+  directory = directory or fn.getcwd()
+  vim.validate {
+    num = {num, "number"},
+    size = {size, "number", true},
+    directory = {directory, "string", true}
+  }
 
   local term = find_term(num)
   origin_win = api.nvim_get_current_win()
@@ -323,9 +331,9 @@ function M.open(num, size)
     api.nvim_set_current_buf(term.bufnr)
     api.nvim_win_set_buf(term.window, term.bufnr)
 
-    vim.cmd("lcd " .. fn.getcwd())
+    -- TODO add ability to set directory to open from
     local name = vim.o.shell .. ";#" .. term_ft .. "#" .. num
-    term.job_id = fn.termopen(name, {detach = 1})
+    term.job_id = fn.termopen(name, {detach = 1, cwd = directory})
 
     local commands = {
       {
@@ -375,11 +383,12 @@ function M.exec(cmd, num, size)
     num = {num, "number"},
     size = {size, "number", true}
   }
+  print("cmd: " .. vim.inspect(cmd))
   -- count
   num = num < 1 and 1 or num
   local term = find_term(num)
   if not find_window(term.window) then
-    M.open(num, size)
+    M.open(num, size, nil)
   end
   term = find_term(num)
   fn.chansend(term.job_id, "clear" .. "\n" .. cmd .. "\n")
@@ -438,6 +447,20 @@ function M.__apply_colors()
   end
 end
 
+local function parse_args(args)
+  local result = {}
+  if args then
+    local parts = vim.split(args, " ")
+    for _, part in ipairs(parts) do
+      local arg = vim.split(part, "=")
+      if #arg > 1 then
+        result[arg[1]] = result[arg[2]]
+      end
+    end
+  end
+  return result
+end
+
 --- If a count is provided we operate on the specific terminal buffer
 --- i.e. 2ToggleTerm => open or close Term 2
 --- if the count is 1 we use a heuristic which is as follows
@@ -445,17 +468,17 @@ end
 --- to be the primary. However if several are open we close them.
 --- this can be used with the count commands to allow specific operations
 --- per term or mass actions
---- @param count number
---- @param size number
-function M.toggle(count, size)
+--- @param args string
+function M.toggle(args)
   vim.validate {
-    count = {count, "number", true},
-    size = {size, "number", true}
+    args = {args, "string", true}
   }
+  local count = vim.v.count
+  local parsed = parse_args(args)
   if count > 1 then
-    toggle_nth_term(count, size)
+    toggle_nth_term(count, parsed.size, parsed.cwd)
   else
-    smart_toggle(count, size)
+    smart_toggle(count, parsed.size, parsed.cwd)
   end
 end
 
