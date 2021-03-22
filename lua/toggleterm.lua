@@ -128,9 +128,14 @@ local function find_window(win_id)
 end
 
 --- get existing terminal or create an empty term table
---- @param num number
+---@param num number
+---@return number
+---@return boolean
 local function find_term(num)
-  return terminals[num] or create_term()
+  if terminals[num] then
+    return terminals[num], false
+  end
+  return create_term(), true
 end
 
 --- get the toggle term number from
@@ -437,11 +442,16 @@ function M.exec(cmd, num, size, dir)
   -- count
   num = num < 1 and 1 or num
   local term = find_term(num)
+  local created = false
   if not find_window(term.window) then
     M.open(num, size, dir)
   end
-  term = find_term(num)
-  fn.chansend(term.job_id, "clear" .. "\n" .. cmd .. "\n")
+  term, created = find_term(num)
+  local term_cmd = "clear" .. "\n"
+  if not created and dir then
+    term_cmd = term_cmd .. "cd " .. dir .. "\n"
+  end
+  fn.chansend(term.job_id, term_cmd .. cmd .. "\n")
   vim.cmd("normal! G")
   vim.cmd("wincmd p")
   vim.cmd("stopinsert!")
