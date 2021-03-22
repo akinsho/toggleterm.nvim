@@ -71,8 +71,14 @@ end
 local function parse_args(args)
   local result = {}
   if args then
+    -- exract the quoted command then remove it
+    -- from the rest of the argument string
+    local cmd_pattern = [[cmd="([^"]+)"]]
+    result.cmd = string.match(args, cmd_pattern)
+    args = args:gsub(cmd_pattern, "")
+
     local parts = vim.split(args, " ")
-    for _, part in pairs(parts) do
+    for _, part in ipairs(parts) do
       local arg = vim.split(part, "=")
       if #arg > 1 then
         result[arg[1]] = arg[2]
@@ -557,11 +563,6 @@ function M.setup(user_prefs)
     )
   end
   create_augroups({ToggleTerminal = autocommands})
-end
-
---- FIXME this shows a cached version of the terminals
-function M.introspect()
-  print("All terminals: " .. vim.inspect(terminals))
 end
 
 return M
