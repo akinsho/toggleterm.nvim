@@ -418,16 +418,15 @@ function M.open(num, size, directory)
   end
 end
 
-function M.exec_command(args)
+function M.exec_command(args, count)
   vim.validate {args = {args, "string"}}
-  local num = vim.v.count
   local parsed = parse_input(args)
   vim.validate {
     cmd = {parsed.cmd, "string"},
     dir = {parsed.dir, "string", true},
     size = {parsed.size, "number", true}
   }
-  M.exec(parsed.cmd, num, parsed.size, parsed.dir)
+  M.exec(parsed.cmd, count, parsed.size, parsed.dir)
 end
 
 --- @param cmd string
@@ -507,8 +506,7 @@ function M.__apply_colors()
   end
 end
 
-function M.toggle_command(args)
-  local count = vim.v.count < 1 and 1 or vim.v.count
+function M.toggle_command(args, count)
   local parsed = parse_input(args)
   vim.validate {
     size = {parsed.size, "string", true},
