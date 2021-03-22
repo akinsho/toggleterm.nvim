@@ -68,21 +68,35 @@ local function create_term()
   }
 end
 
+local function parse_arg(str, result)
+  local arg = vim.split(str, "=")
+  if #arg > 1 then
+    result[arg[1]] = fn.substitute(arg[2], '[\'"]+', "", "g")
+  end
+  return result
+end
+
+---Take a users command arguments in the format "cmd='git commit' dir=~/dotfiles"
+---and parse this into a table of arguments
+---{cmd = "git commit", dir = "~/dotfiles"}
+---TODO: only the cmd argument can handle quotes!
+---@param args string
+---@return table<string, string>
 local function parse_args(args)
   local result = {}
   if args then
     -- exract the quoted command then remove it
     -- from the rest of the argument string
-    local cmd_pattern = [[cmd="([^"]+)"]]
-    result.cmd = string.match(args, cmd_pattern)
-    args = args:gsub(cmd_pattern, "")
+    -- @see: https://stackoverflow.com/a/5950910
+    local regex = [[\v\w+\=%("([^"]*)"|'([^']*)')]]
+    local quoted_arg = fn.matchstr(args, regex, "g")
+    parse_arg(quoted_arg, result)
+
+    args = fn.substitute(args, regex, "", "g")
 
     local parts = vim.split(args, " ")
     for _, part in ipairs(parts) do
-      local arg = vim.split(part, "=")
-      if #arg > 1 then
-        result[arg[1]] = arg[2]
-      end
+      parse_arg(part, result)
     end
   end
   return result
