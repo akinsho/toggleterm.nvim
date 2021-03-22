@@ -68,10 +68,18 @@ local function create_term()
   }
 end
 
-local function parse_arg(str, result)
+local function parse_argument(str, result)
   local arg = vim.split(str, "=")
   if #arg > 1 then
-    result[arg[1]] = fn.substitute(arg[2], '[\'"]+', "", "g")
+    local key, value = arg[1], arg[2]
+    if key == "size" then
+      value = tonumber(value)
+    elseif key == "cmd" then
+      -- Remove quotes
+      -- TODO: find a better way to do this
+      value = string.sub(value, 2, #value - 1)
+    end
+    result[key] = value
   end
   return result
 end
@@ -82,21 +90,19 @@ end
 ---TODO: only the cmd argument can handle quotes!
 ---@param args string
 ---@return table<string, string>
-local function parse_args(args)
+local function parse_input(args)
   local result = {}
   if args then
-    -- exract the quoted command then remove it
-    -- from the rest of the argument string
+    -- exract the quoted command then remove it from the rest of the argument string
     -- @see: https://stackoverflow.com/a/5950910
     local regex = [[\v\w+\=%("([^"]*)"|'([^']*)')]]
     local quoted_arg = fn.matchstr(args, regex, "g")
-    parse_arg(quoted_arg, result)
-
     args = fn.substitute(args, regex, "", "g")
 
+    parse_argument(quoted_arg, result)
     local parts = vim.split(args, " ")
     for _, part in ipairs(parts) do
-      parse_arg(part, result)
+      parse_argument(part, result)
     end
   end
   return result
@@ -410,10 +416,11 @@ end
 function M.exec_command(args)
   vim.validate {args = {args, "string"}}
   local num = vim.v.count
-  local parsed = parse_args(args)
+  local parsed = parse_input(args)
   vim.validate {
     cmd = {parsed.cmd, "string"},
-    dir = {parsed.dir, "string", true}
+    dir = {parsed.dir, "string", true},
+    size = {parsed.size, "number", true}
   }
   M.exec(parsed.cmd, num, parsed.size, parsed.dir)
 end
@@ -492,7 +499,7 @@ end
 
 function M.toggle_command(args)
   local count = vim.v.count < 1 and 1 or vim.v.count
-  local parsed = parse_args(args)
+  local parsed = parse_input(args)
   vim.validate {
     size = {parsed.size, "string", true},
     directory = {parsed.dir, "string", true}
