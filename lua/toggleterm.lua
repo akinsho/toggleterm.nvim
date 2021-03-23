@@ -447,7 +447,10 @@ end
 function M.exec_command(args, count)
   vim.validate {args = {args, "string"}}
   if not args:match("cmd") then
-    return echomsg("TermExec requires a cmd specified using the syntax cmd='ls -l'", "ErrorMsg")
+    return echomsg(
+      "TermExec requires a cmd specified using the syntax cmd='ls -l' e.g. TermExec cmd='ls -l'",
+      "ErrorMsg"
+    )
   end
   local parsed = parse_input(args)
   vim.validate {
