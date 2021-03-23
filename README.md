@@ -12,6 +12,10 @@ A _neovim_ plugin to persist and toggle multiple terminals during an editing ses
 
 ![exec](https://user-images.githubusercontent.com/22454918/112119367-36d1e980-8bb5-11eb-9787-5936391127a3.gif)
 
+## Notices
+
+- **23/03/2021**: `TermExec` command syntax has been refactored to use `TermExec cmd='my-command'`
+
 ## Why?
 
 Neovim's terminal is a very cool, but not super ergonomic tool to use. I find that I often want to
