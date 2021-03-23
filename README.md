@@ -8,6 +8,14 @@ A _neovim_ plugin to persist and toggle multiple terminals during an editing ses
 
 ![vertical orientation](./github/vertical-terms.png)
 
+### Send commands to different terminals
+
+![exec](https://user-images.githubusercontent.com/22454918/112119367-36d1e980-8bb5-11eb-9787-5936391127a3.gif)
+
+## Notices
+
+- **23/03/2021**: `TermExec` command syntax has been refactored to use `TermExec cmd='my-command'`
+
 ## Why?
 
 Neovim's terminal is a very cool, but not super ergonomic tool to use. I find that I often want to
@@ -28,8 +36,6 @@ much more stable alternatives.
 I wrote this initially in vimscript as part of my `init.vim`. I then realised I wanted to extend the functionality,
 but didn't want to end up maintaining a bunch of vimscript I had just managed to hack into place 🤷.
 
-It sort of works fine for the exact use case above, but there are undoubtedly some niggling bugs.
-
 ## Roadmap
 
 All I really want this plugin to be is what I described above. A wrapper around the terminal functionality.
@@ -40,11 +46,9 @@ I won't be turning this into a REPL plugin or doing a bunch of complex stuff.
 If you find any issues, _please_ consider a _pull request_ not an issue. I won't be breaking my back to maintain
 this especially if it isn't broken "on my machine". I'm also going to be pretty conservative about what I add.
 
-### Usage
+### Setup
 
-## NOTE:
-
-This plugin must now be explicitly enabled by using `require"toggleterm".setup{}`
+This plugin must be explicitly enabled by using `require"toggleterm".setup{}`
 
 Setting the key to use for toggling the terminal(s) will setup mappings for _insert, normal and terminal_ modes
 If you prefix the mapping with a number that particular terminal will be opened.
@@ -77,6 +81,33 @@ autocmd TermEnter term://*toggleterm#*
 nnoremap <silent><c-t> :<c-u>exe v:count1 . "ToggleTerm"<CR>
 inoremap <silent><c-t> <Esc>:<c-u>exe v:count1 . "ToggleTerm"<CR>
 ```
+
+### Usage
+
+This plugin provides 2 commands
+
+### `ToggleTerm`
+
+This is the command the mappings call under the hood. You can use it directly
+and prefix it with a count to target a specific terminal. This function also takes
+a the `size` and `dir` as an argument e.g.
+
+```vim
+:ToggleTerm size=40 dir=~/Desktop
+```
+
+If specified on creation toggle term will open at the specified directory at the
+specified height.
+
+_NOTE_: If the terminal has already been opened at a particular directory it will
+remain in that dir
+
+### `TermExec`
+
+This command allows you to open a terminal with a specific action.
+e.g. `2TermExec cmd="git status" dir=~/<my-repo-path>` will run git status in terminal 2.
+note that the `cmd` argument is quoted so that can it can be distinguished from the `dir`
+argument.
 
 ### Set terminal shading
 
@@ -123,18 +154,6 @@ in your statusline
 let statusline .= '%{&ft == "toggleterm" ? "terminal (".b:toggle_number.")" : ""}'
 ```
 
-This plugin provides 2 commands
-
-### `ToggleTerm`
-
-This is the command the mappings call under the hood. You can use it directly
-and prefix it with a count to target a specific terminal.
-
-### `TermExec`
-
-This command allows you to open a terminal with a specific action.
-e.g. `2TermExec git status` will run git status in terminal 2.
-
 ### Custom commands
 
 You can create your on commands by using the lua functions this plugin provides directly
@@ -142,4 +161,14 @@ You can create your on commands by using the lua functions this plugin provides 
 ```vim
 command! -count=1 TermGitPush  lua require'toggleterm'.exec("git push",    <count>, 12)
 command! -count=1 TermGitPushF lua require'toggleterm'.exec("git push -f", <count>, 12)
+```
+
+or in lua:
+
+```lua
+function _G.term_git_push()
+  require('toggleterm').exec("git push", vim.v.count, 20)
+end
+
+vim.api.nvim_set_keymap("n", "<map>", [[<cmd>lua _G.term_git_push()]], {silent = true, noremap = true})
 ```

@@ -38,6 +38,11 @@ function M.save_window_size()
   persistent.height = vim.fn.winheight(0)
 end
 
+local function echomsg(msg, hl)
+  hl = hl or "Title"
+  api.nvim_echo({{msg, hl}}, true, {})
+end
+
 --- Get the size of the split. Order of priority is as follows:
 ---   1. The size argument is a valid number > 0
 ---   2. There is persistent width/height information from prev open state
@@ -56,16 +61,62 @@ local function get_size(size)
   return valid_size and size or psize or preferences.size
 end
 
-local function create_term()
+---create a terminal object
+---@param dir string
+---@return table
+local function create_term(dir)
   local no_of_terms = #terminals
   local next_num = no_of_terms == 0 and 1 or no_of_terms + 1
   return {
     window = -1,
     job_id = -1,
     bufnr = -1,
-    dir = fn.getcwd(),
+    dir = dir or fn.getcwd(),
     number = next_num
   }
+end
+
+local function parse_argument(str, result)
+  local arg = vim.split(str, "=")
+  if #arg > 1 then
+    local key, value = arg[1], arg[2]
+    if key == "size" then
+      value = tonumber(value)
+    elseif key == "cmd" then
+      -- Remove quotes
+      -- TODO: find a better way to do this
+      value = string.sub(value, 2, #value - 1)
+    end
+    result[key] = value
+  end
+  return result
+end
+
+---Take a users command arguments in the format "cmd='git commit' dir=~/dotfiles"
+---and parse this into a table of arguments
+---{cmd = "git commit", dir = "~/dotfiles"}
+---TODO: only the cmd argument can handle quotes!
+---@param args string
+---@return table<string, string>
+local function parse_input(args)
+  local result = {}
+  if args then
+    -- extract the quoted command then remove it from the rest of the argument string
+    -- \v - very magic, reduce the amount of escaping needed
+    -- \w+\= - match a word followed by an = sign
+    -- ("([^"]*)"|'([^']*)') - match double or single quoted text
+    -- @see: https://stackoverflow.com/a/5950910
+    local regex = [[\v\w+\=%("([^"]*)"|'([^']*)')]]
+    local quoted_arg = fn.matchstr(args, regex, "g")
+    args = fn.substitute(args, regex, "", "g")
+    parse_argument(quoted_arg, result)
+
+    local parts = vim.split(args, " ")
+    for _, part in ipairs(parts) do
+      parse_argument(part, result)
+    end
+  end
+  return result
 end
 
 --- Source: https://teukka.tech/luanvim.html
@@ -87,10 +138,16 @@ local function find_window(win_id)
   return fn.win_gotoid(win_id) > 0
 end
 
---- get existing terminal or create an empty term table
---- @param num number
-local function find_term(num)
-  return terminals[num] or create_term()
+---get existing terminal or create an empty term table
+---@param num number
+---@param dir string
+---@return number
+---@return boolean
+local function get_or_create_term(num, dir)
+  if terminals[num] then
+    return terminals[num], false
+  end
+  return create_term(dir), true
 end
 
 --- get the toggle term number from
@@ -227,11 +284,24 @@ local function find_windows_by_bufnr(bufnr)
   return fn.win_findbuf(bufnr)
 end
 
---- @param size number
-local function smart_toggle(_, size)
+---Update the directory of an already opened terminal
+---@param term table
+---@param dir string
+local function change_directory(term, dir)
+  if term.dir ~= dir then
+    local term_cmd = "cd " .. dir .. "\n" .. "clear" .. "\n"
+    fn.chansend(term.job_id, term_cmd)
+  end
+end
+
+--Create a new terminal or close beginning from the last opened
+---@param _ number
+---@param size number
+---@param directory string
+local function smart_toggle(_, size, directory)
   local already_open = find_open_windows()
   if not already_open then
-    M.open(1, size)
+    M.open(1, size, directory)
   else
     local target = #terminals
     -- count backwards from the end of the list
@@ -253,15 +323,15 @@ end
 
 --- @param num number
 --- @param size number
-local function toggle_nth_term(num, size)
-  local term = find_term(num)
+local function toggle_nth_term(num, size, directory)
+  local term = get_or_create_term(num, directory)
 
   update_origin_win(term.window)
 
   if find_window(term.window) then
     M.close(num)
   else
-    M.open(num, size)
+    M.open(num, size, directory)
   end
 end
 
@@ -309,10 +379,16 @@ end
 
 --- @param num number
 --- @param size number
-function M.open(num, size)
-  vim.validate {num = {num, "number"}, size = {size, "number", true}}
+--- @param directory string
+function M.open(num, size, directory)
+  directory = directory and vim.fn.expand(directory) or fn.getcwd()
+  vim.validate {
+    num = {num, "number"},
+    size = {size, "number", true},
+    directory = {directory, "string", true}
+  }
 
-  local term = find_term(num)
+  local term, created = get_or_create_term(num, directory)
   origin_win = api.nvim_get_current_win()
 
   if vim.fn.bufexists(term.bufnr) == 0 then
@@ -323,9 +399,8 @@ function M.open(num, size)
     api.nvim_set_current_buf(term.bufnr)
     api.nvim_win_set_buf(term.window, term.bufnr)
 
-    vim.cmd("lcd " .. fn.getcwd())
     local name = vim.o.shell .. ";#" .. term_ft .. "#" .. num
-    term.job_id = fn.termopen(name, {detach = 1})
+    term.job_id = fn.termopen(name, {detach = 1, cwd = directory})
 
     local commands = {
       {
@@ -363,13 +438,33 @@ function M.open(num, size)
     vim.cmd("keepalt buffer " .. term.bufnr)
     vim.wo.winfixheight = true
     term.window = fn.win_getid()
+    if not created then
+      change_directory(term, directory)
+    end
   end
+end
+
+function M.exec_command(args, count)
+  vim.validate {args = {args, "string"}}
+  if not args:match("cmd") then
+    return echomsg(
+      "TermExec requires a cmd specified using the syntax cmd='ls -l' e.g. TermExec cmd='ls -l'",
+      "ErrorMsg"
+    )
+  end
+  local parsed = parse_input(args)
+  vim.validate {
+    cmd = {parsed.cmd, "string"},
+    dir = {parsed.dir, "string", true},
+    size = {parsed.size, "number", true}
+  }
+  M.exec(parsed.cmd, count, parsed.size, parsed.dir)
 end
 
 --- @param cmd string
 --- @param num number
 --- @param size number
-function M.exec(cmd, num, size)
+function M.exec(cmd, num, size, dir)
   vim.validate {
     cmd = {cmd, "string"},
     num = {num, "number"},
@@ -377,11 +472,16 @@ function M.exec(cmd, num, size)
   }
   -- count
   num = num < 1 and 1 or num
-  local term = find_term(num)
+  local term = get_or_create_term(num, dir)
+  local created = false
   if not find_window(term.window) then
-    M.open(num, size)
+    M.open(num, size, dir)
   end
-  term = find_term(num)
+  --- TODO: find a way to do this without calling this function twice
+  term, created = get_or_create_term(num, dir)
+  if not created and dir and term.dir ~= dir then
+    change_directory(term, dir)
+  end
   fn.chansend(term.job_id, "clear" .. "\n" .. cmd .. "\n")
   vim.cmd("normal! G")
   vim.cmd("wincmd p")
@@ -390,7 +490,7 @@ end
 
 --- @param num number
 function M.close(num)
-  local term = find_term(num)
+  local term = get_or_create_term(num)
 
   update_origin_win(term.window)
 
@@ -438,6 +538,18 @@ function M.__apply_colors()
   end
 end
 
+function M.toggle_command(args, count)
+  local parsed = parse_input(args)
+  vim.validate {
+    size = {parsed.size, "number", true},
+    directory = {parsed.dir, "string", true}
+  }
+  if parsed.size then
+    parsed.size = tonumber(parsed.size)
+  end
+  M.toggle(count, parsed.size, parsed.dir)
+end
+
 --- If a count is provided we operate on the specific terminal buffer
 --- i.e. 2ToggleTerm => open or close Term 2
 --- if the count is 1 we use a heuristic which is as follows
@@ -447,15 +559,16 @@ end
 --- per term or mass actions
 --- @param count number
 --- @param size number
-function M.toggle(count, size)
+--- @param dir string
+function M.toggle(count, size, dir)
   vim.validate {
     count = {count, "number", true},
     size = {size, "number", true}
   }
   if count > 1 then
-    toggle_nth_term(count, size)
+    toggle_nth_term(count, size, dir)
   else
-    smart_toggle(count, size)
+    smart_toggle(count, size, dir)
   end
 end
 
@@ -511,11 +624,6 @@ function M.setup(user_prefs)
     )
   end
   create_augroups({ToggleTerminal = autocommands})
-end
-
---- FIXME this shows a cached version of the terminals
-function M.introspect()
-  print("All terminals: " .. vim.inspect(terminals))
 end
 
 return M
