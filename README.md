@@ -8,6 +8,10 @@ A _neovim_ plugin to persist and toggle multiple terminals during an editing ses
 
 ![vertical orientation](./github/vertical-terms.png)
 
+### Send commands to different terminals
+
+![exec](https://user-images.githubusercontent.com/22454918/112119367-36d1e980-8bb5-11eb-9787-5936391127a3.gif)
+
 ## Why?
 
 Neovim's terminal is a very cool, but not super ergonomic tool to use. I find that I often want to
@@ -27,8 +31,6 @@ much more stable alternatives.
 
 I wrote this initially in vimscript as part of my `init.vim`. I then realised I wanted to extend the functionality,
 but didn't want to end up maintaining a bunch of vimscript I had just managed to hack into place 🤷.
-
-It sort of works fine for the exact use case above, but there are undoubtedly some niggling bugs.
 
 ## Roadmap
 
