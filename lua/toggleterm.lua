@@ -446,10 +446,11 @@ function M.exec(cmd, num, size, dir)
     M.open(num, size, dir)
   end
   term, created = find_term(num)
-  local term_cmd = "clear" .. "\n"
+  local term_cmd = ""
   if not created and dir then
     term_cmd = term_cmd .. "cd " .. dir .. "\n"
   end
+  term_cmd = term_cmd .. "clear" .. "\n"
   fn.chansend(term.job_id, term_cmd .. cmd .. "\n")
   vim.cmd("normal! G")
   vim.cmd("wincmd p")
