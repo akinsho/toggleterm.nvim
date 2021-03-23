@@ -19,6 +19,7 @@ local preferences = {
   size = 12,
   shade_filetypes = {},
   shade_terminals = true,
+  insert_mappings = true,
   start_in_insert = true,
   persist_size = true,
   direction = "horizontal",
@@ -261,15 +262,17 @@ local function setup_global_mappings()
       noremap = true
     }
   )
-  api.nvim_set_keymap(
-    "i",
-    mapping,
-    '<Esc>:<c-u>exe v:count1 . "ToggleTerm"<CR>',
-    {
-      silent = true,
-      noremap = true
-    }
-  )
+  if preferences.insert_mappings then
+    api.nvim_set_keymap(
+      "i",
+      mapping,
+      '<Esc>:<c-u>exe v:count1 . "ToggleTerm"<CR>',
+      {
+        silent = true,
+        noremap = true
+      }
+    )
+  end
 end
 
 local function update_origin_win(term_window)
