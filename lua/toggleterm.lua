@@ -38,6 +38,11 @@ function M.save_window_size()
   persistent.height = vim.fn.winheight(0)
 end
 
+local function echomsg(msg, hl)
+  hl = hl or "Title"
+  api.nvim_echo({{msg, hl}}, true, {})
+end
+
 --- Get the size of the split. Order of priority is as follows:
 ---   1. The size argument is a valid number > 0
 ---   2. There is persistent width/height information from prev open state
@@ -441,6 +446,9 @@ end
 
 function M.exec_command(args, count)
   vim.validate {args = {args, "string"}}
+  if not args:match("cmd") then
+    return echomsg("TermExec requires a cmd specified using the syntax cmd='ls -l'", "ErrorMsg")
+  end
   local parsed = parse_input(args)
   vim.validate {
     cmd = {parsed.cmd, "string"},
