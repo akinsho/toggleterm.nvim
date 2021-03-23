@@ -96,13 +96,13 @@ end
 local function parse_input(args)
   local result = {}
   if args then
-    -- exract the quoted command then remove it from the rest of the argument string
+    -- extract the quoted command then remove it from the rest of the argument string
     -- @see: https://stackoverflow.com/a/5950910
     local regex = [[\v\w+\=%("([^"]*)"|'([^']*)')]]
     local quoted_arg = fn.matchstr(args, regex, "g")
     args = fn.substitute(args, regex, "", "g")
-
     parse_argument(quoted_arg, result)
+
     local parts = vim.split(args, " ")
     for _, part in ipairs(parts) do
       parse_argument(part, result)
