@@ -56,14 +56,17 @@ local function get_size(size)
   return valid_size and size or psize or preferences.size
 end
 
-local function create_term()
+---create a terminal object
+---@param dir string
+---@return table
+local function create_term(dir)
   local no_of_terms = #terminals
   local next_num = no_of_terms == 0 and 1 or no_of_terms + 1
   return {
     window = -1,
     job_id = -1,
     bufnr = -1,
-    dir = fn.getcwd(),
+    dir = dir or fn.getcwd(),
     number = next_num
   }
 end
@@ -127,15 +130,16 @@ local function find_window(win_id)
   return fn.win_gotoid(win_id) > 0
 end
 
---- get existing terminal or create an empty term table
+---get existing terminal or create an empty term table
 ---@param num number
+---@param dir string
 ---@return number
 ---@return boolean
-local function find_term(num)
+local function get_or_create_term(num, dir)
   if terminals[num] then
     return terminals[num], false
   end
-  return create_term(), true
+  return create_term(dir), true
 end
 
 --- get the toggle term number from
@@ -272,6 +276,16 @@ local function find_windows_by_bufnr(bufnr)
   return fn.win_findbuf(bufnr)
 end
 
+---Update the directory of an already opened terminal
+---@param term table
+---@param dir string
+local function change_directory(term, dir)
+  if term.dir ~= dir then
+    local term_cmd = "cd " .. dir .. "\n" .. "clear" .. "\n"
+    fn.chansend(term.job_id, term_cmd)
+  end
+end
+
 --Create a new terminal or close beginning from the last opened
 ---@param _ number
 ---@param size number
@@ -302,7 +316,7 @@ end
 --- @param num number
 --- @param size number
 local function toggle_nth_term(num, size, directory)
-  local term = find_term(num)
+  local term = get_or_create_term(num, directory)
 
   update_origin_win(term.window)
 
@@ -357,6 +371,7 @@ end
 
 --- @param num number
 --- @param size number
+--- @param directory string
 function M.open(num, size, directory)
   directory = directory and vim.fn.expand(directory) or fn.getcwd()
   vim.validate {
@@ -365,7 +380,7 @@ function M.open(num, size, directory)
     directory = {directory, "string", true}
   }
 
-  local term = find_term(num)
+  local term, created = get_or_create_term(num, directory)
   origin_win = api.nvim_get_current_win()
 
   if vim.fn.bufexists(term.bufnr) == 0 then
@@ -415,6 +430,9 @@ function M.open(num, size, directory)
     vim.cmd("keepalt buffer " .. term.bufnr)
     vim.wo.winfixheight = true
     term.window = fn.win_getid()
+    if not created then
+      change_directory(term, directory)
+    end
   end
 end
 
@@ -440,18 +458,17 @@ function M.exec(cmd, num, size, dir)
   }
   -- count
   num = num < 1 and 1 or num
-  local term = find_term(num)
+  local term = get_or_create_term(num, dir)
   local created = false
   if not find_window(term.window) then
     M.open(num, size, dir)
   end
-  term, created = find_term(num)
-  local term_cmd = ""
-  if not created and dir then
-    term_cmd = term_cmd .. "cd " .. dir .. "\n"
+  --- TODO: find a way to do this without calling this function twice
+  term, created = get_or_create_term(num, dir)
+  if not created and dir and term.dir ~= dir then
+    change_directory(term, dir)
   end
-  term_cmd = term_cmd .. "clear" .. "\n"
-  fn.chansend(term.job_id, term_cmd .. cmd .. "\n")
+  fn.chansend(term.job_id, "clear" .. "\n" .. cmd .. "\n")
   vim.cmd("normal! G")
   vim.cmd("wincmd p")
   vim.cmd("stopinsert!")
@@ -459,7 +476,7 @@ end
 
 --- @param num number
 function M.close(num)
-  local term = find_term(num)
+  local term = get_or_create_term(num)
 
   update_origin_win(term.window)
 
@@ -510,7 +527,7 @@ end
 function M.toggle_command(args, count)
   local parsed = parse_input(args)
   vim.validate {
-    size = {parsed.size, "string", true},
+    size = {parsed.size, "number", true},
     directory = {parsed.dir, "string", true}
   }
   if parsed.size then
