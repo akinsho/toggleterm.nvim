@@ -1,6 +1,19 @@
 local api = vim.api
 local fn = vim.fn
-local colors = require("toggleterm/colors")
+local fmt = string.format
+
+local colors = require("toggleterm.colors")
+local config = require("toggleterm.config")
+local utils = require("toggleterm.utils")
+local ui = require("toggleterm.ui")
+
+local T = require("toggleterm.terminal")
+local C = require("toggleterm.constants")
+
+---@type Terminal
+local Terminal = T.Terminal
+local term_ft = C.term_ft
+local SHADING_AMOUNT = C.shading_amount
 -----------------------------------------------------------
 -- Export
 -----------------------------------------------------------
@@ -9,72 +22,14 @@ local M = {
 }
 
 -----------------------------------------------------------
--- Constants
------------------------------------------------------------
-local term_ft = "toggleterm"
--- -30 is a magic number based on manual testing of what looks good
-local SHADING_AMOUNT = -30
-
-local preferences = {
-  size = 12,
-  shade_filetypes = {},
-  shade_terminals = true,
-  insert_mappings = true,
-  start_in_insert = true,
-  persist_size = true,
-  direction = "horizontal",
-  shading_factor = nil
-}
-
------------------------------------------------------------
 -- State
 -----------------------------------------------------------
+---@type Terminal[]
 local terminals = {}
-local persistent = {}
-local origin_win
-
-function M.save_window_size()
-  -- Save the size of the split before it is hidden
-  persistent.width = vim.fn.winwidth(0)
-  persistent.height = vim.fn.winheight(0)
-end
 
 local function echomsg(msg, hl)
   hl = hl or "Title"
   api.nvim_echo({{msg, hl}}, true, {})
-end
-
---- Get the size of the split. Order of priority is as follows:
----   1. The size argument is a valid number > 0
----   2. There is persistent width/height information from prev open state
----   3. Default/base case perference size
----
---- If `preferences.persist_size = false` then option `2` in the
---- list is skipped.
---- @param size number
-local function get_size(size)
-  local valid_size = size ~= nil and size > 0
-  if not preferences.persist_size then
-    return valid_size and size or preferences.size
-  end
-
-  local psize = preferences.direction == "horizontal" and persistent.height or persistent.width
-  return valid_size and size or psize or preferences.size
-end
-
----create a terminal object
----@param dir string
----@return table
-local function create_term(dir)
-  local no_of_terms = #terminals
-  local next_num = no_of_terms == 0 and 1 or no_of_terms + 1
-  return {
-    window = -1,
-    job_id = -1,
-    bufnr = -1,
-    dir = dir or fn.getcwd(),
-    number = next_num
-  }
 end
 
 local function parse_argument(str, result)
@@ -120,45 +75,25 @@ local function parse_input(args)
   return result
 end
 
---- Source: https://teukka.tech/luanvim.html
---- @param definitions table<string,table>
-local function create_augroups(definitions)
-  for group_name, definition in pairs(definitions) do
-    vim.cmd("augroup " .. group_name)
-    vim.cmd("autocmd!")
-    for _, def in pairs(definition) do
-      local command = table.concat(vim.tbl_flatten {"autocmd", def}, " ")
-      vim.cmd(command)
-    end
-    vim.cmd("augroup END")
-  end
-end
-
 --- @param win_id number
 local function find_window(win_id)
   return fn.win_gotoid(win_id) > 0
 end
 
+local function get_term_id()
+  return #terminals == 0 and 1 or #terminals + 1
+end
+
 ---get existing terminal or create an empty term table
 ---@param num number
 ---@param dir string
----@return number
+---@return Terminal
 ---@return boolean
 local function get_or_create_term(num, dir)
   if terminals[num] then
     return terminals[num], false
   end
-  return create_term(dir), true
-end
-
---- get the toggle term number from
---- the name e.g. term://~/.dotfiles//3371887:/usr/bin/zsh;#toggleterm#1
---- the number in this case is 1
---- @param name string
-local function get_number_from_name(name)
-  local parts = vim.split(name, "#")
-  local num = tonumber(parts[#parts])
-  return num
+  return Terminal:new {id = get_term_id(), dir = dir}, true
 end
 
 --- Find the first open terminal window
@@ -184,73 +119,9 @@ local function find_open_windows(comparator)
   return is_open, term_wins
 end
 
---- Add terminal buffer specific options
---- @param num number
---- @param bufnr number
---- @param win_id number
-local function set_opts(num, bufnr, win_id)
-  vim.wo[win_id].winfixheight = true
-  vim.bo[bufnr].buflisted = false
-  vim.bo[bufnr].filetype = term_ft
-  api.nvim_buf_set_var(bufnr, "toggle_number", num)
-end
-
-local function resize(size)
-  local cmd = preferences.direction == "vertical" and "vertical resize" or "resize"
-
-  vim.cmd(cmd .. " " .. size)
-end
-
---- @param size number
-local function open_split(size)
-  size = get_size(size)
-
-  local has_open, win_ids = find_open_windows()
-  local commands =
-    preferences.direction == "horizontal" and
-    {
-      "vsplit",
-      "split",
-      "wincmd J"
-    } or
-    {
-      "split",
-      "vsplit",
-      "wincmd L"
-    }
-
-  if has_open then
-    -- we need to be in the terminal window most recently opened
-    -- in order to split to the right of it
-    fn.win_gotoid(win_ids[#win_ids])
-    vim.cmd(commands[1])
-  else
-    vim.cmd(size .. commands[2])
-    -- move horizontal split to the bottom
-    vim.cmd(commands[3])
-  end
-  resize(size)
-end
-
---- @param bufnr number
-local function setup_buffer_mappings(bufnr)
-  local mapping = preferences.open_mapping
-  if mapping then
-    api.nvim_buf_set_keymap(
-      bufnr,
-      "t",
-      mapping,
-      '<C-\\><C-n>:exe v:count1 . "ToggleTerm"<CR>',
-      {
-        silent = true,
-        noremap = true
-      }
-    )
-  end
-end
-
 local function setup_global_mappings()
-  local mapping = preferences.open_mapping
+  local conf = config.get()
+  local mapping = conf.open_mapping
   -- v:count1 defaults the count to 1 but if a count is passed in uses that instead
   -- <c-u> allows passing along the count
   api.nvim_set_keymap(
@@ -262,7 +133,7 @@ local function setup_global_mappings()
       noremap = true
     }
   )
-  if preferences.insert_mappings then
+  if conf.insert_mappings then
     api.nvim_set_keymap(
       "i",
       mapping,
@@ -275,26 +146,9 @@ local function setup_global_mappings()
   end
 end
 
-local function update_origin_win(term_window)
-  local curr_win = api.nvim_get_current_win()
-  if term_window ~= curr_win then
-    origin_win = curr_win
-  end
-end
-
 --- @param bufnr number
 local function find_windows_by_bufnr(bufnr)
   return fn.win_findbuf(bufnr)
-end
-
----Update the directory of an already opened terminal
----@param term table
----@param dir string
-local function change_directory(term, dir)
-  if term.dir ~= dir then
-    local term_cmd = "cd " .. dir .. "\n" .. "clear" .. "\n"
-    fn.chansend(term.job_id, term_cmd)
-  end
 end
 
 --Create a new terminal or close beginning from the last opened
@@ -329,7 +183,7 @@ end
 local function toggle_nth_term(num, size, directory)
   local term = get_or_create_term(num, directory)
 
-  update_origin_win(term.window)
+  ui.update_origin_win(term.window)
 
   if find_window(term.window) then
     M.close(num)
@@ -358,26 +212,18 @@ function M.close_last_window()
 end
 
 function M.on_term_open()
-  local title = fn.bufname()
-  local num = get_number_from_name(title)
-  if not terminals[num] then
-    local term = create_term()
-    term.bufnr = fn.bufnr()
-    term.window = fn.win_getid()
-    term.job_id = vim.b.terminal_job_id
-    terminals[num] = term
-
-    resize(get_size())
-    set_opts(num, term.bufnr, term.window)
-  end
-end
-
---- Remove the in memory reference to the no longer open terminal
---- @param num string
-function M.delete(num)
-  if terminals[num] then
-    terminals[num] = nil
-  end
+  T.add(
+    T.identify(fn.bufname()),
+    Terminal:new {
+      id = get_term_id(),
+      bufnr = api.nvim_get_current_buf(),
+      window = api.nvim_get_current_win(),
+      job_id = vim.b.terminal_job_id
+    },
+    function(term)
+      term:resize()
+    end
+  )
 end
 
 --- @param num number
@@ -392,59 +238,7 @@ function M.open(num, size, directory)
   }
 
   local term, created = get_or_create_term(num, directory)
-  origin_win = api.nvim_get_current_win()
-
-  if vim.fn.bufexists(term.bufnr) == 0 then
-    open_split(size)
-    term.window = fn.win_getid()
-    term.bufnr = api.nvim_create_buf(false, false)
-
-    api.nvim_set_current_buf(term.bufnr)
-    api.nvim_win_set_buf(term.window, term.bufnr)
-
-    local name = vim.o.shell .. ";#" .. term_ft .. "#" .. num
-    term.job_id = fn.termopen(name, {detach = 1, cwd = directory})
-
-    local commands = {
-      {
-        "TermClose",
-        string.format("<buffer=%d>", term.bufnr),
-        string.format('lua require"toggleterm".delete(%d)', num)
-      }
-    }
-    if preferences.start_in_insert then
-      vim.cmd("startinsert!")
-      table.insert(
-        commands,
-        {
-          "BufEnter",
-          "<buffer>",
-          "startinsert!"
-        }
-      )
-    end
-    if preferences.persist_size then
-      table.insert(
-        commands,
-        {
-          "CursorHold",
-          string.format("<buffer=%d>", term.bufnr),
-          "lua require'toggleterm'.save_window_size()"
-        }
-      )
-    end
-    create_augroups({["ToggleTerm" .. term.bufnr] = commands})
-    setup_buffer_mappings(term.bufnr)
-    terminals[num] = term
-  else
-    open_split(size)
-    vim.cmd("keepalt buffer " .. term.bufnr)
-    vim.wo.winfixheight = true
-    term.window = fn.win_getid()
-    if not created then
-      change_directory(term, directory)
-    end
-  end
+  term:open(size, created)
 end
 
 function M.exec_command(args, count)
@@ -483,7 +277,7 @@ function M.exec(cmd, num, size, dir)
   --- TODO: find a way to do this without calling this function twice
   term, created = get_or_create_term(num, dir)
   if not created and dir and term.dir ~= dir then
-    change_directory(term, dir)
+    term:change_dir(dir)
   end
   fn.chansend(term.job_id, "clear" .. "\n" .. cmd .. "\n")
   vim.cmd("normal! G")
@@ -494,28 +288,8 @@ end
 --- @param num number
 function M.close(num)
   local term = get_or_create_term(num)
-
-  update_origin_win(term.window)
-
-  if find_window(term.window) then
-    M.save_window_size()
-
-    vim.cmd("hide")
-
-    if api.nvim_win_is_valid(origin_win) then
-      api.nvim_set_current_win(origin_win)
-    else
-      origin_win = nil
-    end
-
-    vim.cmd("stopinsert!")
-  else
-    if num then
-      vim.cmd(string.format('echoerr "Failed to close window: %d does not exist"', num))
-    else
-      vim.cmd('echoerr "Failed to close window: invalid term number"')
-    end
-  end
+  term:close()
+  ui.update_origin_win(term.window)
 end
 
 --- only shade explicitly specified filetypes
@@ -526,7 +300,7 @@ function M.__apply_colors()
     ft = "none"
   end
 
-  local allow_list = preferences.shade_filetypes or {}
+  local allow_list = config.get("shade_filetypes") or {}
   table.insert(allow_list, term_ft)
 
   local is_enabled_ft = false
@@ -576,9 +350,7 @@ function M.toggle(count, size, dir)
 end
 
 function M.setup(user_prefs)
-  if user_prefs then
-    preferences = vim.tbl_deep_extend("force", preferences, user_prefs)
-  end
+  local conf = config.set(user_prefs)
   setup_global_mappings()
   local autocommands = {
     {
@@ -593,13 +365,12 @@ function M.setup(user_prefs)
       "lua require'toggleterm'.on_term_open()"
     }
   }
-  if preferences.shade_terminals then
+  if conf.shade_terminals then
     local is_bright = colors.is_bright_background()
 
     -- if background is light then darken the terminal a lot more to increase contrast
     local factor =
-      preferences.shading_factor and type(preferences.shading_factor) == "number" and
-      preferences.shading_factor or
+      conf.shading_factor and type(conf.shading_factor) == "number" and conf.shading_factor or
       (is_bright and 3 or 1)
 
     local amount = factor * SHADING_AMOUNT
@@ -626,7 +397,7 @@ function M.setup(user_prefs)
       }
     )
   end
-  create_augroups({ToggleTerminal = autocommands})
+  utils.create_augroups({ToggleTerminal = autocommands})
 end
 
 return M
