@@ -76,7 +76,8 @@ function M.update_origin_window(term_window)
 end
 
 --- @param win_id number
-function M.find_window(win_id)
+--- @return boolean
+function M.try_open(win_id)
   return fn.win_gotoid(win_id) > 0
 end
 --- Find the first open terminal window

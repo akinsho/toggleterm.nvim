@@ -104,10 +104,16 @@ function Terminal:resize(size)
   ui.resize_split(self, size)
 end
 
+function Terminal:is_open()
+  --- TODO: try open will actually attempt to switch to this window
+  local win_open = ui.try_open(self.window)
+  return win_open and api.nvim_win_get_buf(self.window) == self.bufnr
+end
+
 function Terminal:close()
   ui.update_origin_window(self.window)
 
-  if ui.find_window(self.window) then
+  if ui.try_open(self.window) then
     ui.close(self)
     vim.cmd("stopinsert!")
   else
@@ -147,7 +153,7 @@ end
 ---Open a terminal in a type of window i.e. a split,full window or tab
 ---@param size number
 ---@param term table
-local function open_by_type(size, term)
+local function opener(size, term)
   local dir = term.direction
   if term:is_split() then
     ui.open_split(size, term)
@@ -164,14 +170,14 @@ end
 function Terminal:open(size, is_new)
   ui.set_origin_window()
   if fn.bufexists(self.bufnr) == 0 then
-    open_by_type(size, self)
+    opener(size, self)
     self.window, self.bufnr = ui.create_buf_and_set(self)
     self:__spawn()
     setup_buffer_autocommands(self)
     setup_buffer_mappings(self.bufnr)
     M.add(self.id, self)
   else
-    open_by_type(size, self)
+    opener(size, self)
     ui.switch_buf(self.bufnr)
     self.window = api.nvim_get_current_win()
     if not is_new then

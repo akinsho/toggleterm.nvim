@@ -133,7 +133,7 @@ local function toggle_nth_term(num, size, directory)
   local term = get_term(num, directory)
   ui.update_origin_window(term.window)
 
-  if ui.find_window(term.window) then
+  if term:is_open() then
     M.close(num)
   else
     M.open(num, size, directory)
@@ -211,7 +211,7 @@ function M.exec(cmd, num, size, dir)
   num = num < 1 and 1 or num
   local term = get_term(num, dir)
   local created = false
-  if not ui.find_window(term.window) then
+  if not term:is_open() then
     M.open(num, size, dir)
   end
   --- TODO: find a way to do this without calling this function twice
