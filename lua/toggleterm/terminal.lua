@@ -184,16 +184,15 @@ end
 ---@param num number
 ---@param term Terminal
 ---@param on_add fun(term: Terminal, num: number):nil
+---@return Terminal, number
 function M.add(num, term, on_add)
   if not terminals[num] then
     terminals[num] = term
     if on_add then
       on_add(term, num)
-    else
-      return term, num
     end
   end
-  return nil, num
+  return terminals[num], num
 end
 
 --- get the toggle term number from
