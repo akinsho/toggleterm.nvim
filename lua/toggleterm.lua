@@ -2,35 +2,28 @@ local api = vim.api
 local fn = vim.fn
 local fmt = string.format
 
+local constants = require("toggleterm.constants")
 local colors = require("toggleterm.colors")
 local config = require("toggleterm.config")
 local utils = require("toggleterm.utils")
 local ui = require("toggleterm.ui")
 
 local T = require("toggleterm.terminal")
-local C = require("toggleterm.constants")
 
 ---@type Terminal
 local Terminal = T.Terminal
-local term_ft = C.term_ft
-local SHADING_AMOUNT = C.shading_amount
+local terminals = T.terminals
+---@type fun(num: integer, directory: string): Terminal
+local get_term = T.get_or_create_term
+
+local term_ft = constants.term_ft
+local SHADING_AMOUNT = constants.shading_amount
 -----------------------------------------------------------
 -- Export
 -----------------------------------------------------------
 local M = {
   __set_highlights = colors.set_highlights
 }
-
------------------------------------------------------------
--- State
------------------------------------------------------------
----@type Terminal[]
-local terminals = {}
-
-local function echomsg(msg, hl)
-  hl = hl or "Title"
-  api.nvim_echo({{msg, hl}}, true, {})
-end
 
 local function parse_argument(str, result)
   local arg = vim.split(str, "=")
@@ -75,50 +68,6 @@ local function parse_input(args)
   return result
 end
 
---- @param win_id number
-local function find_window(win_id)
-  return fn.win_gotoid(win_id) > 0
-end
-
-local function get_term_id()
-  return #terminals == 0 and 1 or #terminals + 1
-end
-
----get existing terminal or create an empty term table
----@param num number
----@param dir string
----@return Terminal
----@return boolean
-local function get_or_create_term(num, dir)
-  if terminals[num] then
-    return terminals[num], false
-  end
-  return Terminal:new {id = get_term_id(), dir = dir}, true
-end
-
---- Find the first open terminal window
---- by iterating all windows and matching the
---- containing buffers filetype with the passed in
---- comparator function or the default which matches
---- the filetype
---- @param comparator function
-local function find_open_windows(comparator)
-  comparator = comparator or function(buf)
-      return vim.bo[buf].filetype == term_ft
-    end
-  local wins = api.nvim_list_wins()
-  local is_open = false
-  local term_wins = {}
-  for _, win in pairs(wins) do
-    local buf = api.nvim_win_get_buf(win)
-    if comparator(buf) then
-      is_open = true
-      table.insert(term_wins, win)
-    end
-  end
-  return is_open, term_wins
-end
-
 local function setup_global_mappings()
   local conf = config.get()
   local mapping = conf.open_mapping
@@ -156,7 +105,7 @@ end
 ---@param size number
 ---@param directory string
 local function smart_toggle(_, size, directory)
-  local already_open = find_open_windows()
+  local already_open = ui.find_open_windows()
   if not already_open then
     M.open(1, size, directory)
   else
@@ -165,7 +114,7 @@ local function smart_toggle(_, size, directory)
     for i = #terminals, 1, -1 do
       local term = terminals[i]
       if not term then
-        vim.cmd(string.format('echomsg "Term does not exist %s"', vim.inspect(term)))
+        utils.echomsg(fmt("Term does not exist %s", vim.inspect(term)))
         break
       end
       local wins = find_windows_by_bufnr(term.bufnr)
@@ -181,11 +130,11 @@ end
 --- @param num number
 --- @param size number
 local function toggle_nth_term(num, size, directory)
-  local term = get_or_create_term(num, directory)
+  local term = get_term(num, directory)
 
   ui.update_origin_win(term.window)
 
-  if find_window(term.window) then
+  if ui.find_window(term.window) then
     M.close(num)
   else
     M.open(num, size, directory)
@@ -215,7 +164,6 @@ function M.on_term_open()
   T.add(
     T.identify(fn.bufname()),
     Terminal:new {
-      id = get_term_id(),
       bufnr = api.nvim_get_current_buf(),
       window = api.nvim_get_current_win(),
       job_id = vim.b.terminal_job_id
@@ -237,14 +185,14 @@ function M.open(num, size, directory)
     directory = {directory, "string", true}
   }
 
-  local term, created = get_or_create_term(num, directory)
+  local term, created = get_term(num, directory)
   term:open(size, created)
 end
 
 function M.exec_command(args, count)
   vim.validate {args = {args, "string"}}
   if not args:match("cmd") then
-    return echomsg(
+    return utils.echomsg(
       "TermExec requires a cmd specified using the syntax cmd='ls -l' e.g. TermExec cmd='ls -l'",
       "ErrorMsg"
     )
@@ -269,17 +217,17 @@ function M.exec(cmd, num, size, dir)
   }
   -- count
   num = num < 1 and 1 or num
-  local term = get_or_create_term(num, dir)
+  local term = get_term(num, dir)
   local created = false
-  if not find_window(term.window) then
+  if not ui.find_window(term.window) then
     M.open(num, size, dir)
   end
   --- TODO: find a way to do this without calling this function twice
-  term, created = get_or_create_term(num, dir)
+  term, created = get_term(num, dir)
   if not created and dir and term.dir ~= dir then
     term:change_dir(dir)
   end
-  fn.chansend(term.job_id, "clear" .. "\n" .. cmd .. "\n")
+  term:send(cmd)
   vim.cmd("normal! G")
   vim.cmd("wincmd p")
   vim.cmd("stopinsert!")
@@ -287,9 +235,8 @@ end
 
 --- @param num number
 function M.close(num)
-  local term = get_or_create_term(num)
+  local term = get_term(num)
   term:close()
-  ui.update_origin_win(term.window)
 end
 
 --- only shade explicitly specified filetypes

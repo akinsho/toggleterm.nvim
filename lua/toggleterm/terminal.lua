@@ -9,6 +9,23 @@ local api = vim.api
 local fmt = string.format
 local fn = vim.fn
 
+---@type Terminal[]
+local terminals = {}
+
+--- @class Terminal
+--- @field cmd string
+--- @field direction string
+--- @field id number
+--- @field bufnr number
+--- @field window number
+--- @field job_id number
+--- @field dir string
+local Terminal = {}
+
+local function next_id()
+  return #terminals == 0 and 1 or #terminals + 1
+end
+
 --- @param bufnr number
 local function setup_buffer_mappings(bufnr)
   local mapping = config.get("open_mapping")
@@ -55,29 +72,18 @@ local function setup_buffer_autocommands(term)
       {
         "CursorHold",
         fmt("<buffer=%d>", term.bufnr),
-        "lua require'toggleterm'.save_window_size()"
+        "lua require'toggleterm.ui'.save_window_size()"
       }
     )
   end
   utils.create_augroups({["ToggleTerm" .. term.bufnr] = commands})
 end
 
---- @class Terminal
---- @field cmd string
---- @field direction string
---- @field id number
---- @field bufnr number
---- @field window number
---- @field job_id number
---- @field dir string
-M.Terminal = {}
-
 ---Create a new terminal object
 ---@param term Terminal
 ---@return Terminal
-function M.Terminal:new(term)
+function Terminal:new(term)
   local conf = config.get()
-  assert(term.id, "A terminal id must be specified")
   term = term or {}
   self.__index = self
   term.direction = term.direction or conf.direction
@@ -85,25 +91,26 @@ function M.Terminal:new(term)
   term.job_id = term.job_id or -1
   term.bufnr = term.bufnr or -1
   term.dir = term.dir or vim.loop.cwd()
-  term.id = term.id
+  term.id = next_id()
   return setmetatable(term, self)
 end
 
-function M.Terminal:is_split()
+function Terminal:is_split()
   return self.direction == "vertical" or self.direction == "horizontal"
 end
 
-function M.Terminal:resize(size)
+function Terminal:resize(size)
+  size = size or ui.get_size()
   if self:is_split() then
     vim.cmd(self.direction == "vertical" and "vertical resize" or "resize" .. " " .. size)
   end
 end
 
-function M.Terminal:close()
+function Terminal:close()
   ui.update_origin_window(self.window)
   if ui.find_window(self.window) then
     if self:is_split() then
-      ui.save_size()
+      ui.save_window_size()
       vim.cmd("hide")
       local origin = ui.get_origin_window()
       if api.nvim_win_is_valid(origin) then
@@ -118,22 +125,27 @@ function M.Terminal:close()
     vim.cmd("stopinsert!")
   else
     if self.id then
-      vim.cmd(fmt('echoerr "Failed to close window: %d does not exist"', self.id))
+      utils.echomsg(fmt("Failed to close window: %d does not exist", self.id), "Error")
     else
-      vim.cmd('echoerr "Failed to close window: invalid term number"')
+      utils.echomsg("Failed to close window: invalid term number")
     end
   end
+  ui.update_origin_window(self.window)
 end
 
 ---Send a command to a running terminal
----@param cmd any
-function M.Terminal:send(cmd)
-  fn.chansend(self.job_id, cmd)
+---@param cmd string
+function Terminal:send(cmd)
+  fn.chansend(self.job_id, "clear" .. "\n" .. cmd .. "\n")
+end
+
+function Terminal:clear()
+  self:send("clear" .. "\n")
 end
 
 ---Update the directory of an already opened terminal
 ---@param dir string
-function M.Terminal:change_dir(dir)
+function Terminal:change_dir(dir)
   if self.dir ~= dir then
     self:send("cd " .. dir .. "\n" .. "clear" .. "\n")
   end
@@ -142,7 +154,7 @@ end
 ---Open a terminal window
 ---@param size number
 ---@param is_new boolean
-function M.Terminal:open(size, is_new)
+function Terminal:open(size, is_new)
   ui.set_origin_window()
   if not api.nvim_buf_is_loaded(self.bufnr) then
     self.window = api.nvim_get_current_win()
@@ -157,7 +169,7 @@ function M.Terminal:open(size, is_new)
 
     setup_buffer_autocommands(self)
     setup_buffer_mappings(self.bufnr)
-    M.terminals[self.id] = self
+    terminals[self.id] = self
   else
     self:toggle(size, self)
     self.window = api.nvim_get_current_win()
@@ -170,10 +182,10 @@ end
 ---Open a terminal in a type of window i.e. a split,full window or tab
 ---@param size number
 ---@param term table
-function M.Terminal:toggle(size, term)
+function Terminal:toggle(size, term)
   local dir = self.direction
   if dir == "horizontal" or dir == "vertical" then
-    ui.open_split(size)
+    ui.open_split(size, term)
   elseif dir == "window" then
     ui.open_window(term.bufnr)
   elseif dir == "tab" then
@@ -186,8 +198,8 @@ end
 ---@param term Terminal
 ---@param on_add fun(term: Terminal, num: number):nil
 function M.add(num, term, on_add)
-  if not M.terminals[num] then
-    M.terminals[num] = term
+  if not terminals[num] then
+    terminals[num] = term
     if on_add then
       on_add(term, num)
     else
@@ -209,9 +221,24 @@ end
 --- Remove the in memory reference to the no longer open terminal
 --- @param num string
 function M.delete(num)
-  if M.terminals[num] then
-    M.terminals[num] = nil
+  if terminals[num] then
+    terminals[num] = nil
   end
 end
+
+---get existing terminal or create an empty term table
+---@param num number
+---@param dir string
+---@return Terminal
+---@return boolean
+function M.get_or_create_term(num, dir)
+  if terminals[num] then
+    return terminals[num], false
+  end
+  return Terminal:new {id = next_id(), dir = dir}, true
+end
+
+M.Terminal = Terminal
+M.terminals = terminals
 
 return M

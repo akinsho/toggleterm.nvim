@@ -1,5 +1,12 @@
 local M = {}
 
+local api = vim.api
+
+function M.echomsg(msg, hl)
+  hl = hl or "Title"
+  api.nvim_echo({{msg, hl}}, true, {})
+end
+
 --- Source: https://teukka.tech/luanvim.html
 --- @param definitions table<string,table>
 function M.create_augroups(definitions)
