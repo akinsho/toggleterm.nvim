@@ -137,7 +137,8 @@ function Terminal:change_dir(dir)
   end
 end
 
-function Terminal:spawn()
+---@private
+function Terminal:__spawn()
   local name = vim.o.shell .. ";#" .. term_ft .. "#" .. self.id
   self.job_id = fn.termopen(name, {detach = 1, cwd = self.dir})
   self.name = name
@@ -151,7 +152,7 @@ local function open_by_type(size, term)
   if term:is_split() then
     ui.open_split(size, term)
   elseif dir == "window" then
-    ui.open_window(term.bufnr)
+    --- do nothing, maybe later this should close other windows or something
   elseif dir == "tab" then
     ui.open_tab()
   end
@@ -164,16 +165,14 @@ function Terminal:open(size, is_new)
   ui.set_origin_window()
   if fn.bufexists(self.bufnr) == 0 then
     open_by_type(size, self)
-    self.window, self.bufnr = ui.create_buffer(self)
-    api.nvim_win_set_buf(self.window, self.bufnr)
-    self:spawn()
+    self.window, self.bufnr = ui.create_buf_and_set(self)
+    self:__spawn()
     setup_buffer_autocommands(self)
     setup_buffer_mappings(self.bufnr)
     M.add(self.id, self)
   else
     open_by_type(size, self)
     vim.cmd(fmt("keepalt buffer %d", self.bufnr))
-    vim.wo.winfixheight = true
     self.window = api.nvim_get_current_win()
     if not is_new then
       self:change_dir(self.dir)

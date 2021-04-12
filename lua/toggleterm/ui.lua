@@ -48,13 +48,15 @@ local function set_opts(win, buf, term)
 end
 
 ---Create a terminal buffer with the correct buffer/window options
+---then set it to current window
 ---@param term Terminal
 ---@return number, number
-function M.create_buffer(term)
+function M.create_buf_and_set(term)
   local window = api.nvim_get_current_win()
   local bufnr = api.nvim_create_buf(false, false)
   set_opts(window, bufnr, term)
   api.nvim_set_current_buf(bufnr)
+  api.nvim_win_set_buf(window, bufnr)
   return window, bufnr
 end
 
@@ -132,17 +134,11 @@ function M.open_split(size, term)
     -- move horizontal split to the bottom
     vim.cmd(commands.position)
   end
-  ---TODO should the resize happen here
   M.resize_split(term, size)
 end
 
 function M.open_tab()
   vim.cmd("tabnew")
-end
-
-function M.open_window(term)
-  term.window, term.bufnr = M.create_buffer(term)
-  -- vim.cmd(fmt("buffer! %d", term.bufnr))
 end
 
 local function close_split()
