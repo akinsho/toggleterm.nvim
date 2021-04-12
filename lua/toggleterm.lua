@@ -142,20 +142,13 @@ end
 
 function M.close_last_window()
   local buf = api.nvim_get_current_buf()
+  local _, term = T.identify(api.nvim_buf_get_name(buf))
   local only_one_window = fn.winnr("$") == 1
   if only_one_window and vim.bo[buf].filetype == term_ft then
-    -- Reset the window id so there are no hanging
-    -- references to the terminal window
-    for _, term in pairs(terminals) do
-      if term.bufnr == buf then
-        term.window = -1
-        break
-      end
+    if term:is_split() then
+      term:close()
+      vim.cmd("keepalt bnext")
     end
-    -- FIXME switching causes the buffer
-    -- switched to to have no highlighting
-    -- no idea why
-    vim.cmd("keepalt bnext")
   end
 end
 

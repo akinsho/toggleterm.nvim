@@ -200,9 +200,11 @@ end
 --- the name e.g. term://~/.dotfiles//3371887:/usr/bin/zsh;#toggleterm#1
 --- the number in this case is 1
 --- @param name string
+--- @return number
 function M.identify(name)
   local parts = vim.split(name, "#")
-  return tonumber(parts[#parts])
+  local id = tonumber(parts[#parts])
+  return id, terminals[id]
 end
 
 --- Remove the in memory reference to the no longer open terminal
