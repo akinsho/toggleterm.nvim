@@ -131,8 +131,7 @@ end
 --- @param size number
 local function toggle_nth_term(num, size, directory)
   local term = get_term(num, directory)
-
-  ui.update_origin_win(term.window)
+  ui.update_origin_window(term.window)
 
   if ui.find_window(term.window) then
     M.close(num)

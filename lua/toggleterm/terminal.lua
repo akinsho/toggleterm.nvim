@@ -20,6 +20,7 @@ local terminals = {}
 --- @field window number
 --- @field job_id number
 --- @field dir string
+--- @field name string
 local Terminal = {}
 
 local function next_id()
@@ -34,7 +35,7 @@ local function setup_buffer_mappings(bufnr)
       bufnr,
       "t",
       mapping,
-      '<C-\\><C-n>:exe v:count1 . "ToggleTerm"<CR>',
+      [[<C-\><C-n>:exe v:count1 . "ToggleTerm"<CR>]],
       {
         silent = true,
         noremap = true
@@ -100,35 +101,20 @@ function Terminal:is_split()
 end
 
 function Terminal:resize(size)
-  size = size or ui.get_size()
-  if self:is_split() then
-    vim.cmd(self.direction == "vertical" and "vertical resize" or "resize" .. " " .. size)
-  end
+  ui.resize_split(self, size)
 end
 
 function Terminal:close()
   ui.update_origin_window(self.window)
-  if ui.find_window(self.window) then
-    if self:is_split() then
-      ui.save_window_size()
-      vim.cmd("hide")
-      local origin = ui.get_origin_window()
-      if api.nvim_win_is_valid(origin) then
-        api.nvim_set_current_win(origin)
-      else
-        ui.set_origin_window(nil)
-      end
-    else
-      vim.cmd("b#")
-    end
 
+  if ui.find_window(self.window) then
+    ui.close(self)
     vim.cmd("stopinsert!")
   else
-    if self.id then
-      utils.echomsg(fmt("Failed to close window: %d does not exist", self.id), "Error")
-    else
-      utils.echomsg("Failed to close window: invalid term number")
-    end
+    local msg =
+      self.id and fmt("Failed to close window: %d does not exist", self.id) or
+      "Failed to close window: invalid term number"
+    utils.echomsg(msg, "Error")
   end
   ui.update_origin_window(self.window)
 end
@@ -136,7 +122,7 @@ end
 ---Send a command to a running terminal
 ---@param cmd string
 function Terminal:send(cmd)
-  fn.chansend(self.job_id, "clear" .. "\n" .. cmd .. "\n")
+  fn.chansend(self.job_id, cmd .. "\n")
 end
 
 function Terminal:clear()
@@ -151,45 +137,47 @@ function Terminal:change_dir(dir)
   end
 end
 
----Open a terminal window
----@param size number
----@param is_new boolean
-function Terminal:open(size, is_new)
-  ui.set_origin_window()
-  if not api.nvim_buf_is_loaded(self.bufnr) then
-    self.window = api.nvim_get_current_win()
-    self.bufnr = api.nvim_create_buf(false, false)
-    self:toggle(size, self)
-
-    api.nvim_set_current_buf(self.bufnr)
-    api.nvim_win_set_buf(self.window, self.bufnr)
-
-    local name = vim.o.shell .. ";#" .. term_ft .. "#" .. self.id
-    self.job_id = fn.termopen(name, {detach = 1, cwd = self.dir})
-
-    setup_buffer_autocommands(self)
-    setup_buffer_mappings(self.bufnr)
-    terminals[self.id] = self
-  else
-    self:toggle(size, self)
-    self.window = api.nvim_get_current_win()
-    if not is_new then
-      self:change_dir(self.dir)
-    end
-  end
+function Terminal:spawn()
+  local name = vim.o.shell .. ";#" .. term_ft .. "#" .. self.id
+  self.job_id = fn.termopen(name, {detach = 1, cwd = self.dir})
+  self.name = name
 end
 
 ---Open a terminal in a type of window i.e. a split,full window or tab
 ---@param size number
 ---@param term table
-function Terminal:toggle(size, term)
-  local dir = self.direction
-  if dir == "horizontal" or dir == "vertical" then
+local function open_by_type(size, term)
+  local dir = term.direction
+  if term:is_split() then
     ui.open_split(size, term)
   elseif dir == "window" then
     ui.open_window(term.bufnr)
   elseif dir == "tab" then
     ui.open_tab()
+  end
+end
+
+---Open a terminal window
+---@param size number
+---@param is_new boolean
+function Terminal:open(size, is_new)
+  ui.set_origin_window()
+  if fn.bufexists(self.bufnr) == 0 then
+    open_by_type(size, self)
+    self.window, self.bufnr = ui.create_buffer(self)
+    api.nvim_win_set_buf(self.window, self.bufnr)
+    self:spawn()
+    setup_buffer_autocommands(self)
+    setup_buffer_mappings(self.bufnr)
+    M.add(self.id, self)
+  else
+    open_by_type(size, self)
+    vim.cmd(fmt("keepalt buffer %d", self.bufnr))
+    vim.wo.winfixheight = true
+    self.window = api.nvim_get_current_win()
+    if not is_new then
+      self:change_dir(self.dir)
+    end
   end
 end
 

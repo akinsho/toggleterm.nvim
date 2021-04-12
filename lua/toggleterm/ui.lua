@@ -18,9 +18,9 @@ end
 --- Get the size of the split. Order of priority is as follows:
 --- 1. The size argument is a valid number > 0
 --- 2. There is persistent width/height information from prev open state
---- 3. Default/base case perference size
+--- 3. Default/base case config size
 ---
---- If `preferences.persist_size = false` then option `2` in the
+--- If `config.persist_size = false` then option `2` in the
 --- list is skipped.
 --- @param size number
 function M.get_size(size)
@@ -35,14 +35,27 @@ function M.get_size(size)
 end
 
 --- Add terminal buffer specific options
+--- @param win number
+--- @param buf number
 --- @param term Terminal
-local function set_opts(term)
+local function set_opts(win, buf, term)
   if term:is_split() then
-    vim.wo[term.window].winfixheight = true
+    vim.wo[win].winfixheight = true
   end
-  vim.bo[term.bufnr].buflisted = false
-  vim.bo[term.bufnr].filetype = constants.term_ft
-  api.nvim_buf_set_var(term.bufnr, "toggle_number", term.id)
+  vim.bo[buf].buflisted = false
+  vim.bo[buf].filetype = constants.term_ft
+  api.nvim_buf_set_var(buf, "toggle_number", term.id)
+end
+
+---Create a terminal buffer with the correct buffer/window options
+---@param term Terminal
+---@return number, number
+function M.create_buffer(term)
+  local window = api.nvim_get_current_win()
+  local bufnr = api.nvim_create_buf(false, false)
+  set_opts(window, bufnr, term)
+  api.nvim_set_current_buf(bufnr)
+  return window, bufnr
 end
 
 function M.set_origin_window()
@@ -87,47 +100,85 @@ function M.find_open_windows(comparator)
   return is_open, term_wins
 end
 
+local split_commands = {
+  horizontal = {
+    existing = "vsplit",
+    new = "split",
+    position = "wincmd J",
+    resize = "resize"
+  },
+  vertical = {
+    existing = "split",
+    new = "vsplit",
+    position = "wincmd L",
+    resize = "vertical resize"
+  }
+}
+
 --- @param size number
 --- @param term Terminal
 function M.open_split(size, term)
-  size = M.get_size(size)
-
   local has_open, win_ids = M.find_open_windows()
-  local commands =
-    term.direction == "horizontal" and
-    {
-      "vsplit",
-      "split",
-      "wincmd J"
-    } or
-    {
-      "split",
-      "vsplit",
-      "wincmd L"
-    }
+  local commands = split_commands[term.direction]
 
+  size = M.get_size(size)
   if has_open then
     -- we need to be in the terminal window most recently opened
     -- in order to split to the right of it
     api.nvim_set_current_win(win_ids[#win_ids])
-    vim.cmd(commands[1])
-    vim.cmd(fmt("keepalt buffer %d", term.bufnr))
-    vim.wo.winfixheight = true
+    vim.cmd(commands.existing)
   else
-    vim.cmd(size .. commands[2])
+    vim.cmd(size .. commands.new)
     -- move horizontal split to the bottom
-    vim.cmd(commands[3])
+    vim.cmd(commands.position)
   end
-  term:resize(size)
-  set_opts(term)
+  ---TODO should the resize happen here
+  M.resize_split(term, size)
 end
 
 function M.open_tab()
   vim.cmd("tabnew")
 end
 
-function M.open_window(bufnr)
-  vim.cmd(fmt("buffer! %d", bufnr))
+function M.open_window(term)
+  term.window, term.bufnr = M.create_buffer(term)
+  -- vim.cmd(fmt("buffer! %d", term.bufnr))
+end
+
+local function close_split()
+  M.save_window_size()
+  vim.cmd("hide")
+  if api.nvim_win_is_valid(origin_window) then
+    api.nvim_set_current_win(origin_window)
+  else
+    origin_window = nil
+  end
+end
+
+local function close_window()
+  vim.cmd("b#")
+end
+
+---Close given terminal's ui
+---@param term Terminal
+function M.close(term)
+  if term:is_split() then
+    close_split()
+  elseif term.direction == "window" then
+    close_window()
+  else
+    error(fmt("Not implemented close function for %s", term.direction))
+  end
+end
+
+---Resize a split window
+---@param term Terminal
+---@param size number
+function M.resize_split(term, size)
+  if term:is_split() then
+    size = size or M.get_size()
+    vim.cmd(split_commands[term.direction].resize .. " " .. size)
+  end
 end
 
 return M
