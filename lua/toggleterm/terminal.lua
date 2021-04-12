@@ -172,8 +172,7 @@ function Terminal:open(size, is_new)
     M.add(self.id, self)
   else
     open_by_type(size, self)
-    -- don't change the alternate buffer so that <c-^><c-^> does nothing in the terminal split
-    vim.cmd(fmt("keepalt buffer %d", self.bufnr))
+    ui.switch_buf(self.bufnr)
     self.window = api.nvim_get_current_win()
     if not is_new then
       self:change_dir(self.dir)

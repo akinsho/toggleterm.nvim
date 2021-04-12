@@ -102,6 +102,13 @@ function M.find_open_windows(comparator)
   return is_open, term_wins
 end
 
+---Switch to the given buffer without changing the alternate
+---@param buf number
+function M.switch_buf(buf)
+  -- don't change the alternate buffer so that <c-^><c-^> does nothing in the terminal split
+  vim.cmd(fmt("keepalt buffer %d", buf))
+end
+
 local split_commands = {
   horizontal = {
     existing = "vsplit",
@@ -152,7 +159,7 @@ local function close_split()
 end
 
 local function close_window()
-  vim.cmd("b#")
+  vim.cmd("keepalt b#")
 end
 
 ---Close given terminal's ui
