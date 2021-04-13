@@ -224,7 +224,7 @@ function Terminal:open(size, is_new)
     self:__spawn()
     setup_buffer_autocommands(self)
     setup_buffer_mappings(self.bufnr)
-    M.add(self.id, self)
+    self:__add()
   else
     opener(size, self)
     ui.switch_buf(self.bufnr)
@@ -244,21 +244,6 @@ function Terminal:toggle(size)
     self:open(size)
   end
   return self
-end
-
----Add a terminal to the list of terminals, if it does not exist add nothing
----@param num number
----@param term Terminal
----@param on_add fun(term: Terminal, num: number):nil
----@return Terminal, number
-function M.add(num, term, on_add)
-  if not terminals[num] then
-    terminals[num] = term
-    if on_add then
-      on_add(term, num)
-    end
-  end
-  return terminals[num], num
 end
 
 --- get the toggle term number from
