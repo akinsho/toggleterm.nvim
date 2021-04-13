@@ -12,12 +12,10 @@ local T = require("toggleterm.terminal")
 
 ---@type Terminal
 local Terminal = T.Terminal
----@type Terminal[]
-local terminals = T.terminals
+---@type fun(): Terminal[]
+local get_all = T.get_all
 ---@type fun(id: integer, directory: string, direction: string): Terminal
 local get_term = T.get_or_create_term
----@type fun(id: integer, term: Terminal, on_add: fun(term: Terminal, num: number)): Terminal,number
-local set_term = T.add
 
 local term_ft = constants.term_ft
 local SHADING_AMOUNT = constants.shading_amount
@@ -135,6 +133,7 @@ local function smart_toggle(_, size, directory, direction)
   if not ui.find_open_windows() then
     get_term(1, directory, direction):open(size)
   else
+    local terminals = get_all()
     local target = #terminals
     -- count backwards from the end of the list
     for i = #terminals, 1, -1 do
@@ -177,17 +176,14 @@ end
 
 function M.on_term_open()
   local id = T.identify(fn.bufname())
-  set_term(
-    id,
+  if id then
     Terminal:new {
+      id = id,
       bufnr = api.nvim_get_current_buf(),
       window = api.nvim_get_current_win(),
       job_id = vim.b.terminal_job_id
-    },
-    function(term)
-      term:__resurrect(term.window, term.bufnr)
-    end
-  )
+    }:__resurrect()
+  end
 end
 
 function M.exec_command(args, count)

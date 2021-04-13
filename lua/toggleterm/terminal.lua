@@ -84,16 +84,28 @@ end
 ---@param term Terminal
 ---@return Terminal
 function Terminal:new(term)
-  local conf = config.get()
   term = term or {}
+  --- If we try to create a new terminal, but the id is already
+  --- taken, return the terminal with the containing id
+  if term.id and terminals[term.id] then
+    return terminals[term.id]
+  end
+  local conf = config.get()
   self.__index = self
   term.direction = term.direction or conf.direction
   term.window = term.window or -1
   term.job_id = term.job_id or -1
   term.bufnr = term.bufnr or -1
   term.dir = term.dir or vim.loop.cwd()
-  term.id = next_id()
+  term.id = term.id or next_id()
   return setmetatable(term, self)
+end
+
+---@private
+---Add a terminal to the list of terminals
+function Terminal:__add()
+  terminals[self.id] = self
+  return self
 end
 
 function Terminal:is_split()
@@ -125,6 +137,11 @@ function Terminal:close()
   ui.update_origin_window(self.window)
 end
 
+function Terminal:shutdown()
+  self:close()
+  ui.delete_buf(self)
+end
+
 ---Send a command to a running terminal
 ---@param cmd string
 function Terminal:send(cmd)
@@ -152,10 +169,9 @@ end
 
 ---@private
 ---Add an orphaned terminal to the list of terminal and re-apply settings
----@param win number
----@param buf number
-function Terminal:__resurrect(win, buf)
-  ui.set_options(win, buf, self)
+function Terminal:__resurrect()
+  self:__add()
+  ui.set_options(self.window, self.bufnr, self)
   self:resize()
 end
 
@@ -203,6 +219,7 @@ function Terminal:toggle(size)
   else
     self:open(size)
   end
+  return self
 end
 
 ---Add a terminal to the list of terminals, if it does not exist add nothing
@@ -251,7 +268,17 @@ function M.get_or_create_term(num, dir, direction)
   return Terminal:new {id = next_id(), dir = dir, direction = direction}, true
 end
 
+function M.get_all()
+  return terminals
+end
+
+function M.reset()
+  for idx, term in pairs(terminals) do
+    term:shutdown()
+    terminals[idx] = nil
+  end
+end
+
 M.Terminal = Terminal
-M.terminals = terminals
 
 return M

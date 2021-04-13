@@ -60,6 +60,12 @@ function M.create_buf_and_set(term)
   return window, bufnr
 end
 
+function M.delete_buf(term)
+  if api.nvim_buf_is_valid(term.bufnr) then
+    api.nvim_buf_delete(term.bufnr, {force = true})
+  end
+end
+
 function M.set_origin_window()
   origin_window = api.nvim_get_current_win()
 end
@@ -149,9 +155,13 @@ function M.open_tab()
   vim.cmd("tabnew")
 end
 
-local function close_split()
+---Close terminal window
+---@param term Terminal
+local function close_split(term)
   M.save_window_size()
-  vim.cmd("hide")
+  if api.nvim_win_is_valid(term.window) then
+    api.nvim_win_close(term.window, true)
+  end
   if api.nvim_win_is_valid(origin_window) then
     api.nvim_set_current_win(origin_window)
   else
@@ -167,7 +177,7 @@ end
 ---@param term Terminal
 function M.close(term)
   if term:is_split() then
-    close_split()
+    close_split(term)
   elseif term.direction == "window" then
     close_window()
   else
