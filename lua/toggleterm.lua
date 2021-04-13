@@ -8,14 +8,14 @@ local config = require("toggleterm.config")
 local utils = require("toggleterm.utils")
 local ui = require("toggleterm.ui")
 
-local T = require("toggleterm.terminal")
+local terms = require("toggleterm.terminal")
 
 ---@type Terminal
-local Terminal = T.Terminal
+local Terminal = terms.Terminal
 ---@type fun(): Terminal[]
-local get_all = T.get_all
+local get_all = terms.get_all
 ---@type fun(id: integer, directory: string, direction: string): Terminal
-local get_term = T.get_or_create_term
+local get_term = terms.get_or_create_term
 
 local term_ft = constants.term_ft
 local SHADING_AMOUNT = constants.shading_amount
@@ -164,7 +164,7 @@ end
 
 function M.close_last_window()
   local buf = api.nvim_get_current_buf()
-  local _, term = T.identify(api.nvim_buf_get_name(buf))
+  local _, term = terms.identify(api.nvim_buf_get_name(buf))
   local only_one_window = fn.winnr("$") == 1
   if only_one_window and vim.bo[buf].filetype == term_ft then
     if term:is_split() then
@@ -175,7 +175,7 @@ function M.close_last_window()
 end
 
 function M.on_term_open()
-  local id = T.identify(fn.bufname())
+  local id = terms.identify(fn.bufname())
   if id then
     Terminal:new {
       id = id,
@@ -302,7 +302,7 @@ function M.setup(user_prefs)
           -- is re-applied
           "ColorScheme",
           "*",
-          string.format("lua require'toggleterm'.__set_highlights(%d)", amount)
+          fmt("lua require'toggleterm'.__set_highlights(%d)", amount)
         },
         {
           "TermOpen",
