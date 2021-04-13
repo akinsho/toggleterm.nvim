@@ -210,13 +210,17 @@ function M.exec(cmd, num, size, dir)
   vim.validate {
     cmd = {cmd, "string"},
     num = {num, "number"},
-    size = {size, "number", true}
+    size = {size, "number", true},
+    dir = {dir, "string", true}
   }
+  if dir then
+    dir = fn.expand(dir)
+  end
   -- count
   num = num < 1 and 1 or num
   local term, created = get_term(num, dir)
   if not term:is_open() then
-    term:open(size)
+    term:open(size, created)
   end
   if not created and dir then
     term:change_dir(dir)

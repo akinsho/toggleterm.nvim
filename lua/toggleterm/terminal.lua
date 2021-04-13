@@ -148,21 +148,32 @@ function Terminal:shutdown()
   ui.delete_buf(self)
 end
 
+---Combine arguments into strings separated by new lines
+---@vararg string
+---@return string
+local function with_cr(...)
+  local result = {}
+  for _, str in ipairs({...}) do
+    table.insert(result, str .. "\n")
+  end
+  return table.concat(result, "")
+end
+
 ---Send a command to a running terminal
----@param cmd string
-function Terminal:send(cmd)
-  fn.chansend(self.job_id, cmd .. "\n")
+---@vararg string
+function Terminal:send(...)
+  fn.chansend(self.job_id, with_cr(...))
 end
 
 function Terminal:clear()
-  self:send("clear" .. "\n")
+  self:send("clear")
 end
 
 ---Update the directory of an already opened terminal
 ---@param dir string
 function Terminal:change_dir(dir)
   if self.dir ~= dir then
-    self:send("cd " .. dir .. "\n" .. "clear" .. "\n")
+    self:send(fmt("cd %s", dir), "clear")
   end
 end
 
