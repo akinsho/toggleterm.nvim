@@ -4,6 +4,7 @@ local fn = vim.fn
 local spy = require("luassert.spy")
 
 local toggleterm = require("toggleterm")
+local constants = require("toggleterm.constants")
 
 local ui = require("toggleterm.ui")
 local t = require("toggleterm.terminal")
@@ -100,11 +101,19 @@ describe(
           end
         )
         it(
-          "terminal is given a winhighlight",
+          "should give each terminal a winhighlight",
           function()
             local test1 = Terminal:new():toggle()
             local winhighlight = vim.wo[test1.window].winhighlight
             assert.is.truthy(winhighlight:match("Normal:DarkenedPanel"))
+          end
+        )
+        it(
+          "should set the correct filetype",
+          function()
+            local test1 = Terminal:new():toggle()
+            local ft = vim.bo[test1.bufnr].filetype
+            assert.equals(constants.term_ft, ft)
           end
         )
       end
