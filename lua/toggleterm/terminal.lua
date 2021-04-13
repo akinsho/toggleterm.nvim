@@ -119,7 +119,9 @@ function Terminal:is_split()
 end
 
 function Terminal:resize(size)
-  ui.resize_split(self, size)
+  if self:is_split() then
+    ui.resize_split(self, size)
+  end
 end
 
 function Terminal:is_open()

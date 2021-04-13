@@ -162,16 +162,22 @@ local function toggle_nth_term(num, size, directory, direction)
   term:toggle(size)
 end
 
-function M.close_last_window()
-  local buf = api.nvim_get_current_buf()
-  local _, term = terms.identify(api.nvim_buf_get_name(buf))
+---Close the last window if only a terminal *split* is open
+---@param term Terminal
+local function close_last_window(term)
   local only_one_window = fn.winnr("$") == 1
-  if only_one_window and vim.bo[buf].filetype == term_ft then
+  if only_one_window and vim.bo[term.bufnr].filetype == term_ft then
     if term:is_split() then
       term:close()
       vim.cmd("keepalt bnext")
     end
   end
+end
+
+function M.handle_term_enter()
+  local _, term = terms.identify(api.nvim_buf_get_name(api.nvim_get_current_buf()))
+  term:resize()
+  close_last_window(term)
 end
 
 function M.on_term_open()
@@ -272,7 +278,7 @@ function M.setup(user_prefs)
       "BufEnter",
       "term://*toggleterm#*",
       "nested",
-      "lua require'toggleterm'.close_last_window()"
+      "lua require'toggleterm'.handle_term_enter()"
     },
     {
       "TermOpen",
