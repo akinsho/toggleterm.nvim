@@ -133,7 +133,7 @@ function Terminal:close()
 
   if ui.try_open(self.window) then
     ui.close(self)
-    vim.cmd("stopinsert!")
+    ui.stopinsert()
   else
     local msg =
       self.id and fmt("Failed to close window: %d does not exist", self.id) or
