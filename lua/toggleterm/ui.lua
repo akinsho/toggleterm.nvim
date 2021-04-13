@@ -38,7 +38,7 @@ end
 --- @param win number
 --- @param buf number
 --- @param term Terminal
-local function set_opts(win, buf, term)
+function M.set_options(win, buf, term)
   if term:is_split() then
     vim.wo[win].winfixheight = true
   end
@@ -54,7 +54,7 @@ end
 function M.create_buf_and_set(term)
   local window = api.nvim_get_current_win()
   local bufnr = api.nvim_create_buf(false, false)
-  set_opts(window, bufnr, term)
+  M.set_options(window, bufnr, term)
   api.nvim_set_current_buf(bufnr)
   api.nvim_win_set_buf(window, bufnr)
   return window, bufnr

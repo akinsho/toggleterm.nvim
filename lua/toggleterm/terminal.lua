@@ -150,6 +150,15 @@ function Terminal:__spawn()
   self.name = name
 end
 
+---@private
+---Add an orphaned terminal to the list of terminal and re-apply settings
+---@param win number
+---@param buf number
+function Terminal:__resurrect(win, buf)
+  ui.set_options(win, buf, self)
+  self:resize()
+end
+
 ---Open a terminal in a type of window i.e. a split,full window or tab
 ---@param size number
 ---@param term table
