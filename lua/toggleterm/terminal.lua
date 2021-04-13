@@ -186,6 +186,16 @@ function Terminal:open(size, is_new)
   end
 end
 
+---Open if closed and close if opened
+---@param size number
+function Terminal:toggle(size)
+  if self:is_open() then
+    self:close()
+  else
+    self:open(size)
+  end
+end
+
 ---Add a terminal to the list of terminals, if it does not exist add nothing
 ---@param num number
 ---@param term Terminal
@@ -225,11 +235,11 @@ end
 ---@param dir string
 ---@return Terminal
 ---@return boolean
-function M.get_or_create_term(num, dir)
+function M.get_or_create_term(num, dir, direction)
   if terminals[num] then
     return terminals[num], false
   end
-  return Terminal:new {id = next_id(), dir = dir}, true
+  return Terminal:new {id = next_id(), dir = dir, direction = direction}, true
 end
 
 M.Terminal = Terminal

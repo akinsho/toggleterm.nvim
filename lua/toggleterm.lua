@@ -12,8 +12,9 @@ local T = require("toggleterm.terminal")
 
 ---@type Terminal
 local Terminal = T.Terminal
+---@type Terminal[]
 local terminals = T.terminals
----@type fun(num: integer, directory: string): Terminal
+---@type fun(id: integer, directory: string, direction: string): Terminal
 local get_term = T.get_or_create_term
 
 local term_ft = constants.term_ft
@@ -24,6 +25,29 @@ local SHADING_AMOUNT = constants.shading_amount
 local M = {
   __set_highlights = colors.set_highlights
 }
+
+--- only shade explicitly specified filetypes
+function M.__apply_colors()
+  local ft = vim.bo.filetype
+
+  if not vim.bo.filetype or vim.bo.filetype == "" then
+    ft = "none"
+  end
+
+  local allow_list = config.get("shade_filetypes") or {}
+  table.insert(allow_list, term_ft)
+
+  local is_enabled_ft = false
+  for _, filetype in ipairs(allow_list) do
+    if ft == filetype then
+      is_enabled_ft = true
+      break
+    end
+  end
+  if vim.bo.buftype == "terminal" and is_enabled_ft then
+    colors.darken_terminal()
+  end
+end
 
 local function parse_argument(str, result)
   local arg = vim.split(str, "=")
@@ -104,17 +128,17 @@ end
 ---@param _ number
 ---@param size number
 ---@param directory string
-local function smart_toggle(_, size, directory)
-  local already_open = ui.find_open_windows()
-  if not already_open then
-    M.open(1, size, directory)
+---@param direction string
+local function smart_toggle(_, size, directory, direction)
+  if not ui.find_open_windows() then
+    get_term(1, directory, direction):open(size)
   else
     local target = #terminals
     -- count backwards from the end of the list
     for i = #terminals, 1, -1 do
       local term = terminals[i]
       if not term then
-        utils.echomsg(fmt("Term does not exist %s", vim.inspect(term)))
+        utils.echomsg(fmt("Term does not exist %d", i))
         break
       end
       local wins = find_windows_by_bufnr(term.bufnr)
@@ -123,21 +147,18 @@ local function smart_toggle(_, size, directory)
         break
       end
     end
-    M.close(target)
+    get_term(target):close()
   end
 end
 
 --- @param num number
 --- @param size number
-local function toggle_nth_term(num, size, directory)
-  local term = get_term(num, directory)
+--- @param directory string
+--- @param direction string
+local function toggle_nth_term(num, size, directory, direction)
+  local term = get_term(num, directory, direction)
   ui.update_origin_window(term.window)
-
-  if term:is_open() then
-    M.close(num)
-  else
-    M.open(num, size, directory)
-  end
+  term:toggle(size)
 end
 
 function M.close_last_window()
@@ -164,21 +185,6 @@ function M.on_term_open()
       term:resize()
     end
   )
-end
-
---- @param num number
---- @param size number
---- @param directory string
-function M.open(num, size, directory)
-  directory = directory and vim.fn.expand(directory) or fn.getcwd()
-  vim.validate {
-    num = {num, "number"},
-    size = {size, "number", true},
-    directory = {directory, "string", true}
-  }
-
-  local term, created = get_term(num, directory)
-  term:open(size, created)
 end
 
 function M.exec_command(args, count)
@@ -209,14 +215,11 @@ function M.exec(cmd, num, size, dir)
   }
   -- count
   num = num < 1 and 1 or num
-  local term = get_term(num, dir)
-  local created = false
+  local term, created = get_term(num, dir)
   if not term:is_open() then
-    M.open(num, size, dir)
+    term:open(size)
   end
-  --- TODO: find a way to do this without calling this function twice
-  term, created = get_term(num, dir)
-  if not created and dir and term.dir ~= dir then
+  if not created and dir then
     term:change_dir(dir)
   end
   term:send(cmd)
@@ -225,45 +228,17 @@ function M.exec(cmd, num, size, dir)
   vim.cmd("stopinsert!")
 end
 
---- @param num number
-function M.close(num)
-  local term = get_term(num)
-  term:close()
-end
-
---- only shade explicitly specified filetypes
-function M.__apply_colors()
-  local ft = vim.bo.filetype
-
-  if not vim.bo.filetype or vim.bo.filetype == "" then
-    ft = "none"
-  end
-
-  local allow_list = config.get("shade_filetypes") or {}
-  table.insert(allow_list, term_ft)
-
-  local is_enabled_ft = false
-  for _, filetype in ipairs(allow_list) do
-    if ft == filetype then
-      is_enabled_ft = true
-      break
-    end
-  end
-  if vim.bo.buftype == "terminal" and is_enabled_ft then
-    colors.darken_terminal()
-  end
-end
-
 function M.toggle_command(args, count)
   local parsed = parse_input(args)
   vim.validate {
     size = {parsed.size, "number", true},
-    directory = {parsed.dir, "string", true}
+    directory = {parsed.dir, "string", true},
+    direction = {parsed.direction, "string", true}
   }
   if parsed.size then
     parsed.size = tonumber(parsed.size)
   end
-  M.toggle(count, parsed.size, parsed.dir)
+  M.toggle(count, parsed.size, parsed.dir, parsed.direction)
 end
 
 --- If a count is provided we operate on the specific terminal buffer
@@ -276,15 +251,16 @@ end
 --- @param count number
 --- @param size number
 --- @param dir string
-function M.toggle(count, size, dir)
+--- @param direction string
+function M.toggle(count, size, dir, direction)
   vim.validate {
     count = {count, "number", true},
     size = {size, "number", true}
   }
   if count > 1 then
-    toggle_nth_term(count, size, dir)
+    toggle_nth_term(count, size, dir, direction)
   else
-    smart_toggle(count, size, dir)
+    smart_toggle(count, size, dir, direction)
   end
 end
 
