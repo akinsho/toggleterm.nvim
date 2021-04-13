@@ -4,9 +4,15 @@ A _neovim_ plugin to persist and toggle multiple terminals during an editing ses
 
 ![screenshot](./github/toggleterm.gif "Toggleterm in action")
 
-### Orientation (vertical or horizontal)
+### Multiple orientations
+
+- **Vertical**
 
 ![vertical orientation](./github/vertical-terms.png)
+
+- **Window**
+
+![window orientation](https://user-images.githubusercontent.com/22454918/114622544-00642780-9ca6-11eb-950f-fef95f9a49af.gif)
 
 ### Send commands to different terminals
 
@@ -62,7 +68,7 @@ require"toggleterm".setup{
   shading_factor = '<number>', -- the degree by which to darken to terminal colour, default: 1 for dark backgrounds, 3 for light
   start_in_insert = true,
   persist_size = true,
-  direction = 'vertical' | 'horizontal',
+  direction = 'vertical' | 'horizontal' | 'window',
 }
 ```
 
@@ -144,6 +150,26 @@ require'toggleterm'.setup{
 }
 ```
 
+### Advanced (Unstable)
+
+Toggleterm also exposes the `Terminal` class so that this can be used to create custom terminals
+e.g.
+
+```lua
+local Terminal = require('toggleterm.terminal').Terminal
+Terminal:new {
+  cmd =  string
+  direction = string
+  dir = string
+  on_stdout = fun(job: number, exit_code: number, type: string)
+  on_stderr = fun(job: number, data: string[], name: string)
+  on_exit = fun(job: number, data: string[], name: string)
+}:toggle()
+```
+
+NOTE: this API is still being fleshed out so is a little unstable, please _Do Not
+Set_ the other terminal fields as these are used internally.
+
 ### Statusline
 
 In order to tell each terminal apart you can use the terminal buffer variable `b:toggle_number`
@@ -161,14 +187,4 @@ You can create your on commands by using the lua functions this plugin provides 
 ```vim
 command! -count=1 TermGitPush  lua require'toggleterm'.exec("git push",    <count>, 12)
 command! -count=1 TermGitPushF lua require'toggleterm'.exec("git push -f", <count>, 12)
-```
-
-or in lua:
-
-```lua
-function _G.term_git_push()
-  require('toggleterm').exec("git push", vim.v.count, 20)
-end
-
-vim.api.nvim_set_keymap("n", "<map>", [[<cmd>lua _G.term_git_push()]], {silent = true, noremap = true})
 ```
