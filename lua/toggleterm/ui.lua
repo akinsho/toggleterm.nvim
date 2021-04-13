@@ -81,6 +81,18 @@ function M.update_origin_window(term_window)
   end
 end
 
+function M.scroll_to_bottom()
+  vim.cmd("normal! G")
+end
+
+function M.goto_previous()
+  vim.cmd("wincmd p")
+end
+
+function M.stopinsert()
+  vim.cmd("stopinsert!")
+end
+
 --- @param win_id number
 --- @return boolean
 function M.try_open(win_id)

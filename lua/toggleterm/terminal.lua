@@ -160,9 +160,16 @@ local function with_cr(...)
 end
 
 ---Send a command to a running terminal
----@vararg string
-function Terminal:send(...)
-  fn.chansend(self.job_id, with_cr(...))
+---@param cmd string|string[]
+---@param go_back boolean whether or not to return to original window
+function Terminal:send(cmd, go_back)
+  cmd = type(cmd) == "table" and with_cr(unpack(cmd)) or with_cr(cmd)
+  fn.chansend(self.job_id, cmd)
+  if go_back then
+    ui.scroll_to_bottom()
+    ui.goto_previous()
+    ui.stopinsert()
+  end
 end
 
 function Terminal:clear()
@@ -173,7 +180,7 @@ end
 ---@param dir string
 function Terminal:change_dir(dir)
   if self.dir ~= dir then
-    self:send(fmt("cd %s", dir), "clear")
+    self:send({fmt("cd %s", dir), "clear"})
   end
 end
 

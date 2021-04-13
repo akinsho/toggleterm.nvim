@@ -225,10 +225,7 @@ function M.exec(cmd, num, size, dir)
   if not created and dir then
     term:change_dir(dir)
   end
-  term:send(cmd)
-  vim.cmd("normal! G")
-  vim.cmd("wincmd p")
-  vim.cmd("stopinsert!")
+  term:send(cmd, true)
 end
 
 function M.toggle_command(args, count)
