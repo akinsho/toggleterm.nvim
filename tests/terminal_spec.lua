@@ -1,6 +1,7 @@
 local api = vim.api
-local stub = require("luassert.stub")
-local mock = require("luassert.mock")
+local fn = vim.fn
+
+local spy = require("luassert.spy")
 
 local toggleterm = require("toggleterm")
 
@@ -26,25 +27,25 @@ end
 describe(
   "ToggleTerm tests:",
   function()
-    describe(
-      "core functionality - ",
+    before_each(
       function()
-        before_each(
-          function()
-            terminals = require("toggleterm.terminal").get_all()
+        terminals = require("toggleterm.terminal").get_all()
 
-            toggleterm.setup {
-              open_mapping = [[<c-\>]]
-            }
-          end
-        )
+        toggleterm.setup {
+          open_mapping = [[<c-\>]]
+        }
+      end
+    )
 
-        after_each(
-          function()
-            require("toggleterm.terminal").reset()
-          end
-        )
+    after_each(
+      function()
+        require("toggleterm.terminal").reset()
+      end
+    )
 
+    describe(
+      "toggling terminals - ",
+      function()
         it(
           "new terminals are assigned incremental ids",
           function()
@@ -87,16 +88,38 @@ describe(
             assert.is_true(term_has_windows(term))
           end
         )
+      end
+    )
+
+    describe(
+      "executing commands - ",
+      function()
+        it(
+          "should open a terminal to execute commands",
+          function()
+            toggleterm.exec("ls", 1)
+            assert.is_true(#terminals == 1)
+            assert.is_true(term_has_windows(terminals[1]))
+          end
+        )
+
+        it(
+          "should change terminal's directory if specified",
+          function()
+            toggleterm.exec("ls", 1, 15, fn.expand("~/"))
+            assert.is_true(#terminals == 1)
+            assert.is_true(term_has_windows(terminals[1]))
+          end
+        )
 
         ---TODO figure out how to stub class methods
         pending(
           "should send commands to a terminal on exec",
           function()
             local test1 = Terminal:new():toggle()
-            local m = mock(test1, true)
+            spy.on(test1, "send")
             toggleterm.exec('echo "hello world"', 1)
-            assert.stub(m.send).was_called_with('echo "hello world"')
-            mock.revert(test1)
+            assert.spy(test1.send).was_called()
           end
         )
       end
