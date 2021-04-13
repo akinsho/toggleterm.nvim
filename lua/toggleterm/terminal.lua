@@ -21,6 +21,9 @@ local terminals = {}
 --- @field job_id number
 --- @field dir string
 --- @field name string
+--- @field on_stdout fun(job: number, exit_code: number, type: string)
+--- @field on_stderr fun(job: number, data: string[], name: string)
+--- @field on_exit fun(job: number, data: string[], name: string)
 local Terminal = {}
 
 local function next_id()
@@ -98,6 +101,9 @@ function Terminal:new(term)
   term.bufnr = term.bufnr or -1
   term.dir = term.dir or vim.loop.cwd()
   term.id = term.id or next_id()
+  term.on_stdout = term.on_stdout
+  term.on_stderr = term.on_stderr
+  term.on_exit = term.on_exit
   return setmetatable(term, self)
 end
 
