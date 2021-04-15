@@ -34,16 +34,10 @@ end
 local function setup_buffer_mappings(bufnr)
   local mapping = config.get("open_mapping")
   if mapping then
-    api.nvim_buf_set_keymap(
-      bufnr,
-      "t",
-      mapping,
-      [[<C-\><C-n>:exe v:count1 . "ToggleTerm"<CR>]],
-      {
-        silent = true,
-        noremap = true
-      }
-    )
+    api.nvim_buf_set_keymap(bufnr, "t", mapping, [[<C-\><C-n>:exe v:count1 . "ToggleTerm"<CR>]], {
+      silent = true,
+      noremap = true,
+    })
   end
 end
 
@@ -55,32 +49,26 @@ local function setup_buffer_autocommands(term)
     {
       "TermClose",
       fmt("<buffer=%d>", term.bufnr),
-      fmt('lua require"toggleterm.terminal".delete(%d)', term.id)
-    }
+      fmt('lua require"toggleterm.terminal".delete(%d)', term.id),
+    },
   }
 
   if conf.start_in_insert then
     vim.cmd("startinsert!")
-    table.insert(
-      commands,
-      {
-        "BufEnter",
-        fmt("<buffer=%d>", term.bufnr),
-        "startinsert!"
-      }
-    )
+    table.insert(commands, {
+      "BufEnter",
+      fmt("<buffer=%d>", term.bufnr),
+      "startinsert!",
+    })
   end
   if conf.persist_size and term:is_split() then
-    table.insert(
-      commands,
-      {
-        "CursorHold",
-        fmt("<buffer=%d>", term.bufnr),
-        "lua require'toggleterm.ui'.save_window_size()"
-      }
-    )
+    table.insert(commands, {
+      "CursorHold",
+      fmt("<buffer=%d>", term.bufnr),
+      "lua require'toggleterm.ui'.save_window_size()",
+    })
   end
-  utils.create_augroups({["ToggleTerm" .. term.bufnr] = commands})
+  utils.create_augroups({ ["ToggleTerm" .. term.bufnr] = commands })
 end
 
 ---Create a new terminal object
@@ -137,9 +125,8 @@ function Terminal:close()
     ui.close(self)
     ui.stopinsert()
   else
-    local msg =
-      self.id and fmt("Failed to close window: %d does not exist", self.id) or
-      "Failed to close window: invalid term number"
+    local msg = self.id and fmt("Failed to close window: %d does not exist", self.id)
+      or "Failed to close window: invalid term number"
     utils.echomsg(msg, "Error")
   end
   ui.update_origin_window(self.window)
@@ -155,7 +142,7 @@ end
 ---@return string
 local function with_cr(...)
   local result = {}
-  for _, str in ipairs({...}) do
+  for _, str in ipairs({ ... }) do
     table.insert(result, str .. "\n")
   end
   return table.concat(result, "")
@@ -182,14 +169,14 @@ end
 ---@param dir string
 function Terminal:change_dir(dir)
   if self.dir ~= dir then
-    self:send({fmt("cd %s", dir), "clear"})
+    self:send({ fmt("cd %s", dir), "clear" })
   end
 end
 
 ---@private
 function Terminal:__spawn()
   local name = vim.o.shell .. ";#" .. term_ft .. "#" .. self.id
-  self.job_id = fn.termopen(name, {detach = 1, cwd = self.dir})
+  self.job_id = fn.termopen(name, { detach = 1, cwd = self.dir })
   self.name = name
 end
 
@@ -276,7 +263,8 @@ function M.get_or_create_term(num, dir, direction)
   if terminals[num] then
     return terminals[num], false
   end
-  return Terminal:new {id = next_id(), dir = dir, direction = direction}, true
+  return Terminal:new({ id = next_id(), dir = dir, direction = direction }), true
+end
 end
 
 function M.get_all()

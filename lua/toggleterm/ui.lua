@@ -62,7 +62,7 @@ end
 
 function M.delete_buf(term)
   if api.nvim_buf_is_valid(term.bufnr) then
-    api.nvim_buf_delete(term.bufnr, {force = true})
+    api.nvim_buf_delete(term.bufnr, { force = true })
   end
 end
 
@@ -106,8 +106,8 @@ end
 --- @param comparator function
 function M.find_open_windows(comparator)
   comparator = comparator or function(buf)
-      return vim.bo[buf].filetype == constants.term_ft
-    end
+    return vim.bo[buf].filetype == constants.term_ft
+  end
   local wins = api.nvim_list_wins()
   local is_open = false
   local term_wins = {}
@@ -133,14 +133,14 @@ local split_commands = {
     existing = "vsplit",
     new = "split",
     position = "wincmd J",
-    resize = "resize"
+    resize = "resize",
   },
   vertical = {
     existing = "split",
     new = "vsplit",
     position = "wincmd L",
-    resize = "vertical resize"
-  }
+    resize = "vertical resize",
+  },
 }
 
 --- @param size number
