@@ -102,6 +102,10 @@ function Terminal:__add()
   return self
 end
 
+function Terminal:is_float()
+  return self.direction == "float"
+end
+
 function Terminal:is_split()
   return self.direction == "vertical" or self.direction == "horizontal"
 end
@@ -199,6 +203,9 @@ local function opener(size, term)
     --- do nothing, maybe later this should close other windows or something
   elseif dir == "tab" then
     ui.open_tab()
+  elseif dir == "float" then
+    local dimensions = config.get("dimensions")
+    ui.open_float(dimensions, term)
   end
 end
 

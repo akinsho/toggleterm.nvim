@@ -185,6 +185,27 @@ local function close_window()
   vim.cmd("keepalt b#")
 end
 
+---Open a floating window
+---@param dimension table<string, any>
+---@param term Terminal
+function M.open_float(dimension, term)
+  local buf = api.nvim_create_buf(false, true)
+  local width = math.min(vim.o.columns - 4, math.max(80, vim.o.columns - 20))
+  local height = math.min(vim.o.lines - 4, math.max(20, vim.o.lines - 10))
+  local win = api.nvim_open_win(buf, true, {
+    row = (vim.o.lines - height) / 2,
+    col = (vim.o.columns - width) / 2,
+    relative = "editor",
+    style = "minimal",
+    width = width,
+    height = height,
+    border = "single",
+  })
+  --- TODO Don't hardcode a winblend
+  vim.wo[win].winblend = 3
+  return buf, win
+end
+
 ---Close given terminal's ui
 ---@param term Terminal
 function M.close(term)
@@ -193,7 +214,9 @@ function M.close(term)
   elseif term.direction == "window" then
     close_window()
   else
-    error(fmt("Not implemented close function for %s", term.direction))
+    if api.nvim_win_is_valid(term.window) then
+      api.nvim_win_close(term.window, true)
+    end
   end
 end
 
