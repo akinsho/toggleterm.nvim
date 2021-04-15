@@ -265,7 +265,6 @@ function M.get_or_create_term(num, dir, direction)
   end
   return Terminal:new({ id = next_id(), dir = dir, direction = direction }), true
 end
-end
 
 function M.get_all()
   return terminals
