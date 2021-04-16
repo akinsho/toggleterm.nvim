@@ -204,8 +204,8 @@ local function opener(size, term)
   elseif dir == "tab" then
     ui.open_tab()
   elseif dir == "float" then
-    local dimensions = config.get("dimensions")
-    ui.open_float(dimensions, term)
+    local opts = config.get("float_opts")
+    ui.open_float(opts, term)
   end
 end
 
@@ -271,6 +271,13 @@ function M.get_or_create_term(num, dir, direction)
     return terminals[num], false
   end
   return Terminal:new({ id = next_id(), dir = dir, direction = direction }), true
+end
+
+---Get a single terminal by id
+---@param id number
+---@return Terminal
+function M.get(id)
+  return terminals[id]
 end
 
 function M.get_all()

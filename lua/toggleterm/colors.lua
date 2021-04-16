@@ -1,4 +1,5 @@
 local fn = vim.fn
+local fmt = string.format
 -----------------------------------------------------------
 -- Export
 -----------------------------------------------------------
@@ -85,7 +86,12 @@ end
 ---Darken the colour of a terminal
 ---@param term Terminal
 function M.darken_terminal(term)
-  local highlights = term and term:is_float() and { "NormalFloat:Normal", "FloatBorder:Normal" } or {
+  local conf = require("toggleterm.config")
+  local opts = conf.get('float_opts') or {}
+  local highlights = term and term:is_float() and {
+    fmt("NormalFloat:%s", opts.highlights.background),
+    fmt("FloatBorder:%s", opts.highlights.border),
+  } or {
     "Normal:DarkenedPanel",
     "VertSplit:DarkenedPanel",
     "StatusLine:DarkenedStatusline",

@@ -186,23 +186,25 @@ local function close_window()
 end
 
 ---Open a floating window
----@param dimension table<string, any>
+---@param opts table<string, any>
 ---@param term Terminal
-function M.open_float(dimension, term)
+function M.open_float(opts, term)
+  opts = opts or {}
   local buf = api.nvim_create_buf(false, true)
-  local width = math.min(vim.o.columns - 4, math.max(80, vim.o.columns - 20))
-  local height = math.min(vim.o.lines - 4, math.max(20, vim.o.lines - 10))
+  local width = opts.width or math.min(vim.o.columns - 4, math.max(80, vim.o.columns - 20))
+  local height = opts.hight or math.min(vim.o.lines - 4, math.max(20, vim.o.lines - 10))
   local win = api.nvim_open_win(buf, true, {
-    row = (vim.o.lines - height) / 2,
-    col = (vim.o.columns - width) / 2,
-    relative = "editor",
+    row = opts.row or (vim.o.lines - height) / 2,
+    col = opts.col or (vim.o.columns - width) / 2,
+    relative = opts.relative or "editor",
     style = "minimal",
     width = width,
     height = height,
-    border = "single",
+    border = opts.border or "single",
   })
-  --- TODO Don't hardcode a winblend
-  vim.wo[win].winblend = 3
+  if opts.winblend then
+    vim.wo[win].winblend = opts.winblend
+  end
   return buf, win
 end
 

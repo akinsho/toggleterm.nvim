@@ -73,11 +73,13 @@ describe("ToggleTerm tests:", function()
     before_each(function()
       require("toggleterm.config").set({ shade_terminals = true })
     end)
+
     it("should give each terminal a winhighlight", function()
       local test1 = Terminal:new():toggle()
       local winhighlight = vim.wo[test1.window].winhighlight
       assert.is.truthy(winhighlight:match("Normal:DarkenedPanel"))
     end)
+
     it("should set the correct filetype", function()
       local test1 = Terminal:new():toggle()
       local ft = vim.bo[test1.bufnr].filetype
