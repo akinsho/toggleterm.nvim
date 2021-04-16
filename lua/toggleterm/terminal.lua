@@ -179,7 +179,8 @@ end
 
 ---@private
 function Terminal:__spawn()
-  local cmd = self.cmd or vim.o.shell .. ";#" .. term_ft .. "#" .. self.id
+  local cmd = self.cmd or vim.o.shell
+  cmd = cmd .. ";#" .. term_ft .. "#" .. self.id
   self.job_id = fn.termopen(cmd, { detach = 1, cwd = self.dir })
   self.name = cmd
 end

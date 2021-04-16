@@ -301,7 +301,7 @@ function M.setup(user_prefs)
       },
       {
         "TermOpen",
-        "term://*zsh*,term://*bash*,term://*toggleterm#*",
+        "term://*",
         "lua require('toggleterm').__apply_colors()",
       },
     })
