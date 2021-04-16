@@ -97,15 +97,17 @@ local function setup_global_mappings()
   local mapping = conf.open_mapping
   -- v:count1 defaults the count to 1 but if a count is passed in uses that instead
   -- <c-u> allows passing along the count
-  api.nvim_set_keymap("n", mapping, ':<c-u>exe v:count1 . "ToggleTerm"<CR>', {
-    silent = true,
-    noremap = true,
-  })
-  if conf.insert_mappings then
-    api.nvim_set_keymap("i", mapping, '<Esc>:<c-u>exe v:count1 . "ToggleTerm"<CR>', {
-      silent = true,
-      noremap = true,
-    })
+  if mapping then
+    api.nvim_set_keymap("n", mapping, ':<c-u>exe v:count1 . "ToggleTerm"<CR>', {
+        silent = true,
+        noremap = true,
+      })
+    if conf.insert_mappings then
+      api.nvim_set_keymap("i", mapping, '<Esc>:<c-u>exe v:count1 . "ToggleTerm"<CR>', {
+          silent = true,
+          noremap = true,
+        })
+    end
   end
 end
 
