@@ -163,7 +163,8 @@ function M.open_split(size, term)
   M.resize_split(term, size)
 end
 
-function M.open_tab()
+--- @param term Terminal
+function M.open_tab(term)
   vim.cmd("tabnew")
 end
 
@@ -190,7 +191,7 @@ end
 ---@param term Terminal
 function M.open_float(opts, term)
   opts = opts or {}
-  local buf = api.nvim_create_buf(false, true)
+  local buf = api.nvim_create_buf(false, false)
   local width = opts.width or math.min(vim.o.columns - 4, math.max(80, vim.o.columns - 20))
   local height = opts.hight or math.min(vim.o.lines - 4, math.max(20, vim.o.lines - 10))
   local win = api.nvim_open_win(buf, true, {
@@ -205,7 +206,8 @@ function M.open_float(opts, term)
   if opts.winblend then
     vim.wo[win].winblend = opts.winblend
   end
-  return buf, win
+  -- TODO should we reuse these values
+  -- term.window, term.bufnr = win, buf
 end
 
 ---Close given terminal's ui

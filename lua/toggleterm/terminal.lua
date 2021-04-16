@@ -24,6 +24,7 @@ local terminals = {}
 --- @field on_stdout fun(job: number, exit_code: number, type: string)
 --- @field on_stderr fun(job: number, data: string[], name: string)
 --- @field on_exit fun(job: number, data: string[], name: string)
+--- @field on_open fun(term:Terminal)
 local Terminal = {}
 
 local function next_id()
@@ -84,14 +85,8 @@ function Terminal:new(term)
   local conf = config.get()
   self.__index = self
   term.direction = term.direction or conf.direction
-  term.window = term.window or -1
-  term.job_id = term.job_id or -1
-  term.bufnr = term.bufnr or -1
   term.dir = term.dir or vim.loop.cwd()
   term.id = term.id or next_id()
-  term.on_stdout = term.on_stdout
-  term.on_stderr = term.on_stderr
-  term.on_exit = term.on_exit
   return setmetatable(term, self)
 end
 
@@ -229,6 +224,9 @@ function Terminal:open(size, is_new)
     if not is_new then
       self:change_dir(self.dir)
     end
+  end
+  if self.on_open then
+    self.on_open(self)
   end
 end
 
