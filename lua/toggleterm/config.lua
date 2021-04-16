@@ -15,7 +15,7 @@ local config = {
 ---@param key string
 ---@return table | string | number
 function M.get(key)
-  if key and config[key] then
+  if key then
     return config[key]
   end
   return config
