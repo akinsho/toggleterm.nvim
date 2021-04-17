@@ -192,11 +192,12 @@ end
 function M.open_float(opts, term)
   opts = opts or {}
   local buf = api.nvim_create_buf(false, false)
-  local width = opts.width or math.min(vim.o.columns - 4, math.max(80, vim.o.columns - 20))
-  local height = opts.hight or math.min(vim.o.lines - 4, math.max(20, vim.o.lines - 10))
+  local width = opts.width or math.ceil(math.min(vim.o.columns, math.max(80, vim.o.columns - 20)))
+  local height = opts.hight or math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 10)))
+
   local win = api.nvim_open_win(buf, true, {
-    row = opts.row or (vim.o.lines - height) / 2,
-    col = opts.col or (vim.o.columns - width) / 2,
+    row = (opts.row or math.ceil(vim.o.lines - height) / 2) - 1,
+    col = (opts.col or math.ceil(vim.o.columns - width) / 2) - 1,
     relative = opts.relative or "editor",
     style = "minimal",
     width = width,
