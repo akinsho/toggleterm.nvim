@@ -186,6 +186,8 @@ local function close_window()
   vim.cmd("keepalt b#")
 end
 
+local curved = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
+
 ---Open a floating window
 ---@param opts table<string, any>
 ---@param term Terminal
@@ -193,8 +195,9 @@ function M.open_float(opts, term)
   opts = opts or {}
   local buf = api.nvim_create_buf(false, false)
   local width = opts.width or math.ceil(math.min(vim.o.columns, math.max(80, vim.o.columns - 20)))
-  local height = opts.hight or math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 10)))
+  local height = opts.height or math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 10)))
 
+  local border = opts.border and opts.border == "curved" and curved or "single"
   local win = api.nvim_open_win(buf, true, {
     row = (opts.row or math.ceil(vim.o.lines - height) / 2) - 1,
     col = (opts.col or math.ceil(vim.o.columns - width) / 2) - 1,
@@ -202,7 +205,7 @@ function M.open_float(opts, term)
     style = "minimal",
     width = width,
     height = height,
-    border = opts.border or "single",
+    border = border,
   })
   if opts.winblend then
     vim.wo[win].winblend = opts.winblend
