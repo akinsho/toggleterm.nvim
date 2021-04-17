@@ -59,6 +59,9 @@ This plugin must be explicitly enabled by using `require"toggleterm".setup{}`
 Setting the key to use for toggling the terminal(s) will setup mappings for _insert, normal and terminal_ modes
 If you prefix the mapping with a number that particular terminal will be opened.
 
+**NOTE**: Please ensure you have set `hidden` in your neovim config, otherwise the terminals will be discarded
+when closed.
+
 ```lua
 require"toggleterm".setup{
   size = 20,
