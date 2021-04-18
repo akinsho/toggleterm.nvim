@@ -75,7 +75,7 @@ describe("ToggleTerm tests:", function()
     end)
 
     it("should give each terminal a winhighlight", function()
-      local test1 = Terminal:new():toggle()
+      local test1 = Terminal:new({ direction = "horizontal" }):toggle()
       local winhighlight = vim.wo[test1.window].winhighlight
       assert.is.truthy(winhighlight:match("Normal:DarkenedPanel"))
     end)
@@ -109,12 +109,26 @@ describe("ToggleTerm tests:", function()
     end)
   end)
 
-  describe("layout options - ", function ()
-    it("should open with the correct layout", function ()
-      local term = Terminal:new({direction = "float"}):toggle()
+  describe("layout options - ", function()
+    it("should open with the correct layout", function()
+      local term = Terminal:new({ direction = "float" }):toggle()
       local _, wins = term_has_windows(term)
       assert.equal(#wins, 1)
       assert.equal("popup", fn.win_gettype(fn.win_id2win(wins[1])))
+    end)
+
+    it("should open with user configuration if set", function()
+      toggleterm.setup({
+        float_opts = {
+          height = 20,
+          width = 20,
+        },
+      })
+      local term = Terminal:new({ direction = "float" }):toggle()
+      local _, wins = term_has_windows(term)
+      local config = api.nvim_win_get_config(wins[1])
+      assert.equal(config.width, 20)
+      assert.equal(config.height, 20)
     end)
   end)
 end)
