@@ -52,11 +52,18 @@ end
 ---@param term Terminal
 ---@return number, number
 function M.create_buf_and_set(term)
-  local window = api.nvim_get_current_win()
-  local bufnr = api.nvim_create_buf(false, false)
+  local valid_win = term.window and api.nvim_win_is_valid(term.window)
+  local window = valid_win and term.window or api.nvim_get_current_win()
+  -- If the buffer doesn't exist create a new one
+  local valid_buf = term.bufnr and api.nvim_buf_is_valid(term.bufnr)
+  local bufnr =  valid_buf and term.bufnr or api.nvim_create_buf(false, false)
+
   M.set_options(window, bufnr, term)
-  api.nvim_set_current_buf(bufnr)
-  api.nvim_win_set_buf(window, bufnr)
+  -- If the buffer didn't previously exist then assign it the window
+  if not valid_buf then
+    api.nvim_set_current_buf(bufnr)
+    api.nvim_win_set_buf(window, bufnr)
+  end
   return window, bufnr
 end
 
