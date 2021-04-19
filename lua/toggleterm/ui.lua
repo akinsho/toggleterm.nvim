@@ -44,6 +44,12 @@ function M.set_options(win, buf, term)
   end
   vim.bo[buf].buflisted = false
   vim.bo[buf].filetype = constants.term_ft
+
+  local conf = require("toggleterm.config").get()
+  if conf.hide_numbers then
+    vim.wo[win].number = false
+    vim.wo[win].relativenumber = false
+  end
   api.nvim_buf_set_var(buf, "toggle_number", term.id)
 end
 

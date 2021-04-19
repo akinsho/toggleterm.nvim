@@ -3,6 +3,7 @@ local M = {}
 local config = {
   size = 12,
   shade_filetypes = {},
+  hide_numbers = true,
   shade_terminals = true,
   insert_mappings = true,
   start_in_insert = true,
