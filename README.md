@@ -6,13 +6,17 @@ A _neovim_ plugin to persist and toggle multiple terminals during an editing ses
 
 ### Multiple orientations
 
+- **Float**
+
+![floating window](https://user-images.githubusercontent.com/22454918/115306123-42d2ac00-a15f-11eb-84fc-c4246ee82a09.png)
+
 - **Vertical**
 
 ![vertical orientation](./github/vertical-terms.png)
 
 - **Window**
 
-![window orientation](https://user-images.githubusercontent.com/22454918/114622544-00642780-9ca6-11eb-950f-fef95f9a49af.gif)
+![window orientation](https://user-images.githubusercontent.com/22454918/115306273-82999380-a15f-11eb-9c2b-57266ca16493.png)
 
 ### Send commands to different terminals
 
@@ -72,6 +76,16 @@ require"toggleterm".setup{
   start_in_insert = true,
   persist_size = true,
   direction = 'vertical' | 'horizontal' | 'window',
+  float_opts = {
+    border = 'single' | 'double' | 'shadow' | 'curved' or table of 8 chars, -- see :h nvim_win_open for details on borders
+      width = <value>,
+      height = <value>,
+      winblend = 3,
+      highlights = {
+        border = "Normal",
+        background = "Normal",
+      }
+  }
 }
 ```
 
