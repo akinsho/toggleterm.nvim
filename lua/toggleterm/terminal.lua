@@ -21,6 +21,7 @@ local terminals = {}
 --- @field job_id number
 --- @field dir string
 --- @field name string
+--- @field float_opts table<string, any>
 --- @field on_stdout fun(job: number, exit_code: number, type: string)
 --- @field on_stderr fun(job: number, data: string[], name: string)
 --- @field on_exit fun(job: number, data: string[], name: string)
@@ -87,7 +88,11 @@ function Terminal:new(term)
   term.direction = term.direction or conf.direction
   term.dir = term.dir or vim.loop.cwd()
   term.id = term.id or next_id()
-  return setmetatable(term, self)
+  term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
+  -- Add the newly created terminal to the list of all terminals
+  local new = setmetatable(term, self)
+  new:__add()
+  return new
 end
 
 ---@private
@@ -206,8 +211,7 @@ local function opener(size, term)
   elseif dir == "tab" then
     ui.open_tab()
   elseif dir == "float" then
-    local opts = config.get("float_opts")
-    ui.open_float(opts, term)
+    ui.open_float(term)
   end
 end
 
@@ -222,7 +226,6 @@ function Terminal:open(size, is_new)
     self:__spawn()
     setup_buffer_autocommands(self)
     setup_buffer_mappings(self.bufnr)
-    self:__add()
   else
     opener(size, self)
     ui.switch_buf(self.bufnr)
@@ -253,6 +256,7 @@ end
 --- @param name string
 --- @return number
 function M.identify(name)
+  name = name or api.nvim_buf_get_name(api.nvim_get_current_buf())
   local parts = vim.split(name, "#")
   local id = tonumber(parts[#parts])
   return id, terminals[id]

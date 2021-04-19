@@ -196,10 +196,9 @@ end
 local curved = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
 
 ---Open a floating window
----@param opts table<string, any>
 ---@param term Terminal
-function M.open_float(opts, term)
-  opts = opts or {}
+function M.open_float(term)
+  local opts = term.float_opts or {}
   local buf = api.nvim_create_buf(false, false)
   local width = opts.width or math.ceil(math.min(vim.o.columns, math.max(80, vim.o.columns - 20)))
   local height = opts.height or math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 10)))

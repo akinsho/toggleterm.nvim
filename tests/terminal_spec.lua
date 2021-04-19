@@ -142,5 +142,25 @@ describe("ToggleTerm tests:", function()
       local config = api.nvim_win_get_config(wins[1])
       assert.equal(config.width, 20)
     end)
+
+    it("should use a user's selected highlights", function()
+      local term = Terminal
+        :new({
+          direction = "float",
+          float_opts = {
+            winblend = 12,
+            highlights = {
+              border = "ErrorMsg",
+              background = "Statement",
+            },
+          },
+        })
+        :toggle()
+      local winhighlight = vim.wo[term.window].winhighlight
+      local winblend = vim.wo[term.window].winblend
+      assert.equal(12, winblend)
+      assert.is.truthy(winhighlight:match("NormalFloat:Statement"))
+      assert.is.truthy(winhighlight:match("FloatBorder:ErrorMsg"))
+    end)
   end)
 end)
