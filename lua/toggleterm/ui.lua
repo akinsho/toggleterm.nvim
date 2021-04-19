@@ -210,8 +210,7 @@ function M.open_float(opts, term)
   if opts.winblend then
     vim.wo[win].winblend = opts.winblend
   end
-  -- TODO should we reuse these values
-  -- term.window, term.bufnr = win, buf
+  return win, buf
 end
 
 ---Close given terminal's ui

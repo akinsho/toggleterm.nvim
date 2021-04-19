@@ -87,7 +87,7 @@ end
 ---@param term Terminal
 function M.darken_terminal(term)
   local conf = require("toggleterm.config")
-  local opts = conf.get('float_opts') or {}
+  local opts = conf.get("float_opts") or {}
   local highlights = term and term:is_float() and {
     fmt("NormalFloat:%s", opts.highlights.background),
     fmt("FloatBorder:%s", opts.highlights.border),
