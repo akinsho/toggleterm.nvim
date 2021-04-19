@@ -70,7 +70,7 @@ describe("ToggleTerm tests:", function()
       toggleterm.setup({
         open_mapping = [[<c-\>]],
         shade_filetypes = { "none" },
-        direction = "horizontal", -- large_screen and "vertical" or "horizontal"
+        direction = "horizontal",
         float_opts = {
           height = 10,
           width = 20,
