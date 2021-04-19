@@ -8,7 +8,14 @@ local config = {
   start_in_insert = true,
   persist_size = true,
   direction = "horizontal",
-  shading_factor = nil
+  shading_factor = nil,
+  float_opts = {
+    winblend = 3,
+    highlights = {
+      background = "Normal",
+      border = "Normal",
+    },
+  },
 }
 
 --- get the full user config or just a specified value

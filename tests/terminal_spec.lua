@@ -26,10 +26,6 @@ end
 describe("ToggleTerm tests:", function()
   before_each(function()
     terminals = require("toggleterm.terminal").get_all()
-
-    toggleterm.setup({
-      open_mapping = [[<c-\>]],
-    })
   end)
 
   after_each(function()
@@ -71,13 +67,24 @@ describe("ToggleTerm tests:", function()
 
   describe("terminal buffers options - ", function()
     before_each(function()
-      require("toggleterm.config").set({ shade_terminals = true })
+      toggleterm.setup({
+        open_mapping = [[<c-\>]],
+        shade_filetypes = { "none" },
+        direction = "horizontal",
+        float_opts = {
+          height = 10,
+          width = 20,
+        },
+      })
     end)
+
     it("should give each terminal a winhighlight", function()
-      local test1 = Terminal:new():toggle()
+      local test1 = Terminal:new({ direction = "horizontal" }):toggle()
+      assert.is_true(test1:is_split())
       local winhighlight = vim.wo[test1.window].winhighlight
       assert.is.truthy(winhighlight:match("Normal:DarkenedPanel"))
     end)
+
     it("should set the correct filetype", function()
       local test1 = Terminal:new():toggle()
       local ft = vim.bo[test1.bufnr].filetype
@@ -104,6 +111,56 @@ describe("ToggleTerm tests:", function()
       spy.on(test1, "send")
       toggleterm.exec('echo "hello world"', 1)
       assert.spy(test1.send).was_called()
+    end)
+  end)
+
+  describe("layout options - ", function()
+    before_each(function()
+      toggleterm.setup({
+        open_mapping = [[<c-\>]],
+        shade_filetypes = { "none" },
+        direction = "horizontal",
+        float_opts = {
+          height = 10,
+          width = 20,
+        },
+      })
+    end)
+
+    it("should open with the correct layout", function()
+      local term = Terminal:new({ direction = "float" }):toggle()
+      local _, wins = term_has_windows(term)
+      assert.equal(#wins, 1)
+      assert.equal("popup", fn.win_gettype(fn.win_id2win(wins[1])))
+    end)
+
+    -- FIXME the height is passed in correctly but is returned as 15
+    -- which seems to be an nvim quirk not the code
+    it("should open with user configuration if set", function()
+      local term = Terminal:new({ direction = "float" }):toggle()
+      local _, wins = term_has_windows(term)
+      local config = api.nvim_win_get_config(wins[1])
+      assert.equal(config.width, 20)
+    end)
+
+    it("should use a user's selected highlights", function()
+      local term = Terminal
+        :new({
+          direction = "float",
+          float_opts = {
+            winblend = 12,
+            highlights = {
+              border = "ErrorMsg",
+              background = "Statement",
+            },
+          },
+        })
+        :toggle()
+      local winhighlight = vim.wo[term.window].winhighlight
+      local winblend = vim.wo[term.window].winblend
+      assert.equal(12, winblend)
+      assert.is.truthy(winhighlight:match("NormalFloat:Statement"))
+      assert.is.truthy(winhighlight:match("FloatBorder:ErrorMsg"))
     end)
   end)
 end)

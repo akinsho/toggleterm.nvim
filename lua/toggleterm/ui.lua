@@ -52,11 +52,18 @@ end
 ---@param term Terminal
 ---@return number, number
 function M.create_buf_and_set(term)
-  local window = api.nvim_get_current_win()
-  local bufnr = api.nvim_create_buf(false, false)
+  local valid_win = term.window and api.nvim_win_is_valid(term.window)
+  local window = valid_win and term.window or api.nvim_get_current_win()
+  -- If the buffer doesn't exist create a new one
+  local valid_buf = term.bufnr and api.nvim_buf_is_valid(term.bufnr)
+  local bufnr =  valid_buf and term.bufnr or api.nvim_create_buf(false, false)
+
   M.set_options(window, bufnr, term)
-  api.nvim_set_current_buf(bufnr)
-  api.nvim_win_set_buf(window, bufnr)
+  -- If the buffer didn't previously exist then assign it the window
+  if not valid_buf then
+    api.nvim_set_current_buf(bufnr)
+    api.nvim_win_set_buf(window, bufnr)
+  end
   return window, bufnr
 end
 
@@ -163,7 +170,8 @@ function M.open_split(size, term)
   M.resize_split(term, size)
 end
 
-function M.open_tab()
+--- @param term Terminal
+function M.open_tab(term)
   vim.cmd("tabnew")
 end
 
@@ -185,6 +193,32 @@ local function close_window()
   vim.cmd("keepalt b#")
 end
 
+local curved = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
+
+---Open a floating window
+---@param term Terminal
+function M.open_float(term)
+  local opts = term.float_opts or {}
+  local buf = api.nvim_create_buf(false, false)
+  local width = opts.width or math.ceil(math.min(vim.o.columns, math.max(80, vim.o.columns - 20)))
+  local height = opts.height or math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 10)))
+
+  local border = opts.border and opts.border == "curved" and curved or "single"
+  local win = api.nvim_open_win(buf, true, {
+    row = (opts.row or math.ceil(vim.o.lines - height) / 2) - 1,
+    col = (opts.col or math.ceil(vim.o.columns - width) / 2) - 1,
+    relative = opts.relative or "editor",
+    style = "minimal",
+    width = width,
+    height = height,
+    border = border,
+  })
+  if opts.winblend then
+    vim.wo[win].winblend = opts.winblend
+  end
+  return win, buf
+end
+
 ---Close given terminal's ui
 ---@param term Terminal
 function M.close(term)
@@ -193,7 +227,9 @@ function M.close(term)
   elseif term.direction == "window" then
     close_window()
   else
-    error(fmt("Not implemented close function for %s", term.direction))
+    if api.nvim_win_is_valid(term.window) then
+      api.nvim_win_close(term.window, true)
+    end
   end
 end
 

@@ -44,7 +44,8 @@ function M.__apply_colors()
     end
   end
   if vim.bo.buftype == "terminal" and is_enabled_ft then
-    colors.darken_terminal()
+    local _, term = terms.identify()
+    colors.darken_terminal(term)
   end
 end
 
@@ -69,7 +70,7 @@ end
 ---{cmd = "git commit", dir = "~/dotfiles"}
 ---TODO: only the cmd argument can handle quotes!
 ---@param args string
----@return table<string, string>
+---@return table<string, string|number>
 local function parse_input(args)
   local result = {}
   if args then
@@ -96,15 +97,17 @@ local function setup_global_mappings()
   local mapping = conf.open_mapping
   -- v:count1 defaults the count to 1 but if a count is passed in uses that instead
   -- <c-u> allows passing along the count
-  api.nvim_set_keymap("n", mapping, ':<c-u>exe v:count1 . "ToggleTerm"<CR>', {
-    silent = true,
-    noremap = true,
-  })
-  if conf.insert_mappings then
-    api.nvim_set_keymap("i", mapping, '<Esc>:<c-u>exe v:count1 . "ToggleTerm"<CR>', {
+  if mapping then
+    api.nvim_set_keymap("n", mapping, ':<c-u>exe v:count1 . "ToggleTerm"<CR>', {
       silent = true,
       noremap = true,
     })
+    if conf.insert_mappings then
+      api.nvim_set_keymap("i", mapping, '<Esc>:<c-u>exe v:count1 . "ToggleTerm"<CR>', {
+        silent = true,
+        noremap = true,
+      })
+    end
   end
 end
 
@@ -164,23 +167,22 @@ local function close_last_window(term)
 end
 
 function M.handle_term_enter()
-  local _, term = terms.identify(api.nvim_buf_get_name(api.nvim_get_current_buf()))
+  local _, term = terms.identify()
   term:resize()
   close_last_window(term)
 end
 
 function M.on_term_open()
-  local id = terms.identify(fn.bufname())
-  if id then
-    Terminal
-      :new({
-        id = id,
-        bufnr = api.nvim_get_current_buf(),
-        window = api.nvim_get_current_win(),
-        job_id = vim.b.terminal_job_id,
-      })
-      :__resurrect()
+  local id, term = terms.identify()
+  if not term then
+    term = Terminal:new({
+      id = id,
+      bufnr = api.nvim_get_current_buf(),
+      window = api.nvim_get_current_win(),
+      job_id = vim.b.terminal_job_id,
+    })
   end
+  term:__resurrect()
 end
 
 function M.exec_command(args, count)
@@ -300,7 +302,7 @@ function M.setup(user_prefs)
       },
       {
         "TermOpen",
-        "term://*zsh*,term://*bash*,term://*toggleterm#*",
+        "term://*",
         "lua require('toggleterm').__apply_colors()",
       },
     })
