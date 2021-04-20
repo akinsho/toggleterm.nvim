@@ -22,9 +22,14 @@ A _neovim_ plugin to persist and toggle multiple terminals during an editing ses
 
 ![exec](https://user-images.githubusercontent.com/22454918/112119367-36d1e980-8bb5-11eb-9787-5936391127a3.gif)
 
+
 ## Notices
 
 - **23/03/2021**: `TermExec` command syntax has been refactored to use `TermExec cmd='my-command'`
+
+## Requirements
+
+This plugin requires a *recent* **nvim nightly**.
 
 ## Why?
 
@@ -76,16 +81,21 @@ require"toggleterm".setup{
   shading_factor = '<number>', -- the degree by which to darken to terminal colour, default: 1 for dark backgrounds, 3 for light
   start_in_insert = true,
   persist_size = true,
-  direction = 'vertical' | 'horizontal' | 'window',
+  direction = 'vertical' | 'horizontal' | 'window' | 'float',
+  -- This field is only relevant if direction is set to 'float'
   float_opts = {
-    border = 'single' | 'double' | 'shadow' | 'curved' or table of 8 chars, -- see :h nvim_win_open for details on borders
-      width = <value>,
-      height = <value>,
-      winblend = 3,
-      highlights = {
-        border = "Normal",
-        background = "Normal",
-      }
+    -- The border key is the *almost* same as supported by 'nvim_win_open'
+    -- see :h nvim_win_open for details on borders
+    -- The 'curved' border is a custom border type
+    -- not natively supported but implemented in this plugin.
+    border = 'single' | 'double' | 'shadow' | 'curved' | ... other options supported by win open
+    width = <value>,
+    height = <value>,
+    winblend = 3,
+    highlights = {
+      border = "Normal",
+      background = "Normal",
+    }
   }
 }
 ```
