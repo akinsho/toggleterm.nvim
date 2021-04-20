@@ -84,7 +84,7 @@ require"toggleterm".setup{
   direction = 'vertical' | 'horizontal' | 'window' | 'float',
   -- This field is only relevant if direction is set to 'float'
   float_opts = {
-    -- The border key is the *almost* same as supported by 'nvim_win_open'
+    -- The border key *almost* same as supported by 'nvim_win_open'
     -- see :h nvim_win_open for details on borders
     -- The 'curved' border is a custom border type
     -- not natively supported but implemented in this plugin.
