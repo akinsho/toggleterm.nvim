@@ -10,6 +10,7 @@ local config = {
   persist_size = true,
   direction = "horizontal",
   shading_factor = nil,
+  shell = vim.o.shell,
   float_opts = {
     winblend = 3,
     highlights = {
