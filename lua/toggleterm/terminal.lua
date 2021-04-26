@@ -14,13 +14,14 @@ local terminals = {}
 
 --- @class Terminal
 --- @field cmd string
---- @field direction string
+--- @field direction string the layout style for the terminal
 --- @field id number
 --- @field bufnr number
 --- @field window number
 --- @field job_id number
---- @field dir string
---- @field name string
+--- @field dir string the directory for the terminal
+--- @field name string the name of the terminal
+--- @field count number the count that triggers that specific terminal
 --- @field float_opts table<string, any>
 --- @field on_stdout fun(job: number, exit_code: number, type: string)
 --- @field on_stderr fun(job: number, data: string[], name: string)
@@ -87,7 +88,7 @@ function Terminal:new(term)
   self.__index = self
   term.direction = term.direction or conf.direction
   term.dir = term.dir or vim.loop.cwd()
-  term.id = term.id or next_id()
+  term.id = term.count or term.id or next_id()
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
   -- Add the newly created terminal to the list of all terminals
   return setmetatable(term, self)
@@ -96,7 +97,9 @@ end
 ---@private
 ---Add a terminal to the list of terminals
 function Terminal:__add()
-  terminals[self.id] = self
+  if not terminals[self.id] then
+    terminals[self.id] = self
+  end
   return self
 end
 
@@ -115,6 +118,9 @@ function Terminal:resize(size)
 end
 
 function Terminal:is_open()
+  if not self.window then
+    return false
+  end
   --- TODO: try open will actually attempt to switch to this window
   local win_open = ui.try_open(self.window)
   return win_open and api.nvim_win_get_buf(self.window) == self.bufnr
@@ -127,8 +133,10 @@ function Terminal:close()
     ui.close(self)
     ui.stopinsert()
   else
-    local msg = self.id and fmt("Failed to close window: %d does not exist", self.id)
-      or "Failed to close window: invalid term number"
+    local msg = self.id and fmt(
+      "Failed to close window: win id - %s does not exist",
+      vim.inspect(self.window)
+    ) or "Failed to close window: invalid term number"
     utils.echomsg(msg, "Error")
   end
   ui.update_origin_window(self.window)
