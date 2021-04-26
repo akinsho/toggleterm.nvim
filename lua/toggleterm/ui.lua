@@ -57,12 +57,12 @@ end
 ---then set it to current window
 ---@param term Terminal
 ---@return number, number
-function M.create_buf_and_set(term)
+local function create_term_buf_if_needed(term)
   local valid_win = term.window and api.nvim_win_is_valid(term.window)
   local window = valid_win and term.window or api.nvim_get_current_win()
   -- If the buffer doesn't exist create a new one
   local valid_buf = term.bufnr and api.nvim_buf_is_valid(term.bufnr)
-  local bufnr =  valid_buf and term.bufnr or api.nvim_create_buf(false, false)
+  local bufnr = valid_buf and term.bufnr or api.nvim_create_buf(false, false)
 
   M.set_options(window, bufnr, term)
   -- If the buffer didn't previously exist then assign it the window
@@ -70,7 +70,7 @@ function M.create_buf_and_set(term)
     api.nvim_set_current_buf(bufnr)
     api.nvim_win_set_buf(window, bufnr)
   end
-  return window, bufnr
+  term.window, term.bufnr = window, bufnr
 end
 
 function M.delete_buf(term)
@@ -174,11 +174,17 @@ function M.open_split(size, term)
     vim.cmd(commands.position)
   end
   M.resize_split(term, size)
+  create_term_buf_if_needed(term)
+end
+
+function M.open_window(term)
+  create_term_buf_if_needed(term)
 end
 
 --- @param term Terminal
 function M.open_tab(term)
   vim.cmd("tabnew")
+  create_term_buf_if_needed(term)
 end
 
 ---Close terminal window
@@ -219,10 +225,13 @@ function M.open_float(term)
     height = height,
     border = border,
   })
+
+  term.window, term.bufnr = win, buf
+
   if opts.winblend then
     vim.wo[win].winblend = opts.winblend
   end
-  return win, buf
+  M.set_options(term.window, term.bufnr, term)
 end
 
 ---Close given terminal's ui

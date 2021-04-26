@@ -90,9 +90,7 @@ function Terminal:new(term)
   term.id = term.id or next_id()
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
   -- Add the newly created terminal to the list of all terminals
-  local new = setmetatable(term, self)
-  new:__add()
-  return new
+  return setmetatable(term, self)
 end
 
 ---@private
@@ -207,9 +205,9 @@ local function opener(size, term)
   if term:is_split() then
     ui.open_split(size, term)
   elseif dir == "window" then
-    --- do nothing, maybe later this should close other windows or something
+    ui.open_window(term)
   elseif dir == "tab" then
-    ui.open_tab()
+    ui.open_tab(term)
   elseif dir == "float" then
     ui.open_float(term)
   end
@@ -222,7 +220,7 @@ function Terminal:open(size, is_new)
   ui.set_origin_window()
   if fn.bufexists(self.bufnr) == 0 then
     opener(size, self)
-    self.window, self.bufnr = ui.create_buf_and_set(self)
+    self:__add()
     self:__spawn()
     setup_buffer_autocommands(self)
     setup_buffer_mappings(self.bufnr)
