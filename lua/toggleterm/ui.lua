@@ -249,4 +249,14 @@ function M.resize_split(term, size)
   end
 end
 
+--- @param bufnr number
+function M.find_windows_by_bufnr(bufnr)
+  return fn.win_findbuf(bufnr)
+end
+
+function M.find_open_window(bufnr)
+  local open_win = fn.bufwinid(bufnr)
+  return open_win >= 0, open_win
+end
+
 return M

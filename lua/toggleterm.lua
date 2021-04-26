@@ -111,11 +111,6 @@ local function setup_global_mappings()
   end
 end
 
---- @param bufnr number
-local function find_windows_by_bufnr(bufnr)
-  return fn.win_findbuf(bufnr)
-end
-
 --Create a new terminal or close beginning from the last opened
 ---@param _ number
 ---@param size number
@@ -126,21 +121,19 @@ local function smart_toggle(_, size, directory, direction)
     get_term(1, directory, direction):open(size)
   else
     local terminals = get_all()
-    local target = #terminals
+    local target
     -- count backwards from the end of the list
     for i = #terminals, 1, -1 do
       local term = terminals[i]
-      if not term then
-        utils.echomsg(fmt("Term does not exist %d", i))
-        break
-      end
-      local wins = find_windows_by_bufnr(term.bufnr)
-      if #wins > 0 then
-        target = i
+      if term and ui.find_open_window(term.bufnr) then
+        target = term
         break
       end
     end
-    get_term(target):close()
+    if not target then
+      return utils.echomsg("Couldn't find a terminal to close")
+    end
+    target:close()
   end
 end
 
