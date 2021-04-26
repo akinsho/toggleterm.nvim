@@ -295,8 +295,17 @@ function M.get(id)
   return terminals[id]
 end
 
+---Return the potentially non contiguous map of terminals as a sorted array
+---@return Terminal[]
 function M.get_all()
-  return terminals
+  local result = {}
+  for _,v in pairs(terminals) do
+    table.insert(result, v)
+  end
+  table.sort(result, function (a, b)
+    return a.id < b.id
+  end)
+  return result
 end
 
 function M.reset()
