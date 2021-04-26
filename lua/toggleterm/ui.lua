@@ -53,6 +53,29 @@ function M.set_options(win, buf, term)
   api.nvim_buf_set_var(buf, "toggle_number", term.id)
 end
 
+---Darken the colour of a terminal
+---@param term Terminal
+function M.darken_terminal(term)
+  local highlights
+  if term and term:is_float() or M.is_float() then
+    local config = require("toggleterm.config")
+    local opts = term and term.float_opts or config.get("float_opts") or {}
+    highlights = {
+      fmt("NormalFloat:%s", opts.highlights.background),
+      fmt("FloatBorder:%s", opts.highlights.border),
+    }
+  else
+    highlights = {
+      "Normal:DarkenedPanel",
+      "VertSplit:DarkenedPanel",
+      "StatusLine:DarkenedStatusline",
+      "StatusLineNC:DarkenedStatuslineNC",
+      "SignColumn:DarkenedPanel",
+    }
+  end
+  vim.cmd("setlocal winhighlight=" .. table.concat(highlights, ","))
+end
+
 ---Create a terminal buffer with the correct buffer/window options
 ---then set it to current window
 ---@param term Terminal

@@ -45,7 +45,7 @@ function M.__apply_colors()
   end
   if vim.bo.buftype == "terminal" and is_enabled_ft then
     local _, term = terms.identify()
-    colors.darken_terminal(term)
+    ui.darken_terminal(term)
   end
 end
 
