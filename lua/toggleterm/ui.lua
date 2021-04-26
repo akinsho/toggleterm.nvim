@@ -211,7 +211,8 @@ local curved = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
 ---@param term Terminal
 function M.open_float(term)
   local opts = term.float_opts or {}
-  local buf = api.nvim_create_buf(false, false)
+  local valid_buf = term.bufnr and api.nvim_buf_is_valid(term.bufnr)
+  local buf = valid_buf and term.bufnr or api.nvim_create_buf(false, false)
   local width = opts.width or math.ceil(math.min(vim.o.columns, math.max(80, vim.o.columns - 20)))
   local height = opts.height or math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 10)))
 
@@ -258,14 +259,26 @@ function M.resize_split(term, size)
   end
 end
 
+---Determine if a window is a float
+---@param window number
+function M.is_float(window)
+  return fn.win_gettype(window) == "popup"
+end
+
 --- @param bufnr number
 function M.find_windows_by_bufnr(bufnr)
   return fn.win_findbuf(bufnr)
 end
 
-function M.find_open_window(bufnr)
-  local open_win = fn.bufwinid(bufnr)
-  return open_win >= 0, open_win
+---Return whether or not the terminal passed in has an open window
+---@param term Terminal
+---@return boolean
+function M.buf_has_open_win(term)
+  if not term.window then
+    return false
+  end
+  local open_wins = api.nvim_tabpage_list_wins(api.nvim_get_current_tabpage())
+  return vim.tbl_contains(open_wins, term.window)
 end
 
 return M

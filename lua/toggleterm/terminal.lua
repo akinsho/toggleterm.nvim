@@ -22,6 +22,7 @@ local terminals = {}
 --- @field dir string the directory for the terminal
 --- @field name string the name of the terminal
 --- @field count number the count that triggers that specific terminal
+--- @field hidden boolean whether or not to include this terminal in the terminals list
 --- @field float_opts table<string, any>
 --- @field on_stdout fun(job: number, exit_code: number, type: string)
 --- @field on_stderr fun(job: number, data: string[], name: string)
@@ -89,6 +90,7 @@ function Terminal:new(term)
   term.direction = term.direction or conf.direction
   term.dir = term.dir or vim.loop.cwd()
   term.id = term.count or term.id or next_id()
+  term.hidden = term.hidden or false
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
   -- Add the newly created terminal to the list of all terminals
   return setmetatable(term, self)
@@ -104,11 +106,12 @@ function Terminal:__add()
 end
 
 function Terminal:is_float()
-  return self.direction == "float"
+  return self.direction == "float" and ui.is_float(self.window)
 end
 
 function Terminal:is_split()
-  return self.direction == "vertical" or self.direction == "horizontal"
+  return self.direction == "vertical"
+    or self.direction == "horizontal" and not ui.is_float(self.window)
 end
 
 function Terminal:resize(size)
@@ -186,7 +189,9 @@ end
 ---@private
 function Terminal:__spawn()
   local cmd = self.cmd or config.get("shell")
-  cmd = cmd .. ";#" .. term_ft .. "#" .. self.id
+  if not self.hidden then
+    cmd = fmt("%s;#%s#%d", cmd, term_ft, self.id)
+  end
   self.job_id = fn.termopen(cmd, {
     detach = 1,
     cwd = self.dir,
@@ -228,7 +233,9 @@ function Terminal:open(size, is_new)
   ui.set_origin_window()
   if fn.bufexists(self.bufnr) == 0 then
     opener(size, self)
-    self:__add()
+    if not self.hidden then
+      self:__add()
+    end
     self:__spawn()
     setup_buffer_autocommands(self)
     setup_buffer_mappings(self.bufnr)
@@ -299,10 +306,10 @@ end
 ---@return Terminal[]
 function M.get_all()
   local result = {}
-  for _,v in pairs(terminals) do
+  for _, v in pairs(terminals) do
     table.insert(result, v)
   end
-  table.sort(result, function (a, b)
+  table.sort(result, function(a, b)
     return a.id < b.id
   end)
   return result

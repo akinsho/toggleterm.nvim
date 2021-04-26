@@ -125,7 +125,7 @@ local function smart_toggle(_, size, directory, direction)
     -- count backwards from the end of the list
     for i = #terminals, 1, -1 do
       local term = terminals[i]
-      if term and ui.find_open_window(term.bufnr) then
+      if term and ui.buf_has_open_win(term) then
         target = term
         break
       end
