@@ -216,7 +216,7 @@ function M.open_float(term)
   local width = opts.width or math.ceil(math.min(vim.o.columns, math.max(80, vim.o.columns - 20)))
   local height = opts.height or math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 10)))
 
-  local border = opts.border and opts.border == "curved" and curved or "single"
+  local border = opts.border == "curved" and curved or opts.border or "single"
   local win = api.nvim_open_win(buf, true, {
     row = (opts.row or math.ceil(vim.o.lines - height) / 2) - 1,
     col = (opts.col or math.ceil(vim.o.columns - width) / 2) - 1,
