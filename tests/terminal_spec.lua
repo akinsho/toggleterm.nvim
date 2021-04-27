@@ -96,6 +96,13 @@ describe("ToggleTerm tests:", function()
       Terminal:new({cmd = "bash"}):toggle()
       assert.truthy(vim.b.term_title:match('bash'))
     end)
+
+    it('should open the correct terminal if a user specifies a count', function()
+      local term = Terminal:new({count = 5, id = 5}):toggle()
+      term:toggle()
+      assert.is_false(term_has_windows(term))
+      toggleterm.toggle(5)
+      assert.is_true(term_has_windows(term))
     end)
   end)
 
