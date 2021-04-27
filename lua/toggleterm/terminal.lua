@@ -28,6 +28,7 @@ local terminals = {}
 --- @field on_stderr fun(job: number, data: string[], name: string)
 --- @field on_exit fun(job: number, data: string[], name: string)
 --- @field on_open fun(term:Terminal)
+--- @field on_close fun(term:Terminal)
 local Terminal = {}
 
 local function next_id()
@@ -133,6 +134,9 @@ function Terminal:close()
   ui.update_origin_window(self.window)
 
   if ui.try_open(self.window) then
+    if self.on_close then
+      self:on_close()
+    end
     ui.close(self)
     ui.stopinsert()
   else
@@ -243,8 +247,10 @@ function Terminal:open(size, is_new)
       self:change_dir(self.dir)
     end
   end
+  -- NOTE: it is important that this function is called at this point.
+  -- i.e. the buffer has been correctly assigned
   if self.on_open then
-    self.on_open(self)
+    self:on_open()
   end
 end
 
