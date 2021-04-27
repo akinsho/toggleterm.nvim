@@ -189,9 +189,7 @@ end
 ---@private
 function Terminal:__spawn()
   local cmd = self.cmd or config.get("shell")
-  if not self.hidden then
-    cmd = fmt("%s;#%s#%d", cmd, term_ft, self.id)
-  end
+  cmd = fmt("%s;#%s#%d", cmd, term_ft, self.id)
   self.job_id = fn.termopen(cmd, {
     detach = 1,
     cwd = self.dir,
@@ -233,9 +231,7 @@ function Terminal:open(size, is_new)
   ui.set_origin_window()
   if fn.bufexists(self.bufnr) == 0 then
     opener(size, self)
-    if not self.hidden then
-      self:__add()
-    end
+    self:__add()
     self:__spawn()
     setup_buffer_autocommands(self)
     setup_buffer_mappings(self.bufnr)
@@ -289,25 +285,30 @@ end
 ---@return Terminal
 ---@return boolean
 function M.get_or_create_term(num, dir, direction)
-  if terminals[num] then
-    return terminals[num], false
+  local term = M.get(num)
+  if term then
+    return term, false
   end
   return Terminal:new({ id = next_id(), dir = dir, direction = direction }), true
 end
 
----Get a single terminal by id
+---Get a single terminal by id, unless it is hidden
 ---@param id number
 ---@return Terminal
 function M.get(id)
-  return terminals[id]
+  local term = terminals[id]
+  return term and not term.hidden and term or nil
 end
 
 ---Return the potentially non contiguous map of terminals as a sorted array
+---@param include_hidden boolean whether or nor to filter out hidden
 ---@return Terminal[]
-function M.get_all()
+function M.get_all(include_hidden)
   local result = {}
   for _, v in pairs(terminals) do
-    table.insert(result, v)
+    if include_hidden or (not include_hidden and not v.hidden) then
+      table.insert(result, v)
+    end
   end
   table.sort(result, function(a, b)
     return a.id < b.id

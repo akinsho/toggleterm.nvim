@@ -168,14 +168,15 @@ end
 function M.on_term_open()
   local id, term = terms.identify()
   if not term then
-    term = Terminal:new({
-      id = id,
-      bufnr = api.nvim_get_current_buf(),
-      window = api.nvim_get_current_win(),
-      job_id = vim.b.terminal_job_id,
-    })
+    Terminal
+      :new({
+        id = id,
+        bufnr = api.nvim_get_current_buf(),
+        window = api.nvim_get_current_win(),
+        job_id = vim.b.terminal_job_id,
+      })
+      :__resurrect()
   end
-  term:__resurrect()
 end
 
 function M.exec_command(args, count)
