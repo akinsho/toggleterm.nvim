@@ -94,7 +94,8 @@ describe("ToggleTerm tests:", function()
 
     it('should create a terminal with a custom command', function()
       Terminal:new({cmd = "bash"}):toggle()
-      assert.falsy(vim.b.term_title:match('bash'))
+      assert.truthy(vim.b.term_title:match('bash'))
+    end)
     end)
   end)
 
