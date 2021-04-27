@@ -11,8 +11,8 @@ local t = require("toggleterm.terminal")
 
 ---@type Terminal
 local Terminal = t.Terminal
----@type Terminal[]
-local terminals
+---@type fun(): Terminal[]
+local get_all = t.get_all
 
 ---Return if a terminal has windows
 ---@param term table
@@ -24,10 +24,6 @@ local function term_has_windows(term)
 end
 
 describe("ToggleTerm tests:", function()
-  before_each(function()
-    terminals = require("toggleterm.terminal").get_all()
-  end)
-
   after_each(function()
     require("toggleterm.terminal").reset()
   end)
@@ -45,7 +41,7 @@ describe("ToggleTerm tests:", function()
     it("should get terminals as a list", function ()
       Terminal:new({id = 20}):toggle()
       Terminal:new():toggle()
-      local terms = require("toggleterm.terminal").get_all()
+      local terms = get_all()
       assert.equal(#terms, 2)
       assert.equal(terms[#terms].id, 20)
     end)
@@ -67,6 +63,7 @@ describe("ToggleTerm tests:", function()
 
     it("should toggle a specific buffer if a count is passed", function()
       toggleterm.toggle(2, 15)
+      local terminals = get_all()
       assert.equals(#terminals, 1)
       local term = terminals[1]
       assert.is_true(term_has_windows(term))
@@ -103,12 +100,14 @@ describe("ToggleTerm tests:", function()
   describe("executing commands - ", function()
     it("should open a terminal to execute commands", function()
       toggleterm.exec("ls", 1)
+      local terminals = get_all()
       assert.is_true(#terminals == 1)
       assert.is_true(term_has_windows(terminals[1]))
     end)
 
     it("should change terminal's directory if specified", function()
       toggleterm.exec("ls", 1, 15, fn.expand("~/"))
+      local terminals = get_all()
       assert.is_true(#terminals == 1)
       assert.is_true(term_has_windows(terminals[1]))
     end)
