@@ -303,7 +303,7 @@ end
 ---@return Terminal
 function M.get(id)
   local term = terminals[id]
-  return term and not term.hidden and term or nil
+  return (term and not term.hidden) and term or nil
 end
 
 ---Return the potentially non contiguous map of terminals as a sorted array
