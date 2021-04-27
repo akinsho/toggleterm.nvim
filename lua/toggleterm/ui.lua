@@ -161,7 +161,10 @@ end
 ---@param buf number
 function M.switch_buf(buf)
   -- don't change the alternate buffer so that <c-^><c-^> does nothing in the terminal split
-  vim.cmd(fmt("keepalt buffer %d", buf))
+  local cur_buf = api.nvim_get_current_buf()
+  if cur_buf ~= buf then
+    vim.cmd(fmt("keepalt buffer %d", buf))
+  end
 end
 
 local split_commands = {
