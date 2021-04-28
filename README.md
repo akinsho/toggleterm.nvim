@@ -184,8 +184,8 @@ require'toggleterm'.setup{
 Toggleterm also exposes the `Terminal` class so that this can be used to create custom terminals
 e.g.
 
+Each terminal can take the following arguments:
 ```lua
---[[
 Terminal:new {
   cmd =  string -- command to execute when creating the terminal e.g. 'top'
   direction = string -- the layout for the terminal, same as the main config options
@@ -197,20 +197,35 @@ Terminal:new {
   on_stderr = fun(job: number, data: string[], name: string)
   on_exit = fun(job: number, data: string[], name: string)
 }
---]]
+```
+
+#### Usage
+```lua
 local Terminal  = require('toggleterm.terminal').Terminal
--- This will create a new terminal that runs the specified command once toggled
--- if the hidden key is set to true this terminal will not be toggled by normal toggleterm
--- commands such as `:ToggleTerm` or the open mapping and will only open and close in response to a user
--- specified command
 local lazygit = Terminal:new({ cmd = "lazygit", hidden = true })
 
--- Alternatively the terminal can be specified with a count which is the number that can be used
--- to trigger this specific terminal. This can then be triggered using the current count such e.g.
--- :5ToggleTerm<CR>
-local lazygit = Terminal:new({ cmd = "lazygit", count = 5 })
+function _lazygit_toggle()
+  lazygit:toggle()
+end
 
---- You can also set a custom layout for a terminal
+vim.api.nvim_set_keymap("n", "<leader>g", "<cmd>lua _lazygit_toggle()<CR>", {noremap = true, silent = true})
+```
+
+This will create a new terminal that runs the specified command once toggled
+if the `hidden` key is set to true this terminal will not be toggled by normal toggleterm
+commands such as `:ToggleTerm` or the open mapping and will only open and close in response to a user
+specified mapping like the above.
+
+Alternatively the terminal can be specified with a count which is the number that can be used
+to trigger this specific terminal. This can then be triggered using the current count such e.g.
+`:5ToggleTerm<CR>`
+
+```lua
+local lazygit = Terminal:new({ cmd = "lazygit", count = 5 })
+```
+
+You can also set a custom layout for a terminal
+```lua
 local lazygit = Terminal:new({
   cmd = "lazygit",
   direction = "float",
@@ -227,7 +242,6 @@ local lazygit = Terminal:new({
   end,
 })
 
-
 function _lazygit_toggle()
   lazygit:toggle()
 end
@@ -235,7 +249,7 @@ end
 vim.api.nvim_set_keymap("n", "<leader>g", "<cmd>lua _lazygit_toggle()<CR>", {noremap = true, silent = true})
 ```
 
-WARNING: do not use any of the private functionality of the terminal or other non-public parts of the API as these
+**WARNING**: do not use any of the private functionality of the terminal or other non-public parts of the API as these
 can change in the future.
 
 ### Statusline
