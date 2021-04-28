@@ -134,6 +134,7 @@ end
 function M.try_open(win_id)
   return fn.win_gotoid(win_id) > 0
 end
+
 --- Find the first open terminal window
 --- by iterating all windows and matching the
 --- containing buffers filetype with the passed in

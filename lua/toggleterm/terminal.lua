@@ -242,7 +242,6 @@ function Terminal:open(size, is_new)
   else
     opener(size, self)
     ui.switch_buf(self.bufnr)
-    self.window = api.nvim_get_current_win()
     if not is_new then
       self:change_dir(self.dir)
     end
