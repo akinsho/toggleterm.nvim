@@ -72,7 +72,7 @@ describe("ToggleTerm tests:", function()
       assert.is_true(term_has_windows(term))
     end)
 
-    it('should not list hidden terminal', function()
+    it('should not list hidden terminals', function()
       Terminal:new({hidden = true}):toggle()
       local terminals = get_all()
       assert.equal(#terminals, 0)
