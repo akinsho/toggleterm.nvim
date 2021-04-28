@@ -179,25 +179,63 @@ require'toggleterm'.setup{
 }
 ```
 
-### Advanced (Unstable)
+### Custom Terminals
 
 Toggleterm also exposes the `Terminal` class so that this can be used to create custom terminals
 e.g.
 
 ```lua
-local Terminal = require('toggleterm.terminal').Terminal
+--[[
 Terminal:new {
-  cmd =  string
-  direction = string
-  dir = string
+  cmd =  string -- command to execute when creating the terminal e.g. 'top'
+  direction = string -- the layout for the terminal, same as the main config options
+  dir = string -- the directory for the terminal
+  on_open = fun(t: Terminal) -- function to run when the terminal opens
+  on_close = fun(t: Terminal) -- function to run when the terminal closes
+  -- callbacks for processing the output
   on_stdout = fun(job: number, exit_code: number, type: string)
   on_stderr = fun(job: number, data: string[], name: string)
   on_exit = fun(job: number, data: string[], name: string)
-}:toggle()
+}
+--]]
+local Terminal  = require('toggleterm.terminal').Terminal
+-- This will create a new terminal that runs the specified command once toggled
+-- if the hidden key is set to true this terminal will not be toggled by normal toggleterm
+-- commands such as `:ToggleTerm` or the open mapping and will only open and close in response to a user
+-- specified command
+local lazygit = Terminal:new({ cmd = "lazygit", hidden = true })
+
+-- Alternatively the terminal can be specified with a count which is the number that can be used
+-- to trigger this specific terminal. This can then be trigger using a the current count such e.g.
+-- :5ToggleTerm<CR>
+local lazygit = Terminal:new({ cmd = "lazygit", count = 5 })
+
+--- You can also set a custom layout for a terminal
+local lazygit = Terminal:new({
+  cmd = "lazygit",
+  direction = "float",
+  float_opts = {
+    border = "double",
+  },
+  -- function to run on opening the terminal
+  on_open = function(term)
+    vim.api.nvim_buf_set_keymap(term.bufnr, "n", "q", "<cmd>close<CR>", {noremap = true, silent = true})
+  end,
+  on_close = function(term)
+    vim.cmd("Closing terminal")
+  end,
+})
+
+
+function _lazygit_toggle()
+  lazygit:toggle()
+end
+
+vim.api.nvim_set_keymap("n", "<leader>g", "<cmd>lua _lazygit_toggle()<CR>", {noremap = true, silent = true})
 ```
 
-NOTE: this API is still being fleshed out so is a little unstable, please _Do Not
-Set_ the other terminal fields as these are used internally.
+WARNING: do not use any of the private functionality of the terminal or other non-public parts of the API as these
+can change in the future.
 
 ### Statusline
 
