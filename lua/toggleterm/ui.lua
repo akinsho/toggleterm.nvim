@@ -299,7 +299,7 @@ end
 ---Return whether or not the terminal passed in has an open window
 ---@param term Terminal
 ---@return boolean
-function M.buf_has_open_win(term)
+function M.term_has_open_win(term)
   if not term.window then
     return false
   end
