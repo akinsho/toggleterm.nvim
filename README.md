@@ -181,6 +181,9 @@ require'toggleterm'.setup{
 
 ### Custom Terminals
 
+![lazy git](https://user-images.githubusercontent.com/22454918/116447435-e69f1480-a84f-11eb-86dd-19fa29646aa1.png)
+*using [lazygit](https://github.com/jesseduffield/lazygit)*
+
 Toggleterm also exposes the `Terminal` class so that this can be used to create custom terminals
 e.g.
 
@@ -212,19 +215,19 @@ vim.api.nvim_set_keymap("n", "<leader>g", "<cmd>lua _lazygit_toggle()<CR>", {nor
 ```
 
 This will create a new terminal that runs the specified command once toggled
-if the `hidden` key is set to true this terminal will not be toggled by normal toggleterm
-commands such as `:ToggleTerm` or the open mapping and will only open and close in response to a user
+if the `hidden` key is set to true. This terminal will not be toggled by normal toggleterm
+commands such as `:ToggleTerm` or the open mapping. It will only open and close in response to a user
 specified mapping like the above.
 
 Alternatively the terminal can be specified with a count which is the number that can be used
-to trigger this specific terminal. This can then be triggered using the current count such e.g.
+to trigger this specific terminal. This can then be triggered using the current count e.g.
 `:5ToggleTerm<CR>`
 
 ```lua
 local lazygit = Terminal:new({ cmd = "lazygit", count = 5 })
 ```
 
-You can also set a custom layout for a terminal
+You can also set a custom layout for a terminal.
 ```lua
 local lazygit = Terminal:new({
   cmd = "lazygit",
