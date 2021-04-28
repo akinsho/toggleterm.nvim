@@ -53,16 +53,39 @@ function M.set_options(win, buf, term)
   api.nvim_buf_set_var(buf, "toggle_number", term.id)
 end
 
+---Darken the colour of a terminal
+---@param term Terminal
+function M.darken_terminal(term)
+  local highlights
+  if term and term:is_float() or M.is_float() then
+    local config = require("toggleterm.config")
+    local opts = term and term.float_opts or config.get("float_opts") or {}
+    highlights = {
+      fmt("NormalFloat:%s", opts.highlights.background),
+      fmt("FloatBorder:%s", opts.highlights.border),
+    }
+  else
+    highlights = {
+      "Normal:DarkenedPanel",
+      "VertSplit:DarkenedPanel",
+      "StatusLine:DarkenedStatusline",
+      "StatusLineNC:DarkenedStatuslineNC",
+      "SignColumn:DarkenedPanel",
+    }
+  end
+  vim.cmd("setlocal winhighlight=" .. table.concat(highlights, ","))
+end
+
 ---Create a terminal buffer with the correct buffer/window options
 ---then set it to current window
 ---@param term Terminal
 ---@return number, number
-function M.create_buf_and_set(term)
+local function create_term_buf_if_needed(term)
   local valid_win = term.window and api.nvim_win_is_valid(term.window)
   local window = valid_win and term.window or api.nvim_get_current_win()
   -- If the buffer doesn't exist create a new one
   local valid_buf = term.bufnr and api.nvim_buf_is_valid(term.bufnr)
-  local bufnr =  valid_buf and term.bufnr or api.nvim_create_buf(false, false)
+  local bufnr = valid_buf and term.bufnr or api.nvim_create_buf(false, false)
 
   M.set_options(window, bufnr, term)
   -- If the buffer didn't previously exist then assign it the window
@@ -70,7 +93,7 @@ function M.create_buf_and_set(term)
     api.nvim_set_current_buf(bufnr)
     api.nvim_win_set_buf(window, bufnr)
   end
-  return window, bufnr
+  term.window, term.bufnr = window, bufnr
 end
 
 function M.delete_buf(term)
@@ -111,6 +134,7 @@ end
 function M.try_open(win_id)
   return fn.win_gotoid(win_id) > 0
 end
+
 --- Find the first open terminal window
 --- by iterating all windows and matching the
 --- containing buffers filetype with the passed in
@@ -138,7 +162,10 @@ end
 ---@param buf number
 function M.switch_buf(buf)
   -- don't change the alternate buffer so that <c-^><c-^> does nothing in the terminal split
-  vim.cmd(fmt("keepalt buffer %d", buf))
+  local cur_buf = api.nvim_get_current_buf()
+  if cur_buf ~= buf then
+    vim.cmd(fmt("keepalt buffer %d", buf))
+  end
 end
 
 local split_commands = {
@@ -174,11 +201,17 @@ function M.open_split(size, term)
     vim.cmd(commands.position)
   end
   M.resize_split(term, size)
+  create_term_buf_if_needed(term)
+end
+
+function M.open_window(term)
+  create_term_buf_if_needed(term)
 end
 
 --- @param term Terminal
 function M.open_tab(term)
   vim.cmd("tabnew")
+  create_term_buf_if_needed(term)
 end
 
 ---Close terminal window
@@ -205,11 +238,12 @@ local curved = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
 ---@param term Terminal
 function M.open_float(term)
   local opts = term.float_opts or {}
-  local buf = api.nvim_create_buf(false, false)
+  local valid_buf = term.bufnr and api.nvim_buf_is_valid(term.bufnr)
+  local buf = valid_buf and term.bufnr or api.nvim_create_buf(false, false)
   local width = opts.width or math.ceil(math.min(vim.o.columns, math.max(80, vim.o.columns - 20)))
   local height = opts.height or math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 10)))
 
-  local border = opts.border and opts.border == "curved" and curved or "single"
+  local border = opts.border == "curved" and curved or opts.border or "single"
   local win = api.nvim_open_win(buf, true, {
     row = (opts.row or math.ceil(vim.o.lines - height) / 2) - 1,
     col = (opts.col or math.ceil(vim.o.columns - width) / 2) - 1,
@@ -219,10 +253,13 @@ function M.open_float(term)
     height = height,
     border = border,
   })
+
+  term.window, term.bufnr = win, buf
+
   if opts.winblend then
     vim.wo[win].winblend = opts.winblend
   end
-  return win, buf
+  M.set_options(term.window, term.bufnr, term)
 end
 
 ---Close given terminal's ui
@@ -247,6 +284,28 @@ function M.resize_split(term, size)
     size = size or M.get_size()
     vim.cmd(split_commands[term.direction].resize .. " " .. size)
   end
+end
+
+---Determine if a window is a float
+---@param window number
+function M.is_float(window)
+  return fn.win_gettype(window) == "popup"
+end
+
+--- @param bufnr number
+function M.find_windows_by_bufnr(bufnr)
+  return fn.win_findbuf(bufnr)
+end
+
+---Return whether or not the terminal passed in has an open window
+---@param term Terminal
+---@return boolean
+function M.term_has_open_win(term)
+  if not term.window then
+    return false
+  end
+  local open_wins = api.nvim_tabpage_list_wins(api.nvim_get_current_tabpage())
+  return vim.tbl_contains(open_wins, term.window)
 end
 
 return M

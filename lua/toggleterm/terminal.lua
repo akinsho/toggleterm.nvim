@@ -14,18 +14,21 @@ local terminals = {}
 
 --- @class Terminal
 --- @field cmd string
---- @field direction string
+--- @field direction string the layout style for the terminal
 --- @field id number
 --- @field bufnr number
 --- @field window number
 --- @field job_id number
---- @field dir string
---- @field name string
+--- @field dir string the directory for the terminal
+--- @field name string the name of the terminal
+--- @field count number the count that triggers that specific terminal
+--- @field hidden boolean whether or not to include this terminal in the terminals list
 --- @field float_opts table<string, any>
 --- @field on_stdout fun(job: number, exit_code: number, type: string)
 --- @field on_stderr fun(job: number, data: string[], name: string)
 --- @field on_exit fun(job: number, data: string[], name: string)
 --- @field on_open fun(term:Terminal)
+--- @field on_close fun(term:Terminal)
 local Terminal = {}
 
 local function next_id()
@@ -87,27 +90,29 @@ function Terminal:new(term)
   self.__index = self
   term.direction = term.direction or conf.direction
   term.dir = term.dir or vim.loop.cwd()
-  term.id = term.id or next_id()
+  term.id = term.count or term.id or next_id()
+  term.hidden = term.hidden or false
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
   -- Add the newly created terminal to the list of all terminals
-  local new = setmetatable(term, self)
-  new:__add()
-  return new
+  return setmetatable(term, self)
 end
 
 ---@private
 ---Add a terminal to the list of terminals
 function Terminal:__add()
-  terminals[self.id] = self
+  if not terminals[self.id] then
+    terminals[self.id] = self
+  end
   return self
 end
 
 function Terminal:is_float()
-  return self.direction == "float"
+  return self.direction == "float" and ui.is_float(self.window)
 end
 
 function Terminal:is_split()
-  return self.direction == "vertical" or self.direction == "horizontal"
+  return self.direction == "vertical"
+    or self.direction == "horizontal" and not ui.is_float(self.window)
 end
 
 function Terminal:resize(size)
@@ -117,6 +122,9 @@ function Terminal:resize(size)
 end
 
 function Terminal:is_open()
+  if not self.window then
+    return false
+  end
   --- TODO: try open will actually attempt to switch to this window
   local win_open = ui.try_open(self.window)
   return win_open and api.nvim_win_get_buf(self.window) == self.bufnr
@@ -126,11 +134,16 @@ function Terminal:close()
   ui.update_origin_window(self.window)
 
   if ui.try_open(self.window) then
+    if self.on_close then
+      self:on_close()
+    end
     ui.close(self)
     ui.stopinsert()
   else
-    local msg = self.id and fmt("Failed to close window: %d does not exist", self.id)
-      or "Failed to close window: invalid term number"
+    local msg = self.id and fmt(
+      "Failed to close window: win id - %s does not exist",
+      vim.inspect(self.window)
+    ) or "Failed to close window: invalid term number"
     utils.echomsg(msg, "Error")
   end
   ui.update_origin_window(self.window)
@@ -180,7 +193,7 @@ end
 ---@private
 function Terminal:__spawn()
   local cmd = self.cmd or config.get("shell")
-  cmd = cmd .. ";#" .. term_ft .. "#" .. self.id
+  cmd = fmt("%s;#%s#%d", cmd, term_ft, self.id)
   self.job_id = fn.termopen(cmd, {
     detach = 1,
     cwd = self.dir,
@@ -207,9 +220,9 @@ local function opener(size, term)
   if term:is_split() then
     ui.open_split(size, term)
   elseif dir == "window" then
-    --- do nothing, maybe later this should close other windows or something
+    ui.open_window(term)
   elseif dir == "tab" then
-    ui.open_tab()
+    ui.open_tab(term)
   elseif dir == "float" then
     ui.open_float(term)
   end
@@ -222,20 +235,21 @@ function Terminal:open(size, is_new)
   ui.set_origin_window()
   if fn.bufexists(self.bufnr) == 0 then
     opener(size, self)
-    self.window, self.bufnr = ui.create_buf_and_set(self)
+    self:__add()
     self:__spawn()
     setup_buffer_autocommands(self)
     setup_buffer_mappings(self.bufnr)
   else
     opener(size, self)
     ui.switch_buf(self.bufnr)
-    self.window = api.nvim_get_current_win()
     if not is_new then
       self:change_dir(self.dir)
     end
   end
+  -- NOTE: it is important that this function is called at this point.
+  -- i.e. the buffer has been correctly assigned
   if self.on_open then
-    self.on_open(self)
+    self:on_open()
   end
 end
 
@@ -276,21 +290,35 @@ end
 ---@return Terminal
 ---@return boolean
 function M.get_or_create_term(num, dir, direction)
-  if terminals[num] then
-    return terminals[num], false
+  local term = M.get(num)
+  if term then
+    return term, false
   end
   return Terminal:new({ id = next_id(), dir = dir, direction = direction }), true
 end
 
----Get a single terminal by id
+---Get a single terminal by id, unless it is hidden
 ---@param id number
 ---@return Terminal
 function M.get(id)
-  return terminals[id]
+  local term = terminals[id]
+  return (term and not term.hidden) and term or nil
 end
 
-function M.get_all()
-  return terminals
+---Return the potentially non contiguous map of terminals as a sorted array
+---@param include_hidden boolean whether or nor to filter out hidden
+---@return Terminal[]
+function M.get_all(include_hidden)
+  local result = {}
+  for _, v in pairs(terminals) do
+    if include_hidden or (not include_hidden and not v.hidden) then
+      table.insert(result, v)
+    end
+  end
+  table.sort(result, function(a, b)
+    return a.id < b.id
+  end)
+  return result
 end
 
 function M.reset()

@@ -83,21 +83,4 @@ function M.set_highlights(amount)
   vim.cmd("highlight DarkenedStatuslineNC cterm=italic gui=NONE guibg=" .. darkened_bg)
 end
 
----Darken the colour of a terminal
----@param term Terminal
-function M.darken_terminal(term)
-  local opts = (term and term.float_opts) and term.float_opts or {}
-  local highlights = term and term:is_float() and {
-    fmt("NormalFloat:%s", opts.highlights.background),
-    fmt("FloatBorder:%s", opts.highlights.border),
-  } or {
-    "Normal:DarkenedPanel",
-    "VertSplit:DarkenedPanel",
-    "StatusLine:DarkenedStatusline",
-    "StatusLineNC:DarkenedStatuslineNC",
-    "SignColumn:DarkenedPanel",
-  }
-  vim.cmd("setlocal winhighlight=" .. table.concat(highlights, ","))
-end
-
 return M

@@ -45,7 +45,7 @@ function M.__apply_colors()
   end
   if vim.bo.buftype == "terminal" and is_enabled_ft then
     local _, term = terms.identify()
-    colors.darken_terminal(term)
+    ui.darken_terminal(term)
   end
 end
 
@@ -111,11 +111,6 @@ local function setup_global_mappings()
   end
 end
 
---- @param bufnr number
-local function find_windows_by_bufnr(bufnr)
-  return fn.win_findbuf(bufnr)
-end
-
 --Create a new terminal or close beginning from the last opened
 ---@param _ number
 ---@param size number
@@ -126,21 +121,19 @@ local function smart_toggle(_, size, directory, direction)
     get_term(1, directory, direction):open(size)
   else
     local terminals = get_all()
-    local target = #terminals
+    local target
     -- count backwards from the end of the list
     for i = #terminals, 1, -1 do
       local term = terminals[i]
-      if not term then
-        utils.echomsg(fmt("Term does not exist %d", i))
-        break
-      end
-      local wins = find_windows_by_bufnr(term.bufnr)
-      if #wins > 0 then
-        target = i
+      if term and ui.term_has_open_win(term) then
+        target = term
         break
       end
     end
-    get_term(target):close()
+    if not target then
+      return utils.echomsg("Couldn't find a terminal to close")
+    end
+    target:close()
   end
 end
 
@@ -175,14 +168,15 @@ end
 function M.on_term_open()
   local id, term = terms.identify()
   if not term then
-    term = Terminal:new({
-      id = id,
-      bufnr = api.nvim_get_current_buf(),
-      window = api.nvim_get_current_win(),
-      job_id = vim.b.terminal_job_id,
-    })
+    Terminal
+      :new({
+        id = id,
+        bufnr = api.nvim_get_current_buf(),
+        window = api.nvim_get_current_win(),
+        job_id = vim.b.terminal_job_id,
+      })
+      :__resurrect()
   end
-  term:__resurrect()
 end
 
 function M.exec_command(args, count)
@@ -252,10 +246,8 @@ end
 --- @param dir string
 --- @param direction string
 function M.toggle(count, size, dir, direction)
-  vim.validate({
-    count = { count, "number", true },
-    size = { size, "number", true },
-  })
+  vim.validate({ count = { count, "number", true }, size = { size, "number", true } })
+  -- TODO this should toggle the specified term if any count is passed in
   if count > 1 then
     toggle_nth_term(count, size, dir, direction)
   else

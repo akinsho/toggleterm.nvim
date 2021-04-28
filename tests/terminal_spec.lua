@@ -11,8 +11,8 @@ local t = require("toggleterm.terminal")
 
 ---@type Terminal
 local Terminal = t.Terminal
----@type Terminal[]
-local terminals
+---@type fun(): Terminal[]
+local get_all = t.get_all
 
 ---Return if a terminal has windows
 ---@param term table
@@ -24,9 +24,8 @@ local function term_has_windows(term)
 end
 
 describe("ToggleTerm tests:", function()
-  before_each(function()
-    terminals = require("toggleterm.terminal").get_all()
-  end)
+  -- We must set hidden to use the plugin
+  vim.o.hidden = true
 
   after_each(function()
     require("toggleterm.terminal").reset()
@@ -40,6 +39,14 @@ describe("ToggleTerm tests:", function()
       assert.are.same(test1.id, 1)
       assert.are.same(test2.id, 2)
       assert.are.same(test3.id, 3)
+    end)
+
+    it("should get terminals as a list", function ()
+      Terminal:new({id = 20}):toggle()
+      Terminal:new():toggle()
+      local terms = get_all()
+      assert.equal(#terms, 2)
+      assert.equal(terms[#terms].id, 20)
     end)
 
     it("should open a terminal window on toggle", function()
@@ -59,9 +66,46 @@ describe("ToggleTerm tests:", function()
 
     it("should toggle a specific buffer if a count is passed", function()
       toggleterm.toggle(2, 15)
+      local terminals = get_all()
       assert.equals(#terminals, 1)
       local term = terminals[1]
       assert.is_true(term_has_windows(term))
+    end)
+
+    it('should not list hidden terminals', function()
+      Terminal:new({hidden = true}):toggle()
+      local terminals = get_all()
+      assert.equal(#terminals, 0)
+      Terminal:new():toggle()
+      terminals = get_all()
+      assert.equal(#terminals, 1)
+    end)
+
+    it('should not toggle a terminal if hidden', function()
+      local term = Terminal:new({hidden = true}):toggle()
+      assert.is_true(term_has_windows(term))
+      toggleterm.toggle(1)
+      assert.is_true(term_has_windows(term))
+    end)
+
+    it('should not toggle a terminal if not hidden', function()
+      local term = Terminal:new():toggle()
+      assert.is_true(term_has_windows(term))
+      toggleterm.toggle(1)
+      assert.is_false(term_has_windows(term))
+    end)
+
+    it('should create a terminal with a custom command', function()
+      Terminal:new({cmd = "bash"}):toggle()
+      assert.truthy(vim.b.term_title:match('bash'))
+    end)
+
+    it('should open the correct terminal if a user specifies a count', function()
+      local term = Terminal:new({count = 5}):toggle()
+      term:toggle()
+      assert.is_false(ui.term_has_open_win(term))
+      toggleterm.toggle(5)
+      assert.is_true(ui.term_has_open_win(term))
     end)
   end)
 
@@ -95,12 +139,14 @@ describe("ToggleTerm tests:", function()
   describe("executing commands - ", function()
     it("should open a terminal to execute commands", function()
       toggleterm.exec("ls", 1)
+      local terminals = get_all()
       assert.is_true(#terminals == 1)
       assert.is_true(term_has_windows(terminals[1]))
     end)
 
     it("should change terminal's directory if specified", function()
       toggleterm.exec("ls", 1, 15, fn.expand("~/"))
+      local terminals = get_all()
       assert.is_true(#terminals == 1)
       assert.is_true(term_has_windows(terminals[1]))
     end)
