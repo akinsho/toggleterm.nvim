@@ -24,6 +24,9 @@ local function term_has_windows(term)
 end
 
 describe("ToggleTerm tests:", function()
+  -- We must set hidden to use the plugin
+  vim.o.hidden = true
+
   after_each(function()
     require("toggleterm.terminal").reset()
   end)
@@ -98,11 +101,11 @@ describe("ToggleTerm tests:", function()
     end)
 
     it('should open the correct terminal if a user specifies a count', function()
-      local term = Terminal:new({count = 5, id = 5}):toggle()
+      local term = Terminal:new({count = 5}):toggle()
       term:toggle()
-      assert.is_false(term_has_windows(term))
+      assert.is_false(ui.term_has_open_win(term))
       toggleterm.toggle(5)
-      assert.is_true(term_has_windows(term))
+      assert.is_true(ui.term_has_open_win(term))
     end)
   end)
 
