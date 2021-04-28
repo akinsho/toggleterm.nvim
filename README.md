@@ -206,7 +206,7 @@ local Terminal  = require('toggleterm.terminal').Terminal
 local lazygit = Terminal:new({ cmd = "lazygit", hidden = true })
 
 -- Alternatively the terminal can be specified with a count which is the number that can be used
--- to trigger this specific terminal. This can then be trigger using a the current count such e.g.
+-- to trigger this specific terminal. This can then be triggered using the current count such e.g.
 -- :5ToggleTerm<CR>
 local lazygit = Terminal:new({ cmd = "lazygit", count = 5 })
 
@@ -221,6 +221,7 @@ local lazygit = Terminal:new({
   on_open = function(term)
     vim.api.nvim_buf_set_keymap(term.bufnr, "n", "q", "<cmd>close<CR>", {noremap = true, silent = true})
   end,
+  -- function to run on closing the terminal
   on_close = function(term)
     vim.cmd("Closing terminal")
   end,
