@@ -185,7 +185,7 @@ require'toggleterm'.setup{
 *using [lazygit](https://github.com/jesseduffield/lazygit)*
 
 Toggleterm also exposes the `Terminal` class so that this can be used to create custom terminals
-e.g.
+for showing terminal UIs like `lazygit`, `htop` etc.
 
 Each terminal can take the following arguments:
 ```lua
