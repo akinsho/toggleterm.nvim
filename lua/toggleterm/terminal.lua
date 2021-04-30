@@ -190,6 +190,19 @@ function Terminal:change_dir(dir)
   end
 end
 
+--- Handle when a terminal process exits
+---@param term Terminal
+local function __handle_exit(term)
+  return function (...)
+    if term.on_exit then
+      term:on_exit(...)
+    end
+    if config.get("close_on_exit") then
+      term:close()
+    end
+  end
+end
+
 ---@private
 function Terminal:__spawn()
   local cmd = self.cmd or config.get("shell")
@@ -197,14 +210,7 @@ function Terminal:__spawn()
   self.job_id = fn.termopen(cmd, {
     detach = 1,
     cwd = self.dir,
-    on_exit = function ()
-      if self.on_exit then
-        self:on_exit()
-      end
-      if config.get("close_on_exit") then
-        self:close()
-      end
-    end,
+    on_exit = __handle_exit(self),
     on_stdout = self.on_stdout,
     on_stderr = self.on_stderr,
   })
