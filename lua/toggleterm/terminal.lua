@@ -197,7 +197,14 @@ function Terminal:__spawn()
   self.job_id = fn.termopen(cmd, {
     detach = 1,
     cwd = self.dir,
-    on_exit = self.on_exit,
+    on_exit = function ()
+      if self.on_exit then
+        self:on_exit()
+      end
+      if config.get("close_on_exit") then
+        self:close()
+      end
+    end,
     on_stdout = self.on_stdout,
     on_stderr = self.on_stderr,
   })
