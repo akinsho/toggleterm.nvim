@@ -8,6 +8,7 @@ local config = {
   insert_mappings = true,
   start_in_insert = true,
   persist_size = true,
+  close_on_exit = true,
   direction = "horizontal",
   shading_factor = nil,
   shell = vim.o.shell,

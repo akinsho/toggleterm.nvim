@@ -41,15 +41,7 @@ Sometimes I want these side by side, and I _really_ want these terminals to be e
 I also want my terminal to look different from non-terminal buffers so I use `winhighlight` to darken them based on the `Normal`
 background colour.
 
-This is the exact use case this was designed for. If that's your use case this might work for you. If not there are a lot of
-much more stable alternatives.
-
-- [neoterm](https://github.com/kassio/neoterm)
-
-## Why Lua?
-
-I wrote this initially in vimscript as part of my `init.vim`. I then realised I wanted to extend the functionality,
-but didn't want to end up maintaining a bunch of vimscript I had just managed to hack into place 🤷.
+This is the exact use case this was designed for. If that's your use case this might work for you.
 
 ## Roadmap
 
@@ -63,7 +55,7 @@ this especially if it isn't broken "on my machine". I'm also going to be pretty 
 
 ### Setup
 
-This plugin must be explicitly enabled by using `require"toggleterm".setup{}`
+This plugin must be explicitly enabled by using `require("toggleterm").setup{}`
 
 Setting the key to use for toggling the terminal(s) will setup mappings for _insert, normal and terminal_ modes
 If you prefix the mapping with a number that particular terminal will be opened.
@@ -72,7 +64,7 @@ If you prefix the mapping with a number that particular terminal will be opened.
 when closed.
 
 ```lua
-require"toggleterm".setup{
+require("toggleterm").setup{
   size = 20,
   open_mapping = [[<c-\>]],
   hide_numbers = true, -- hide the number column in toggleterm buffers
@@ -82,7 +74,8 @@ require"toggleterm".setup{
   start_in_insert = true,
   persist_size = true,
   direction = 'vertical' | 'horizontal' | 'window' | 'float',
-  shell = vim.o.shell, -- change the default shell 
+  close_on_exit = true, -- close the terminal window when the process exits
+  shell = vim.o.shell, -- change the default shell
   -- This field is only relevant if direction is set to 'float'
   float_opts = {
     -- The border key is *almost* the same as 'nvim_win_open'
