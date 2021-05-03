@@ -1,8 +1,16 @@
 " Plugin file for terminal.vim
 " see: toggleterm/init.lua for more details
-if !has('nvim-0.5')
-  echoerr 'You need neovim nightly to run this plugin'
-  finish
+
+if has('nvim')
+	if !has('nvim-0.5')
+		echoerr 'You need Neovim Nightly to run this plugin'
+		finish
+	endif
+else
+    echohl Error
+    echom "Sorry this plugin only works with NeoVim ¯\_(ツ)_/¯"
+    echohl clear
+    finish
 endif
 
 "--------------------------------------------------------------------------------
