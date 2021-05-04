@@ -31,6 +31,18 @@ A _neovim_ plugin to persist and toggle multiple terminals during an editing ses
 
 This plugin requires a *recent* **nvim nightly**.
 
+## Installation
+
+Using packer in lua
+```lua
+use {"akinsho/nvim-toggleterm.lua"}
+```
+
+Using vim-plug in vimscript
+```vim
+Plug 'akinsho/nvim-toggleterm.lua'
+```
+
 ## Why?
 
 Neovim's terminal is a very cool, but not super ergonomic tool to use. I find that I often want to
