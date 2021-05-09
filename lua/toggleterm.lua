@@ -49,6 +49,24 @@ function M.__apply_colors()
   end
 end
 
+---Expand wildcards similar to `:h expand`
+---all credit to @voldkiss for this vim regex wizadry
+---https://github.com/voldikss/vim-floaterm/blob/master/autoload/floaterm/cmdline.vim#L51
+---@param cmd string
+---@return string
+local function expand(cmd)
+  local wildchars =
+  [[\(%\|#\|#\d\|<cfile>\|<afile>\|<abuf>\|<amatch>\|<cexpr>\|<sfile>\|<slnum>\|<sflnum>\|<SID>\|<stack>\|<cword>\|<cWORD>\|<client>\)]]
+  cmd = fn.substitute(
+  cmd,
+  [[\([^\\]\|^\)\zs]] .. wildchars .. [[\(<\|\(\(:g\=s?.*?.*?\)\|\(:[phtreS8\~\.]\)\)*\)\ze]],
+  [[\=expand(submatch(0))]],
+  "g"
+  )
+  cmd = fn.substitute(cmd, [[\zs\\]] .. wildchars, [=[\=submatch(0)[1:]]=], "g")
+  return cmd
+end
+
 local function parse_argument(str, result)
   local arg = vim.split(str, "=")
   if #arg > 1 then
@@ -58,7 +76,7 @@ local function parse_argument(str, result)
     elseif key == "cmd" then
       -- Remove quotes
       -- TODO: find a better way to do this
-      value = string.sub(value, 2, #value - 1)
+      value = expand(string.sub(value, 2, #value - 1))
     end
     result[key] = value
   end
