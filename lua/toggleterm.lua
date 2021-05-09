@@ -74,8 +74,7 @@ local function parse_argument(str, result)
     if key == "size" then
       value = tonumber(value)
     elseif key == "cmd" then
-      -- Remove quotes
-      -- TODO: find a better way to do this
+      -- Remove quotes, TODO: find a better way to do this
       value = expand(string.sub(value, 2, #value - 1))
     end
     result[key] = value
@@ -217,6 +216,7 @@ end
 --- @param cmd string
 --- @param num number
 --- @param size number
+--- @param dir string
 function M.exec(cmd, num, size, dir)
   vim.validate({
     cmd = { cmd, "string" },
