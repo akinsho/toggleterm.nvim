@@ -41,7 +41,7 @@ local function expand(cmd)
   return cmd
 end
 
-local patterns = {
+local p = {
   single = "'(.-)'",
   double = '"(.-)"',
 }
@@ -54,10 +54,7 @@ local patterns = {
 function M.parse(args)
   local result = {}
   if args then
-    local quotes = args:match(patterns.single) and patterns.single
-      or args:match(patterns.double) and patterns.double
-      or nil
-
+    local quotes = args:match(p.single) and p.single or args:match(p.double) and p.double or nil
     if quotes then
       -- 1. extract the quoted command
       local pattern = "([^=-]+)=" .. quotes
