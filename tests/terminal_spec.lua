@@ -179,6 +179,16 @@ describe("ToggleTerm tests:", function()
       toggleterm.exec_command("--cmd='echo %'", 1)
       assert.spy(test1.send).was_called_with(test1, fmt("echo %s", file), true)
     end)
+
+    it('should handle nested quotes in cmd args', function()
+      local file = vim.fn.tempname() .. ".txt"
+      vim.cmd(fmt("e %s", file))
+      local test1 = Terminal:new():toggle()
+      vim.cmd('wincmd w')
+      spy.on(test1, "send")
+      toggleterm.exec_command("--cmd='g++ -std=c++17 % -o run'", 1)
+      assert.spy(test1.send).was_called_with(test1, fmt("g++ -std=c++17 %s -o run", file), true)
+    end)
   end)
 
   describe("layout options - ", function()
