@@ -146,8 +146,13 @@ remain in that dir
 
 This command allows you to open a terminal with a specific action.
 e.g. `2TermExec cmd="git status" dir=~/<my-repo-path>` will run git status in terminal 2.
-note that the `cmd` argument is quoted so that can it can be distinguished from the `dir`
-argument.
+note that the `cmd` argument **must be quoted**.
+
+*NOTE:* the `dir` argument can also be *optionally* quoted if it contains spaces.
+
+The `cmd` and `dir` arguments can also expand the same special keywords as `:h expand` e.g.
+`TermExec cmd="echo %"` will be expanded to `TermExec cmd="echo /file/example"`
+see `:h expand()` for more details
 
 ### Set terminal shading
 
