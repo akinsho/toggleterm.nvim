@@ -49,66 +49,6 @@ function M.__apply_colors()
   end
 end
 
----Expand wildcards similar to `:h expand`
----all credit to @voldkiss for this vim regex wizadry
----https://github.com/voldikss/vim-floaterm/blob/master/autoload/floaterm/cmdline.vim#L51
----@param cmd string
----@return string
-local function expand(cmd)
-  local wildchars =
-  [[\(%\|#\|#\d\|<cfile>\|<afile>\|<abuf>\|<amatch>\|<cexpr>\|<sfile>\|<slnum>\|<sflnum>\|<SID>\|<stack>\|<cword>\|<cWORD>\|<client>\)]]
-  cmd = fn.substitute(
-  cmd,
-  [[\([^\\]\|^\)\zs]] .. wildchars .. [[\(<\|\(\(:g\=s?.*?.*?\)\|\(:[phtreS8\~\.]\)\)*\)\ze]],
-  [[\=expand(submatch(0))]],
-  "g"
-  )
-  cmd = fn.substitute(cmd, [[\zs\\]] .. wildchars, [=[\=submatch(0)[1:]]=], "g")
-  return cmd
-end
-
-local function parse_argument(str, result)
-  local arg = vim.split(str, "=")
-  if #arg > 1 then
-    local key, value = arg[1], arg[2]
-    if key == "size" then
-      value = tonumber(value)
-    elseif key == "cmd" then
-      -- Remove quotes, TODO: find a better way to do this
-      value = expand(string.sub(value, 2, #value - 1))
-    end
-    result[key] = value
-  end
-  return result
-end
-
----Take a users command arguments in the format "cmd='git commit' dir=~/dotfiles"
----and parse this into a table of arguments
----{cmd = "git commit", dir = "~/dotfiles"}
----TODO: only the cmd argument can handle quotes!
----@param args string
----@return table<string, string|number>
-local function parse_input(args)
-  local result = {}
-  if args then
-    -- extract the quoted command then remove it from the rest of the argument string
-    -- \v - very magic, reduce the amount of escaping needed
-    -- \w+\= - match a word followed by an = sign
-    -- ("([^"]*)"|'([^']*)') - match double or single quoted text
-    -- @see: https://stackoverflow.com/a/5950910
-    local regex = [[\v\w+\=%("([^"]*)"|'([^']*)')]]
-    local quoted_arg = fn.matchstr(args, regex, "g")
-    args = fn.substitute(args, regex, "", "g")
-    parse_argument(quoted_arg, result)
-
-    local parts = vim.split(args, " ")
-    for _, part in ipairs(parts) do
-      parse_argument(part, result)
-    end
-  end
-  return result
-end
-
 local function setup_global_mappings()
   local conf = config.get()
   local mapping = conf.open_mapping
@@ -204,7 +144,7 @@ function M.exec_command(args, count)
       "ErrorMsg"
     )
   end
-  local parsed = parse_input(args)
+  local parsed = require("toggleterm.commandline").parse(args)
   vim.validate({
     cmd = { parsed.cmd, "string" },
     dir = { parsed.dir, "string", true },
@@ -240,7 +180,7 @@ function M.exec(cmd, num, size, dir)
 end
 
 function M.toggle_command(args, count)
-  local parsed = parse_input(args)
+  local parsed = require("toggleterm.commandline").parse(args)
   vim.validate({
     size = { parsed.size, "number", true },
     directory = { parsed.dir, "string", true },
