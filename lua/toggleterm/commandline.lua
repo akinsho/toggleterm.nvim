@@ -49,6 +49,7 @@ local p = {
 ---Take a users command arguments in the format "cmd='git commit' dir=~/dotfiles"
 ---and parse this into a table of arguments
 ---{cmd = "git commit", dir = "~/dotfiles"}
+---@see https://stackoverflow.com/a/27007701
 ---@param args string
 ---@return table<string, string|number>
 function M.parse(args)
