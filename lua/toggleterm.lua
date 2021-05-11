@@ -4,9 +4,6 @@ local fmt = string.format
 
 local constants = require("toggleterm.constants")
 local colors = require("toggleterm.colors")
-local config = require("toggleterm.config")
-local utils = require("toggleterm.utils")
-local ui = require("toggleterm.ui")
 
 local terms = require("toggleterm.terminal")
 
@@ -33,7 +30,7 @@ function M.__apply_colors()
     ft = "none"
   end
 
-  local allow_list = config.get("shade_filetypes") or {}
+  local allow_list = require("toggleterm.config").get("shade_filetypes") or {}
   table.insert(allow_list, term_ft)
 
   local is_enabled_ft = false
@@ -45,12 +42,12 @@ function M.__apply_colors()
   end
   if vim.bo.buftype == "terminal" and is_enabled_ft then
     local _, term = terms.identify()
-    ui.darken_terminal(term)
+    require("toggleterm.ui").darken_terminal(term)
   end
 end
 
 local function setup_global_mappings()
-  local conf = config.get()
+  local conf = require("toggleterm.config").get()
   local mapping = conf.open_mapping
   -- v:count1 defaults the count to 1 but if a count is passed in uses that instead
   -- <c-u> allows passing along the count
@@ -74,6 +71,7 @@ end
 ---@param directory string
 ---@param direction string
 local function smart_toggle(_, size, directory, direction)
+  local ui = require("toggleterm.ui")
   if not ui.find_open_windows() then
     get_term(1, directory, direction):open(size)
   else
@@ -88,7 +86,7 @@ local function smart_toggle(_, size, directory, direction)
       end
     end
     if not target then
-      return utils.echomsg("Couldn't find a terminal to close")
+      return require('toggleterm.utils').echomsg("Couldn't find a terminal to close")
     end
     target:close()
   end
@@ -100,7 +98,7 @@ end
 --- @param direction string
 local function toggle_nth_term(num, size, directory, direction)
   local term = get_term(num, directory, direction)
-  ui.update_origin_window(term.window)
+  require("toggleterm.ui").update_origin_window(term.window)
   term:toggle(size)
 end
 
@@ -139,7 +137,7 @@ end
 function M.exec_command(args, count)
   vim.validate({ args = { args, "string" } })
   if not args:match("cmd") then
-    return utils.echomsg(
+    return require("toggleterm.utils").echomsg(
       "TermExec requires a cmd specified using the syntax cmd='ls -l' e.g. TermExec cmd='ls -l'",
       "ErrorMsg"
     )
@@ -214,7 +212,7 @@ function M.toggle(count, size, dir, direction)
 end
 
 function M.setup(user_prefs)
-  local conf = config.set(user_prefs)
+  local conf = require("toggleterm.config").set(user_prefs)
   setup_global_mappings()
   local autocommands = {
     {
@@ -257,7 +255,7 @@ function M.setup(user_prefs)
       },
     })
   end
-  utils.create_augroups({ ToggleTerminal = autocommands })
+  require('toggleterm.utils').create_augroups({ ToggleTerminal = autocommands })
 end
 
 return M
