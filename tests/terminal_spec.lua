@@ -1,5 +1,6 @@
 local api = vim.api
 local fn = vim.fn
+local fmt = string.format
 
 local spy = require("luassert.spy")
 
@@ -117,7 +118,6 @@ describe("ToggleTerm tests:", function()
       vim.wait(1000)
       assert.is_false(ui.term_has_open_win(term))
     end)
-
   end)
 
   describe("terminal buffers options - ", function()
@@ -162,12 +162,32 @@ describe("ToggleTerm tests:", function()
       assert.is_true(term_has_windows(terminals[1]))
     end)
 
-    ---TODO figure out how to stub class methods
-    pending("should send commands to a terminal on exec", function()
+    it("should send commands to a terminal on exec", function()
       local test1 = Terminal:new():toggle()
       spy.on(test1, "send")
       toggleterm.exec('echo "hello world"', 1)
       assert.spy(test1.send).was_called()
+      assert.spy(test1.send).was_called_with(test1, 'echo "hello world"', true)
+    end)
+
+    it("should expand vim wildcards", function()
+      local file = vim.fn.tempname() .. ".txt"
+      vim.cmd(fmt("e %s", file))
+      local test1 = Terminal:new():toggle()
+      vim.cmd('wincmd w')
+      spy.on(test1, "send")
+      toggleterm.exec_command("--cmd='echo %'", 1)
+      assert.spy(test1.send).was_called_with(test1, fmt("echo %s", file), true)
+    end)
+
+    it('should handle nested quotes in cmd args', function()
+      local file = vim.fn.tempname() .. ".txt"
+      vim.cmd(fmt("e %s", file))
+      local test1 = Terminal:new():toggle()
+      vim.cmd('wincmd w')
+      spy.on(test1, "send")
+      toggleterm.exec_command("--cmd='g++ -std=c++17 % -o run'", 1)
+      assert.spy(test1.send).was_called_with(test1, fmt("g++ -std=c++17 %s -o run", file), true)
     end)
   end)
 
