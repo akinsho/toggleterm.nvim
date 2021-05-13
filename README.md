@@ -136,11 +136,15 @@ a the `size` and `dir` as an argument e.g.
 :ToggleTerm size=40 dir=~/Desktop
 ```
 
+The directory can also be specified as `git_dir` which toggleterm will then
+use to try and derive the git repo directory.
+*NOTE*: This currently will not work for work tree's or other more complex setups
+
 If specified on creation toggle term will open at the specified directory at the
 specified height.
 
 _NOTE_: If the terminal has already been opened at a particular directory it will
-remain in that dir
+remain in that directory.
 
 ### `TermExec`
 
@@ -241,12 +245,14 @@ You can also set a custom layout for a terminal.
 ```lua
 local lazygit = Terminal:new({
   cmd = "lazygit",
+  dir = "git_dir",
   direction = "float",
   float_opts = {
     border = "double",
   },
   -- function to run on opening the terminal
   on_open = function(term)
+    vim.cmd("startinsert!")
     vim.api.nvim_buf_set_keymap(term.bufnr, "n", "q", "<cmd>close<CR>", {noremap = true, silent = true})
   end,
   -- function to run on closing the terminal

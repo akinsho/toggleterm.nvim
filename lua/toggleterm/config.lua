@@ -23,7 +23,7 @@ local config = {
 
 --- get the full user config or just a specified value
 ---@param key string
----@return table | string | number
+---@return any
 function M.get(key)
   if key then
     return config[key]

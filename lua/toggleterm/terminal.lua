@@ -76,6 +76,16 @@ local function setup_buffer_autocommands(term)
   utils.create_augroups({ ["ToggleTerm" .. term.bufnr] = commands })
 end
 
+local function _get_dir(dir)
+  if dir == "git_dir" then
+    dir = require("toggleterm.utils").git_dir()
+  end
+  if not dir then
+    dir = vim.loop.cwd()
+  end
+  return dir
+end
+
 ---Create a new terminal object
 ---@param term Terminal
 ---@return Terminal
@@ -89,7 +99,7 @@ function Terminal:new(term)
   local conf = config.get()
   self.__index = self
   term.direction = term.direction or conf.direction
-  term.dir = term.dir or vim.loop.cwd()
+  term.dir = _get_dir(term.dir)
   term.id = term.count or term.id or next_id()
   term.hidden = term.hidden or false
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)

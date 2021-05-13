@@ -116,8 +116,10 @@ end
 
 function M.handle_term_enter()
   local _, term = terms.identify()
-  term:resize()
-  close_last_window(term)
+  if term then
+    term:resize()
+    close_last_window(term)
+  end
 end
 
 function M.on_term_open()
