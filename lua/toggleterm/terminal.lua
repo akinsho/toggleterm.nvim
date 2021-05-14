@@ -76,6 +76,9 @@ local function setup_buffer_autocommands(term)
   utils.create_augroups({ ["ToggleTerm" .. term.bufnr] = commands })
 end
 
+---get the directory for the terminal parsing special arguments
+---@param dir string
+---@return string
 local function _get_dir(dir)
   if dir == "git_dir" then
     dir = require("toggleterm.utils").git_dir()
@@ -99,7 +102,6 @@ function Terminal:new(term)
   local conf = config.get()
   self.__index = self
   term.direction = term.direction or conf.direction
-  term.dir = _get_dir(term.dir)
   term.id = term.count or term.id or next_id()
   term.hidden = term.hidden or false
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
@@ -203,7 +205,7 @@ end
 --- Handle when a terminal process exits
 ---@param term Terminal
 local function __handle_exit(term)
-  return function (...)
+  return function(...)
     if term.on_exit then
       term:on_exit(...)
     end
@@ -219,7 +221,7 @@ function Terminal:__spawn()
   cmd = fmt("%s;#%s#%d", cmd, term_ft, self.id)
   self.job_id = fn.termopen(cmd, {
     detach = 1,
-    cwd = self.dir,
+    cwd = _get_dir(self.dir),
     on_exit = __handle_exit(self),
     on_stdout = self.on_stdout,
     on_stderr = self.on_stderr,
