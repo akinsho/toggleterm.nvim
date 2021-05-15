@@ -162,7 +162,9 @@ function Terminal:close()
 end
 
 function Terminal:shutdown()
-  self:close()
+  if self:is_open() then
+    self:close()
+  end
   ui.delete_buf(self)
 end
 
