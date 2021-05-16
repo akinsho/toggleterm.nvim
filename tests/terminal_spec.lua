@@ -211,6 +211,25 @@ describe("ToggleTerm tests:", function()
       assert.equal("popup", fn.win_gettype(fn.win_id2win(wins[1])))
     end)
 
+    it("should not change numbers when resolving size",function()
+      local term = Terminal:new()
+      local size = 20
+      assert.equal(size, ui._resolve_size(size))
+      assert.equal(size, ui._resolve_size(size, term))
+    end)
+
+    it("should evaluate custom functions when resolving size",function()
+      local term = Terminal:new({ direction = "vertical" })
+      local size1 = 20
+      local size2 = function(term)
+        if term.direction == "vertical" then
+          return size1
+        end
+        return 0
+      end
+      assert.equal(ui._resolve_size(size2,term),size1)
+    end)
+
     -- FIXME the height is passed in correctly but is returned as 15
     -- which seems to be an nvim quirk not the code
     it("should open with user configuration if set", function()
