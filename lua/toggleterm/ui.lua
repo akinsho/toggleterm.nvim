@@ -68,6 +68,7 @@ function M.darken_terminal(term)
   else
     highlights = {
       "Normal:DarkenedPanel",
+      "EndOfBuffer:DarkenedPanel",
       "VertSplit:DarkenedPanel",
       "StatusLine:DarkenedStatusline",
       "StatusLineNC:DarkenedStatuslineNC",
