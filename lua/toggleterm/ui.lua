@@ -1,6 +1,7 @@
 local M = {}
 
 local constants = require("toggleterm.constants")
+local utils = require("toggleterm.utils")
 
 local fn = vim.fn
 local fmt = string.format
@@ -184,16 +185,14 @@ local split_commands = {
 }
 
 --- @param size number/function
-local function resolve_size(size)
+function M._resolve_size(size,term)
   if type(size) == 'number' then
-    return function()
-      return size
-    end
-  end
-  if type(size) == 'function' then
     return size
   end
-  error(string.format('The input %s is not of type "number" or "function".',size))
+  if term and type(size) == 'function' then
+    return size(term)
+  end
+  utils.echomsg(string.format('The input %s is not of type "number" or "function".',size),"Error")
 end
 
 --- @param size number
@@ -202,8 +201,7 @@ function M.open_split(size, term)
   local has_open, win_ids = M.find_open_windows()
   local commands = split_commands[term.direction]
 
-  size = M.get_size(size)
-  size = resolve_size(size)(term)
+  size = M._resolve_size(M.get_size(size), term)
   if has_open then
     -- we need to be in the terminal window most recently opened
     -- in order to split to the right of it
@@ -254,8 +252,8 @@ function M.open_float(term)
   local opts = term.float_opts or {}
   local valid_buf = term.bufnr and api.nvim_buf_is_valid(term.bufnr)
   local buf = valid_buf and term.bufnr or api.nvim_create_buf(false, false)
-  local width = resolve_size(opts.width)(term) or math.ceil(math.min(vim.o.columns, math.max(80, vim.o.columns - 20)))
-  local height = resolve_size(opts.height)(term) or math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 10)))
+  local width = M._resolve_size(opts.width, term) or math.ceil(math.min(vim.o.columns, math.max(80, vim.o.columns - 20)))
+  local height = M._resolve_size(opts.height, term) or math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 10)))
 
   local border = opts.border == "curved" and curved or opts.border or "single"
   local win = api.nvim_open_win(buf, true, {
