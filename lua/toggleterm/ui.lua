@@ -186,10 +186,11 @@ local split_commands = {
 
 --- @param size number/function
 function M._resolve_size(size,term)
-  if type(size) == 'number' then
+  if size == nil then
+    return
+  elseif type(size) == 'number' then
     return size
-  end
-  if term and type(size) == 'function' then
+  elseif term and type(size) == 'function' then
     return size(term)
   end
   utils.echomsg(string.format('The input %s is not of type "number" or "function".',size),"Error")
