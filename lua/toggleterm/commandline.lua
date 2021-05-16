@@ -58,7 +58,7 @@ function M.parse(args)
     local quotes = args:match(p.single) and p.single or args:match(p.double) and p.double or nil
     if quotes then
       -- 1. extract the quoted command
-      local pattern = "([^=-]+)=" .. quotes
+      local pattern = "(%S+)=" .. quotes
       for key, value in args:gmatch(pattern) do
         value = fn.shellescape(value)
         result[vim.trim(key)] = expand(value:match(quotes))
