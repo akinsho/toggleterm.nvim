@@ -14,6 +14,7 @@ local terminals = {}
 
 --- @class Terminal
 --- @field cmd string
+--- @field no_format boolean disables formatting of command input
 --- @field direction string the layout style for the terminal
 --- @field id number
 --- @field bufnr number
@@ -220,7 +221,7 @@ end
 ---@private
 function Terminal:__spawn()
   local cmd = self.cmd or config.get("shell")
-  cmd = fmt("%s;#%s#%d", cmd, term_ft, self.id)
+  cmd = self.no_format and cmd or fmt("%s;#%s#%d", cmd, term_ft, self.id)
   self.job_id = fn.termopen(cmd, {
     detach = 1,
     cwd = _get_dir(self.dir),
