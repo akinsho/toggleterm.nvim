@@ -221,8 +221,8 @@ describe("ToggleTerm tests:", function()
     it("should evaluate custom functions when resolving size",function()
       local term = Terminal:new({ direction = "vertical" })
       local size1 = 20
-      local size2 = function(term)
-        if term.direction == "vertical" then
+      local size2 = function(_t)
+        if _t.direction == "vertical" then
           return size1
         end
         return 0
