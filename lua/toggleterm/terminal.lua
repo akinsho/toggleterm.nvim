@@ -14,7 +14,6 @@ local terminals = {}
 
 --- @class Terminal
 --- @field cmd string
---- @field no_format boolean disables formatting of command input
 --- @field direction string the layout style for the terminal
 --- @field id number
 --- @field bufnr number
@@ -221,7 +220,11 @@ end
 ---@private
 function Terminal:__spawn()
   local cmd = self.cmd or config.get("shell")
-  cmd = self.no_format and cmd or fmt("%s;#%s#%d", cmd, term_ft, self.id)
+  if vim.fn.has("win32") then
+    cmd = fmt("%s&::%s::%d", cmd, term_ft, self.id)
+  else
+    cmd = fmt("%s;#%s#%d", cmd, term_ft, self.id)
+  end
   self.job_id = fn.termopen(cmd, {
     detach = 1,
     cwd = _get_dir(self.dir),
@@ -299,7 +302,12 @@ end
 --- @return number
 function M.identify(name)
   name = name or api.nvim_buf_get_name(api.nvim_get_current_buf())
-  local parts = vim.split(name, "#")
+  local parts
+  if vim.fn.has('win32') then
+    parts = vim.split(name, "::")
+  else
+    parts = vim.split(name, "#")
+  end
   local id = tonumber(parts[#parts])
   return id, terminals[id]
 end
