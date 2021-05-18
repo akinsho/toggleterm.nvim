@@ -205,7 +205,6 @@ Each terminal can take the following arguments:
 ```lua
 Terminal:new {
   cmd = string -- command to execute when creating the terminal e.g. 'top'
-  no_format = boolean -- disables formatting of command input 
   direction = string -- the layout for the terminal, same as the main config options
   dir = string -- the directory for the terminal
   on_open = fun(t: Terminal) -- function to run when the terminal opens

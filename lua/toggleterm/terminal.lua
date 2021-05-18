@@ -9,6 +9,9 @@ local api = vim.api
 local fmt = string.format
 local fn = vim.fn
 
+local command_sep = has("win32") and "&" or ";"
+local comment_sep = has("win32") and "::" or "#"
+
 ---@type Terminal[]
 local terminals = {}
 
@@ -220,11 +223,14 @@ end
 ---@private
 function Terminal:__spawn()
   local cmd = self.cmd or config.get("shell")
-  if vim.fn.has("win32") then
-    cmd = fmt("%s&::%s::%d", cmd, term_ft, self.id)
-  else
-    cmd = fmt("%s;#%s#%d", cmd, term_ft, self.id)
-  end
+  cmd = table.concat({
+    cmd,
+    command_sep,
+    comment_sep,
+    term_ft,
+    comment_sep,
+    self.id
+  })
   self.job_id = fn.termopen(cmd, {
     detach = 1,
     cwd = _get_dir(self.dir),
@@ -302,12 +308,7 @@ end
 --- @return number
 function M.identify(name)
   name = name or api.nvim_buf_get_name(api.nvim_get_current_buf())
-  local parts
-  if vim.fn.has('win32') then
-    parts = vim.split(name, "::")
-  else
-    parts = vim.split(name, "#")
-  end
+  local parts = vim.split(name,comment_sep)
   local id = tonumber(parts[#parts])
   return id, terminals[id]
 end
