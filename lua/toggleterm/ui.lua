@@ -185,16 +185,22 @@ local split_commands = {
   },
 }
 
---- @param size number/function
-function M._resolve_size(size,term)
-  if size == nil then
+--- @private
+--- @param size number|function
+--- @param term Terminal
+--- @return number?
+function M._resolve_size(size, term)
+  if not size then
     return
-  elseif type(size) == 'number' then
+  elseif type(size) == "number" then
     return size
-  elseif term and type(size) == 'function' then
+  elseif term and type(size) == "function" then
     return size(term)
   end
-  utils.echomsg(string.format('The input %s is not of type "number" or "function".',size),"Error")
+  utils.echomsg(
+    string.format('The input %s is not of type "number" or "function".', size),
+    "Error"
+  )
 end
 
 --- @param size number
@@ -254,8 +260,10 @@ function M.open_float(term)
   local opts = term.float_opts or {}
   local valid_buf = term.bufnr and api.nvim_buf_is_valid(term.bufnr)
   local buf = valid_buf and term.bufnr or api.nvim_create_buf(false, false)
-  local width = M._resolve_size(opts.width, term) or math.ceil(math.min(vim.o.columns, math.max(80, vim.o.columns - 20)))
-  local height = M._resolve_size(opts.height, term) or math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 10)))
+  local width = M._resolve_size(opts.width, term)
+    or math.ceil(math.min(vim.o.columns, math.max(80, vim.o.columns - 20)))
+  local height = M._resolve_size(opts.height, term)
+    or math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 10)))
 
   local border = opts.border == "curved" and curved or opts.border or "single"
   local win = api.nvim_open_win(buf, true, {
@@ -295,7 +303,7 @@ end
 ---@param size number
 function M.resize_split(term, size)
   if term:is_split() then
-    size = size or M.get_size()
+    size = M._resolve_size(size or M.get_size(), term)
     vim.cmd(split_commands[term.direction].resize .. " " .. size)
   end
 end

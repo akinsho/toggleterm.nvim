@@ -229,7 +229,7 @@ function Terminal:__spawn()
     comment_sep,
     term_ft,
     comment_sep,
-    self.id
+    self.id,
   })
   self.job_id = fn.termopen(cmd, {
     detach = 1,
@@ -308,7 +308,7 @@ end
 --- @return number
 function M.identify(name)
   name = name or api.nvim_buf_get_name(api.nvim_get_current_buf())
-  local parts = vim.split(name,comment_sep)
+  local parts = vim.split(name, comment_sep)
   local id = tonumber(parts[#parts])
   return id, terminals[id]
 end

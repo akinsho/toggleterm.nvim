@@ -174,17 +174,17 @@ describe("ToggleTerm tests:", function()
       local file = vim.fn.tempname() .. ".txt"
       vim.cmd(fmt("e %s", file))
       local test1 = Terminal:new():toggle()
-      vim.cmd('wincmd w')
+      vim.cmd("wincmd w")
       spy.on(test1, "send")
       toggleterm.exec_command("cmd='echo %'", 1)
       assert.spy(test1.send).was_called_with(test1, fmt("echo %s", file), true)
     end)
 
-    it('should handle nested quotes in cmd args', function()
+    it("should handle nested quotes in cmd args", function()
       local file = vim.fn.tempname() .. ".txt"
       vim.cmd(fmt("e %s", file))
       local test1 = Terminal:new():toggle()
-      vim.cmd('wincmd w')
+      vim.cmd("wincmd w")
       spy.on(test1, "send")
       toggleterm.exec_command("cmd='g++ -std=c++17 % -o run'", 1)
       assert.spy(test1.send).was_called_with(test1, fmt("g++ -std=c++17 %s -o run", file), true)
@@ -211,14 +211,14 @@ describe("ToggleTerm tests:", function()
       assert.equal("popup", fn.win_gettype(fn.win_id2win(wins[1])))
     end)
 
-    it("should not change numbers when resolving size",function()
+    it("should not change numbers when resolving size", function()
       local term = Terminal:new()
       local size = 20
       assert.equal(size, ui._resolve_size(size))
       assert.equal(size, ui._resolve_size(size, term))
     end)
 
-    it("should evaluate custom functions when resolving size",function()
+    it("should evaluate custom functions when resolving size", function()
       local term = Terminal:new({ direction = "vertical" })
       local size1 = 20
       local size2 = function(_t)
@@ -227,7 +227,7 @@ describe("ToggleTerm tests:", function()
         end
         return 0
       end
-      assert.equal(ui._resolve_size(size2,term),size1)
+      assert.equal(ui._resolve_size(size2, term), size1)
     end)
 
     -- FIXME the height is passed in correctly but is returned as 15
