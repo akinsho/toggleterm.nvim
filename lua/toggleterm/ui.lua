@@ -185,6 +185,22 @@ local split_commands = {
   },
 }
 
+---Guess whether or not the window is a horizontal or vertical split
+---this only works if either of the two are full size
+function M.guess_direction()
+  -- current window is full height vertical split
+  -- NOTE: add one for tabline and one for status
+  local ui_lines = (vim.o.tabline ~= "" and 1 or 0) + (vim.o.laststatus ~= 0 and 1 or 0)
+  if api.nvim_win_get_height(0) + vim.o.cmdheight + ui_lines == vim.o.lines then
+    return "vertical"
+  end
+  -- current window is full width horizontal split
+  if api.nvim_win_get_width(0) == vim.o.columns then
+    return "horizontal"
+  end
+  return nil
+end
+
 --- @private
 --- @param size number|function
 --- @param term Terminal
