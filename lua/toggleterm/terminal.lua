@@ -9,8 +9,9 @@ local api = vim.api
 local fmt = string.format
 local fn = vim.fn
 
-local command_sep = (vim.fn.has("win32") == 1) and "&" or ";"
-local comment_sep = (vim.fn.has("win32") == 1) and "::" or "#"
+local is_windows = fn.has("win32") == 1
+local command_sep = is_windows and "&" or ";"
+local comment_sep = is_windows and "::" or "#"
 
 ---@type Terminal[]
 local terminals = {}
