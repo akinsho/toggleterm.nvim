@@ -86,7 +86,7 @@ local function smart_toggle(_, size, directory, direction)
       end
     end
     if not target then
-      return require('toggleterm.utils').echomsg("Couldn't find a terminal to close")
+      return require("toggleterm.utils").echomsg("Couldn't find a terminal to close")
     end
     target:close()
   end
@@ -131,7 +131,7 @@ function M.on_term_open()
         bufnr = api.nvim_get_current_buf(),
         window = api.nvim_get_current_win(),
         job_id = vim.b.terminal_job_id,
-        direction = require('toggleterm.ui').guess_direction()
+        direction = require("toggleterm.ui").guess_direction(),
       })
       :__resurrect()
   end
@@ -234,7 +234,9 @@ function M.setup(user_prefs)
     local is_bright = colors.is_bright_background()
 
     -- if background is light then darken the terminal a lot more to increase contrast
-    local factor = conf.shading_factor and type(conf.shading_factor) == "number" and conf.shading_factor
+    local factor = conf.shading_factor
+        and type(conf.shading_factor) == "number"
+        and conf.shading_factor
       or (is_bright and 3 or 1)
 
     local amount = factor * SHADING_AMOUNT
@@ -258,7 +260,7 @@ function M.setup(user_prefs)
       },
     })
   end
-  require('toggleterm.utils').create_augroups({ ToggleTerminal = autocommands })
+  require("toggleterm.utils").create_augroups({ ToggleTerminal = autocommands })
 end
 
 return M

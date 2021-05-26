@@ -144,9 +144,10 @@ end
 --- the filetype
 --- @param comparator function
 function M.find_open_windows(comparator)
-  comparator = comparator or function(buf)
-    return vim.bo[buf].filetype == constants.term_ft
-  end
+  comparator = comparator
+    or function(buf)
+      return vim.bo[buf].filetype == constants.term_ft
+    end
   local wins = api.nvim_list_wins()
   local is_open = false
   local term_wins = {}
@@ -213,10 +214,7 @@ function M._resolve_size(size, term)
   elseif term and type(size) == "function" then
     return size(term)
   end
-  utils.echomsg(
-    string.format('The input %s is not of type "number" or "function".', size),
-    "Error"
-  )
+  utils.echomsg(string.format('The input %s is not of type "number" or "function".', size), "Error")
 end
 
 --- @param size number

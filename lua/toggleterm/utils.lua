@@ -9,7 +9,7 @@ local fmt = string.format
 ---@param hl string
 function M.echomsg(msg, hl)
   hl = hl or "Title"
-  api.nvim_echo({{msg, hl}}, true, {})
+  api.nvim_echo({ { msg, hl } }, true, {})
 end
 
 --- Source: https://teukka.tech/luanvim.html
@@ -19,7 +19,7 @@ function M.create_augroups(definitions)
     vim.cmd("augroup " .. group_name)
     vim.cmd("autocmd!")
     for _, def in pairs(definition) do
-      local command = table.concat(vim.tbl_flatten {"autocmd", def}, " ")
+      local command = table.concat(vim.tbl_flatten({ "autocmd", def }), " ")
       vim.cmd(command)
     end
     vim.cmd("augroup END")
