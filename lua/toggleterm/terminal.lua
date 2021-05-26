@@ -217,6 +217,9 @@ local function __handle_exit(term)
     end
     if config.get("close_on_exit") then
       term:close()
+      if api.nvim_buf_is_loaded(term.bufnr) then
+        api.nvim_buf_delete(term.bufnr, { force = true })
+      end
     end
   end
 end
