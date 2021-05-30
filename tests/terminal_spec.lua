@@ -1,3 +1,5 @@
+_G.IS_TEST = true
+
 local api = vim.api
 local fn = vim.fn
 local fmt = string.format
@@ -29,7 +31,7 @@ describe("ToggleTerm tests:", function()
   vim.o.hidden = true
 
   after_each(function()
-    require("toggleterm.terminal").reset()
+    require("toggleterm.terminal").__reset()
   end)
 
   describe("toggling terminals - ", function()
@@ -40,6 +42,16 @@ describe("ToggleTerm tests:", function()
       assert.are.same(test1.id, 1)
       assert.are.same(test2.id, 2)
       assert.are.same(test3.id, 3)
+    end)
+
+    it('should assign the next id filling in any missing gaps', function()
+      t.__set_ids {1, 2, 5}
+      local id = t.__next_id()
+      assert.equal(id, 3)
+      id = t.__next_id()
+      assert.equal(id, 4)
+      id = t.__next_id()
+      assert.equal(id, 6)
     end)
 
     it("should get terminals as a list", function()

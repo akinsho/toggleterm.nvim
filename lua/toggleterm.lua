@@ -7,13 +7,6 @@ local colors = require("toggleterm.colors")
 
 local terms = require("toggleterm.terminal")
 
----@type Terminal
-local Terminal = terms.Terminal
----@type fun(): Terminal[]
-local get_all = terms.get_all
----@type fun(id: integer, directory: string, direction: string): Terminal
-local get_term = terms.get_or_create_term
-
 local term_ft = constants.term_ft
 local SHADING_AMOUNT = constants.shading_amount
 -----------------------------------------------------------
@@ -73,9 +66,10 @@ end
 local function smart_toggle(_, size, directory, direction)
   local ui = require("toggleterm.ui")
   if not ui.find_open_windows() then
-    get_term(1, directory, direction):open(size)
+    local id = terms.recent_id()
+    terms.get_or_create_term(id, directory, direction):open(size)
   else
-    local terminals = get_all()
+    local terminals = terms.get_all()
     local target
     -- count backwards from the end of the list
     for i = #terminals, 1, -1 do
@@ -97,7 +91,7 @@ end
 --- @param directory string
 --- @param direction string
 local function toggle_nth_term(num, size, directory, direction)
-  local term = get_term(num, directory, direction)
+  local term = terms.get_or_create_term(num, directory, direction)
   require("toggleterm.ui").update_origin_window(term.window)
   term:toggle(size)
 end
@@ -125,7 +119,7 @@ end
 function M.on_term_open()
   local id, term = terms.identify()
   if not term then
-    Terminal
+    terms.Terminal
       :new({
         id = id,
         bufnr = api.nvim_get_current_buf(),
@@ -170,7 +164,7 @@ function M.exec(cmd, num, size, dir)
   end
   -- count
   num = num < 1 and 1 or num
-  local term, created = get_term(num, dir)
+  local term, created = terms.get_or_create_term(num, dir)
   if not term:is_open() then
     term:open(size, created)
   end
@@ -234,9 +228,7 @@ function M.setup(user_prefs)
     local is_bright = colors.is_bright_background()
 
     -- if background is light then darken the terminal a lot more to increase contrast
-    local factor = conf.shading_factor
-        and type(conf.shading_factor) == "number"
-        and conf.shading_factor
+    local factor = conf.shading_factor and type(conf.shading_factor) == "number" and conf.shading_factor
       or (is_bright and 3 or 1)
 
     local amount = factor * SHADING_AMOUNT
