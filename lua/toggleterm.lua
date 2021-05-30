@@ -65,11 +65,12 @@ end
 ---@param direction string
 local function smart_toggle(_, size, directory, direction)
   local ui = require("toggleterm.ui")
+  local terminals = terms.get_all()
   if not ui.find_open_windows() then
-    local id = terms.recent_id()
+    -- Re-open the first terminal toggled
+    local id = terminals[1] and terminals[1].id or 1
     terms.get_or_create_term(id, directory, direction):open(size)
   else
-    local terminals = terms.get_all()
     local target
     -- count backwards from the end of the list
     for i = #terminals, 1, -1 do
