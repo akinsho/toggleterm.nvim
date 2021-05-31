@@ -203,6 +203,22 @@ describe("ToggleTerm tests:", function()
     end)
   end)
 
+  describe("terminal behaviour", function()
+    it("should respect insert_mappings in terminal mode", function()
+      toggleterm.setup({ open_mapping = [[<space>t]], insert_mappings = false })
+      t.Terminal:new():toggle()
+      local result = vim.fn.mapcheck("<space>t", "t")
+      assert.equal("", result)
+    end)
+
+    it("should map in terminal mode if insert_mappings is true", function()
+      toggleterm.setup({ open_mapping = [[<space>t]], insert_mappings = true })
+      t.Terminal:new():toggle()
+      local result = vim.fn.mapcheck("<space>t", "t")
+      assert.is_true(#result > 0)
+    end)
+  end)
+
   describe("layout options - ", function()
     before_each(function()
       toggleterm.setup({
