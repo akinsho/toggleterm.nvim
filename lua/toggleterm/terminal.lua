@@ -182,10 +182,9 @@ function Terminal:close()
     ui.close(self)
     ui.stopinsert()
   else
-    local msg = self.id and fmt(
-      "Failed to close window: win id - %s does not exist",
-      vim.inspect(self.window)
-    ) or "Failed to close window: invalid term number"
+    local msg = self.id
+        and fmt("Failed to close window: win id - %s does not exist", vim.inspect(self.window))
+      or "Failed to close window: invalid term number"
     utils.echomsg(msg, "Error")
   end
   ui.update_origin_window(self.window)

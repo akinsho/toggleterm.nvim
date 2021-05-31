@@ -229,7 +229,9 @@ function M.setup(user_prefs)
     local is_bright = colors.is_bright_background()
 
     -- if background is light then darken the terminal a lot more to increase contrast
-    local factor = conf.shading_factor and type(conf.shading_factor) == "number" and conf.shading_factor
+    local factor = conf.shading_factor
+        and type(conf.shading_factor) == "number"
+        and conf.shading_factor
       or (is_bright and 3 or 1)
 
     local amount = factor * SHADING_AMOUNT
