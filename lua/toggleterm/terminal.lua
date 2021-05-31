@@ -35,8 +35,33 @@ local terminals = {}
 --- @field on_close fun(term:Terminal)
 local Terminal = {}
 
+---@type number[]
+local ids = {}
+
+---@private
+--- Get the next available id based on the next number in the sequence that
+--- hasn't already been allocated e.g. in a list of {1,2,5,6} the next id should
+--- be 3 then 4 then 7
+---@return integer
 local function next_id()
-  return #terminals == 0 and 1 or #terminals + 1
+  local next_to_use = #ids + 1
+  local next_index = #ids + 1
+  for index, id in ipairs(ids) do
+    if id ~= index then
+      next_to_use = index
+      next_index = index
+    end
+  end
+  table.insert(ids, next_index, next_to_use)
+  return next_to_use
+end
+
+--- remove the passed id from the list of available ids
+---@param num number
+local function decrement_id(num)
+  vim.tbl_filter(function(id)
+    return id == num
+  end, ids)
 end
 
 --- @param bufnr number
@@ -100,13 +125,14 @@ function Terminal:new(term)
   term = term or {}
   --- If we try to create a new terminal, but the id is already
   --- taken, return the terminal with the containing id
-  if term.id and terminals[term.id] then
-    return terminals[term.id]
+  local id = term.count or term.id
+  if id and terminals[id] then
+    return terminals[id]
   end
   local conf = config.get()
   self.__index = self
   term.direction = term.direction or conf.direction
-  term.id = term.count or term.id or next_id()
+  term.id = id or next_id()
   term.hidden = term.hidden or false
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
   -- Add the newly created terminal to the list of all terminals
@@ -156,9 +182,10 @@ function Terminal:close()
     ui.close(self)
     ui.stopinsert()
   else
-    local msg = self.id
-        and fmt("Failed to close window: win id - %s does not exist", vim.inspect(self.window))
-      or "Failed to close window: invalid term number"
+    local msg = self.id and fmt(
+      "Failed to close window: win id - %s does not exist",
+      vim.inspect(self.window)
+    ) or "Failed to close window: invalid term number"
     utils.echomsg(msg, "Error")
   end
   ui.update_origin_window(self.window)
@@ -320,6 +347,7 @@ end
 --- @param num string
 function M.delete(num)
   if terminals[num] then
+    decrement_id(num)
     terminals[num] = nil
   end
 end
@@ -334,7 +362,7 @@ function M.get_or_create_term(num, dir, direction)
   if term then
     return term, false
   end
-  return Terminal:new({ id = next_id(), dir = dir, direction = direction }), true
+  return Terminal:new({ dir = dir, direction = direction }), true
 end
 
 ---Get a single terminal by id, unless it is hidden
@@ -361,11 +389,23 @@ function M.get_all(include_hidden)
   return result
 end
 
-function M.reset()
-  for idx, term in pairs(terminals) do
-    term:shutdown()
-    terminals[idx] = nil
+if _G.IS_TEST then
+  ---@private
+  function M.__reset()
+    for _, term in pairs(terminals) do
+      term:shutdown()
+      M.delete(term.id)
+    end
+    ids = {}
   end
+
+  ---@private
+  ---@param tbl number[]
+  function M.__set_ids(tbl)
+    ids = tbl
+  end
+
+  M.__next_id = next_id
 end
 
 M.Terminal = Terminal
