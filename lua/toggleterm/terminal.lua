@@ -64,12 +64,21 @@ local function decrement_id(num)
   end, ids)
 end
 
+---Get an opened (valid) toggle terminal by id, defaults to the first opened
+---@param position number
+---@return nil
+function M.get_toggled_id(position)
+  position = position or 1
+  local t = M.get_all()
+  return t[position] and t[position].id or nil
+end
+
 --- @param bufnr number
 local function setup_buffer_mappings(bufnr)
   local conf = config.get()
   local mapping = conf.open_mapping
   if mapping and conf.insert_mappings then
-    api.nvim_buf_set_keymap(bufnr, "t", mapping, [[<C-\><C-n>:exe v:count1 . "ToggleTerm"<CR>]], {
+    api.nvim_buf_set_keymap(bufnr, "t", mapping, [[<C-\><C-n>:execute v:count . "ToggleTerm"<CR>]], {
       silent = true,
       noremap = true,
     })

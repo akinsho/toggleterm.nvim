@@ -42,15 +42,15 @@ end
 local function setup_global_mappings()
   local conf = require("toggleterm.config").get()
   local mapping = conf.open_mapping
-  -- v:count1 defaults the count to 1 but if a count is passed in uses that instead
-  -- <c-u> allows passing along the count
+  -- v:count defaults the count to 0 but if a count is passed in uses that instead
+  -- <c-u> clears the commandline first
   if mapping then
-    api.nvim_set_keymap("n", mapping, ':<c-u>exe v:count1 . "ToggleTerm"<CR>', {
+    api.nvim_set_keymap("n", mapping, ':<c-u>execute v:count . "ToggleTerm"<CR>', {
       silent = true,
       noremap = true,
     })
     if conf.insert_mappings then
-      api.nvim_set_keymap("i", mapping, '<Esc>:<c-u>exe v:count1 . "ToggleTerm"<CR>', {
+      api.nvim_set_keymap("i", mapping, '<Esc>:<c-u>execute v:count . "ToggleTerm"<CR>', {
         silent = true,
         noremap = true,
       })
@@ -68,8 +68,7 @@ local function smart_toggle(_, size, directory, direction)
   local terminals = terms.get_all()
   if not ui.find_open_windows() then
     -- Re-open the first terminal toggled
-    local id = terminals[1] and terminals[1].id or 1
-    terms.get_or_create_term(id, directory, direction):open(size)
+    terms.get_or_create_term(terms.get_toggled_id(), directory, direction):open(size)
   else
     local target
     -- count backwards from the end of the list
@@ -164,7 +163,7 @@ function M.exec(cmd, num, size, dir)
     dir = fn.expand(dir)
   end
   -- count
-  num = num < 1 and 1 or num
+  num = num >= 1 and num or terms.get_toggled_id()
   local term, created = terms.get_or_create_term(num, dir)
   if not term:is_open() then
     term:open(size, created)
@@ -202,7 +201,7 @@ end
 function M.toggle(count, size, dir, direction)
   vim.validate({ count = { count, "number", true }, size = { size, "number", true } })
   -- TODO this should toggle the specified term if any count is passed in
-  if count > 1 then
+  if count >= 1 then
     toggle_nth_term(count, size, dir, direction)
   else
     smart_toggle(count, size, dir, direction)

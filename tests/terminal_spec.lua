@@ -44,8 +44,8 @@ describe("ToggleTerm tests:", function()
       assert.are.same(test3.id, 3)
     end)
 
-    it('should assign the next id filling in any missing gaps', function()
-      t.__set_ids {1, 2, 5}
+    it("should assign the next id filling in any missing gaps", function()
+      t.__set_ids({ 1, 2, 5 })
       local id = t.__next_id()
       assert.equal(id, 3)
       id = t.__next_id()

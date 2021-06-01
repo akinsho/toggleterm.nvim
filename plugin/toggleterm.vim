@@ -8,6 +8,6 @@ endif
 "--------------------------------------------------------------------------------
 " Commands
 "--------------------------------------------------------------------------------
-" count defaults to 1
-command! -count=1 -complete=shellcmd -nargs=* TermExec lua require'toggleterm'.exec_command(<q-args>, <count>)
-command! -count=1 -nargs=* ToggleTerm lua require'toggleterm'.toggle_command(<q-args>, <count>)
+" Count is 0 by default
+command! -count -complete=shellcmd -nargs=* TermExec lua require'toggleterm'.exec_command(<q-args>, <count>)
+command! -count -nargs=* ToggleTerm lua require'toggleterm'.toggle_command(<q-args>, <count>)
