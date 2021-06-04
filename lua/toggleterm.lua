@@ -208,6 +208,28 @@ function M.toggle(count, size, dir, direction)
   end
 end
 
+---@alias command '"close"' | '"open"'
+
+---Close or Open all toggle terms
+---@param command command
+function M.toggle_all(command)
+  if command ~= "close" and command ~= "open" then
+    return
+  end
+  for _, term in pairs(terms.get_all()) do
+    local is_open = term:is_open()
+    if command == "close" then
+      if is_open then
+        term:close()
+      end
+    else
+      if not is_open then
+        term:open()
+      end
+    end
+  end
+end
+
 function M.setup(user_prefs)
   local conf = require("toggleterm.config").set(user_prefs)
   setup_global_mappings()
@@ -228,9 +250,7 @@ function M.setup(user_prefs)
     local is_bright = colors.is_bright_background()
 
     -- if background is light then darken the terminal a lot more to increase contrast
-    local factor = conf.shading_factor
-        and type(conf.shading_factor) == "number"
-        and conf.shading_factor
+    local factor = conf.shading_factor and type(conf.shading_factor) == "number" and conf.shading_factor
       or (is_bright and 3 or 1)
 
     local amount = factor * SHADING_AMOUNT
