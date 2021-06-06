@@ -11,3 +11,5 @@ endif
 " Count is 0 by default
 command! -count -complete=shellcmd -nargs=* TermExec lua require'toggleterm'.exec_command(<q-args>, <count>)
 command! -count -nargs=* ToggleTerm lua require'toggleterm'.toggle_command(<q-args>, <count>)
+command! ToggleTermCloseAll lua require'toggleterm'.toggle_all("close")
+command! ToggleTermOpenAll lua require'toggleterm'.toggle_all("open")

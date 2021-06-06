@@ -121,13 +121,40 @@ describe("ToggleTerm tests:", function()
       assert.is_true(ui.term_has_open_win(term))
     end)
 
-    --- TODO: this test fails and uses vim.wait as a workaround because
-    --- we need to wait for the terminal to execute the command and close first
-    pending("should close on exit", function()
+    it("should open a hidden terminal and a visible one", function()
+      local hidden = Terminal:new({ hidden = true }):toggle()
+      local visible = Terminal:new():toggle()
+      hidden:toggle()
+      visible:toggle()
+    end)
+
+    it('should close all open terminals using toggle all', function()
+      local test1 = Terminal:new():toggle()
+      local test2 = Terminal:new():toggle()
+      toggleterm.toggle_all('close')
+
+      assert.is_false(ui.term_has_open_win(test1))
+      assert.is_false(ui.term_has_open_win(test2))
+    end)
+
+    it('should open all open terminals using toggle all', function()
+      local test1 = Terminal:new():toggle()
+      local test2 = Terminal:new():toggle()
+      toggleterm.toggle_all('close')
+
+      assert.is_false(ui.term_has_open_win(test1))
+      assert.is_false(ui.term_has_open_win(test2))
+
+      toggleterm.toggle_all('open')
+      assert.is_true(ui.term_has_open_win(test1))
+      assert.is_true(ui.term_has_open_win(test2))
+    end)
+
+    it("should close on exit", function()
       local term = Terminal:new():toggle()
       assert.is_true(ui.term_has_open_win(term))
       term:send("exit")
-      vim.wait(1000)
+      vim.wait(1000, function() end)
       assert.is_false(ui.term_has_open_win(term))
     end)
   end)
