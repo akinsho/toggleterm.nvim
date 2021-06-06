@@ -296,6 +296,7 @@ function M.open_float(term)
     vim.wo[win].winblend = opts.winblend
   end
   M.set_options(term.window, term.bufnr, term)
+  vim.cmd("autocmd! WinLeave <buffer> close!")
 end
 
 ---Close given terminal's ui
