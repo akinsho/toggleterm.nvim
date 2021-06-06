@@ -45,6 +45,7 @@ function M.set_options(win, buf, term)
   end
   vim.bo[buf].buflisted = false
   vim.bo[buf].filetype = constants.term_ft
+  vim.wo[win].signcolumn = "no"
 
   local conf = require("toggleterm.config").get()
   if conf.hide_numbers then
