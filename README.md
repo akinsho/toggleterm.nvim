@@ -154,6 +154,10 @@ specified height.
 _NOTE_: If the terminal has already been opened at a particular directory it will
 remain in that directory.
 
+### `ToggleTermOpenAll` and `ToggleTermCloseAll`
+These commands allow you to open all the previously toggled terminal in one go
+or close all the currently open terminals at once.
+
 ### `TermExec`
 
 This command allows you to open a terminal with a specific action.
