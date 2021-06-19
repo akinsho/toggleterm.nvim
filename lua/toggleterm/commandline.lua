@@ -21,6 +21,11 @@ function M.parse(args)
       -- 1. extract the quoted command
       local pattern = "(%S+)=" .. quotes
       for key, value in args:gmatch(pattern) do
+        -- Check if the current OS is Windows so we can determine if +shellslash
+        -- exists and if it exists, then determine if it is enabled. In that way,
+        -- we can determine if we should match the value with single or double quotes.
+        quotes = jit.os ~= "Windows" and p.single or vim.g.shellslash == "yes" and quotes or p.single
+
         value = fn.shellescape(value)
         result[vim.trim(key)] = fn.expandcmd(value:match(quotes))
       end
