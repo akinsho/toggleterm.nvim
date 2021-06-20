@@ -163,8 +163,9 @@ function Terminal:is_float()
 end
 
 function Terminal:is_split()
-  return (self.direction == "vertical" or self.direction == "horizontal")
-    and not ui.is_float(self.window)
+  return (self.direction == "vertical" or self.direction == "horizontal") and not ui.is_float(
+    self.window
+  )
 end
 
 function Terminal:resize(size)
@@ -193,7 +194,10 @@ function Terminal:close()
     ui.stopinsert()
   else
     local msg = self.id
-        and fmt("Failed to close window: win id - %s does not exist", vim.inspect(self.window))
+        and fmt(
+          "Failed to close window: win id - %s does not exist",
+          vim.inspect(self.window)
+        )
       or "Failed to close window: invalid term number"
     utils.echomsg(msg, "Error")
   end

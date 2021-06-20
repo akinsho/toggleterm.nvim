@@ -24,7 +24,9 @@ function M.parse(args)
         -- Check if the current OS is Windows so we can determine if +shellslash
         -- exists and if it exists, then determine if it is enabled. In that way,
         -- we can determine if we should match the value with single or double quotes.
-        quotes = jit.os ~= "Windows" and p.single or vim.g.shellslash == "yes" and quotes or p.single
+        quotes = jit.os ~= "Windows" and p.single
+          or vim.g.shellslash == "yes" and quotes
+          or p.single
 
         value = fn.shellescape(value)
         result[vim.trim(key)] = fn.expandcmd(value:match(quotes))
