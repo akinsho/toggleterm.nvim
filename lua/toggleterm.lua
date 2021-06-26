@@ -43,14 +43,13 @@ local function setup_global_mappings()
   local conf = require("toggleterm.config").get()
   local mapping = conf.open_mapping
   -- v:count defaults the count to 0 but if a count is passed in uses that instead
-  -- <c-u> clears the commandline first
   if mapping then
-    api.nvim_set_keymap("n", mapping, ':<c-u>execute v:count . "ToggleTerm"<CR>', {
+    api.nvim_set_keymap("n", mapping, '<Cmd>execute v:count . "ToggleTerm"<CR>', {
       silent = true,
       noremap = true,
     })
     if conf.insert_mappings then
-      api.nvim_set_keymap("i", mapping, '<Esc>:<c-u>execute v:count . "ToggleTerm"<CR>', {
+      api.nvim_set_keymap("i", mapping, '<Esc><Cmd>execute v:count . "ToggleTerm"<CR>', {
         silent = true,
         noremap = true,
       })
