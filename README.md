@@ -29,7 +29,7 @@ A _neovim_ plugin to persist and toggle multiple terminals during an editing ses
 
 ## Requirements
 
-This plugin only works in *Neovim* and requires a *recent* **nvim nightly**.
+This plugin only works in *Neovim 0.5* or newer.
 
 ## Installation
 
