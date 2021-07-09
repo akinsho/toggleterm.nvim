@@ -59,8 +59,8 @@ end
 --- remove the passed id from the list of available ids
 ---@param num number
 local function decrement_id(num)
-  vim.tbl_filter(function(id)
-    return id == num
+  ids = vim.tbl_filter(function(id)
+    return id ~= num
   end, ids)
 end
 
