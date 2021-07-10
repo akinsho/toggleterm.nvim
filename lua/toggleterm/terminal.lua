@@ -312,7 +312,9 @@ end
 ---@param size number
 ---@param is_new boolean
 function Terminal:open(size, is_new)
-  self.dir = fn.expand(self.dir)
+  if self.dir then
+    self.dir = fn.expand(self.dir)
+  end
   ui.set_origin_window()
   if fn.bufexists(self.bufnr) == 0 then
     opener(size, self)
