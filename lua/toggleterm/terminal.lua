@@ -122,10 +122,11 @@ local function _get_dir(dir)
   if dir == "git_dir" then
     dir = require("toggleterm.utils").git_dir()
   end
-  if not dir then
-    dir = vim.loop.cwd()
+  if dir then
+    return vim.fn.expand(dir)
+  else
+    return vim.loop.cwd()
   end
-  return dir
 end
 
 ---Create a new terminal object
@@ -242,6 +243,7 @@ end
 ---Update the directory of an already opened terminal
 ---@param dir string
 function Terminal:change_dir(dir)
+  dir = _get_dir(dir)
   if self.dir ~= dir then
     self:send({ fmt("cd %s", dir), "clear" })
   end
@@ -296,14 +298,14 @@ end
 ---@param size number
 ---@param term table
 local function opener(size, term)
-  local dir = term.direction
+  local direction = term.direction
   if term:is_split() then
     ui.open_split(size, term)
-  elseif dir == "window" then
+  elseif direction == "window" then
     ui.open_window(term)
-  elseif dir == "tab" then
+  elseif direction == "tab" then
     ui.open_tab(term)
-  elseif dir == "float" then
+  elseif direction == "float" then
     ui.open_float(term)
   end
 end
@@ -312,9 +314,7 @@ end
 ---@param size number
 ---@param is_new boolean
 function Terminal:open(size, is_new)
-  if self.dir then
-    self.dir = fn.expand(self.dir)
-  end
+  self.dir = _get_dir(self.dir)
   ui.set_origin_window()
   if fn.bufexists(self.bufnr) == 0 then
     opener(size, self)

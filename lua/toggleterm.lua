@@ -158,9 +158,6 @@ function M.exec(cmd, num, size, dir)
     size = { size, "number", true },
     dir = { dir, "string", true },
   })
-  if dir then
-    dir = fn.expand(dir)
-  end
   -- count
   num = num >= 1 and num or terms.get_toggled_id()
   local term, created = terms.get_or_create_term(num, dir)
