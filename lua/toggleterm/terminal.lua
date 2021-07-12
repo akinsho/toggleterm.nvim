@@ -164,9 +164,8 @@ function Terminal:is_float()
 end
 
 function Terminal:is_split()
-  return (self.direction == "vertical" or self.direction == "horizontal") and not ui.is_float(
-    self.window
-  )
+  return (self.direction == "vertical" or self.direction == "horizontal")
+    and not ui.is_float(self.window)
 end
 
 function Terminal:resize(size)
