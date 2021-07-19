@@ -186,22 +186,14 @@ end
 function Terminal:close()
   ui.update_origin_window(self.window)
 
-  if ui.try_open(self.window) then
-    if self.on_close then
-      self:on_close()
-    end
-    ui.close(self)
-    ui.stopinsert()
-  else
-    local msg = self.id
-        and fmt(
-          "Failed to close window: win id - %s does not exist",
-          vim.inspect(self.window)
-        )
-      or "Failed to close window: invalid term number"
-    utils.echomsg(msg, "Error")
+  if self.on_close then
+    self:on_close()
   end
-  ui.update_origin_window(self.window)
+  local ok = pcall(ui.close, self)
+  if ok then
+    ui.stopinsert()
+    ui.update_origin_window(self.window)
+  end
 end
 
 function Terminal:shutdown()
