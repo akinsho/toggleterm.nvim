@@ -251,8 +251,8 @@ end
 ---Close terminal window
 ---@param term Terminal
 local function close_split(term)
-  M.save_window_size()
   if api.nvim_win_is_valid(term.window) then
+    M.save_window_size()
     api.nvim_win_close(term.window, true)
   end
   if api.nvim_win_is_valid(origin_window) then
