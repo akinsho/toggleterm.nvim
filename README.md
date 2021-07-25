@@ -121,7 +121,7 @@ alternatively you can do this manually (not recommended but, your prerogative)
 let g:toggleterm_terminal_mapping = '<C-t>'
 " or manually...
 autocmd TermEnter term://*toggleterm#*
-      \ tnoremap <silent><c-t> <C-\><C-n>:exe v:count1 . "ToggleTerm"<CR>
+      \ tnoremap <silent><c-t> <Cmd>exe v:count1 . "ToggleTerm"<CR>
 
 " By applying the mappings this way you can pass a count to your
 " mapping to open a specific window.
