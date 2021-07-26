@@ -143,9 +143,10 @@ function M.exec_command(args, count)
     cmd = { parsed.cmd, "string" },
     size = { parsed.size, "number", true },
     dir = { parsed.dir, "string", true },
-    direction = { parsed.direction, "string", true }
+    direction = { parsed.direction, "string", true },
+    go_back = { parsed.go_back, "boolean", true },
   })
-  M.exec(parsed.cmd, count, parsed.size, parsed.dir, parsed.direction)
+  M.exec(parsed.cmd, count, parsed.size, parsed.dir, parsed.direction, parsed.go_back)
 end
 
 --- @param cmd string
@@ -153,13 +154,15 @@ end
 --- @param size number
 --- @param dir string
 --- @param direction string
-function M.exec(cmd, num, size, dir, direction)
+--- @param go_back boolean whether or not to return to original window
+function M.exec(cmd, num, size, dir, direction, go_back)
   vim.validate({
     cmd = { cmd, "string" },
     num = { num, "number" },
     size = { size, "number", true },
     dir = { dir, "string", true },
-    direction = { direction, "string", true }
+    direction = { direction, "string", true },
+    go_back = { go_back, "boolean", true },
   })
   -- count
   num = num >= 1 and num or terms.get_toggled_id()
@@ -170,7 +173,14 @@ function M.exec(cmd, num, size, dir, direction)
   if not created and dir then
     term:change_dir(dir)
   end
-  term:send(cmd, true)
+  -- going back from floating window closes it
+  if term:is_float() then
+    go_back = false
+  end
+  if go_back == nil then
+    go_back = true
+  end
+  term:send(cmd, go_back)
 end
 
 function M.toggle_command(args, count)
