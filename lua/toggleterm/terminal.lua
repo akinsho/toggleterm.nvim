@@ -27,6 +27,7 @@ local terminals = {}
 --- @field name string the name of the terminal
 --- @field count number the count that triggers that specific terminal
 --- @field hidden boolean whether or not to include this terminal in the terminals list
+--- @field close_on_exit boolean whether or not to close the terminal window when the process exits
 --- @field float_opts table<string, any>
 --- @field on_stdout fun(job: number, exit_code: number, type: string)
 --- @field on_stderr fun(job: number, data: string[], name: string)
@@ -146,6 +147,9 @@ function Terminal:new(term)
   term.id = id or next_id()
   term.hidden = term.hidden or false
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
+  if term.close_on_exit == nil then
+    term.close_on_exit = conf.close_on_exit
+  end
   -- Add the newly created terminal to the list of all terminals
   return setmetatable(term, self)
 end
@@ -243,7 +247,7 @@ local function __handle_exit(term)
     if term.on_exit then
       term:on_exit(...)
     end
-    if config.get("close_on_exit") then
+    if term.close_on_exit then
       term:close()
       if api.nvim_buf_is_loaded(term.bufnr) then
         api.nvim_buf_delete(term.bufnr, { force = true })
