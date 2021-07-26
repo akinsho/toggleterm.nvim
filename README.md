@@ -219,6 +219,7 @@ Terminal:new {
   cmd = string -- command to execute when creating the terminal e.g. 'top'
   direction = string -- the layout for the terminal, same as the main config options
   dir = string -- the directory for the terminal
+  close_on_exit = bool -- close the terminal window when the process exits
   on_open = fun(t: Terminal) -- function to run when the terminal opens
   on_close = fun(t: Terminal) -- function to run when the terminal closes
   -- callbacks for processing the output
