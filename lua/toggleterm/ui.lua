@@ -7,13 +7,31 @@ local fn = vim.fn
 local fmt = string.format
 local api = vim.api
 
-local persistent = {}
 local origin_window
+local persistent = {}
 
-function M.save_window_size()
-  -- Save the size of the split before it is hidden
-  persistent.width = vim.fn.winwidth(0)
-  persistent.height = vim.fn.winheight(0)
+--- Save the size of a split window before it is hidden
+--- @param direction string
+--- @param window number
+function M.save_window_size(direction, window)
+  if direction == "horizontal" then
+    persistent.horizontal = api.nvim_win_get_height(window)
+  elseif direction == "vertical" then
+    persistent.vertical = api.nvim_win_get_width(window)
+  end
+end
+
+--- Explicitly set the persistent size of a direction
+--- @param direction string
+--- @param size number
+function M.save_direction_size(direction, size)
+  persistent[direction] = size
+end
+
+--- @param direction string
+--- @return boolean
+function M.has_saved_size(direction)
+  return persistent[direction] ~= nil
 end
 
 --- Get the size of the split. Order of priority is as follows:
@@ -24,15 +42,14 @@ end
 --- If `config.persist_size = false` then option `2` in the
 --- list is skipped.
 --- @param size number
-function M.get_size(size)
+--- @param direction string
+function M.get_size(size, direction)
   local config = require("toggleterm.config").get()
   local valid_size = size ~= nil and size > 0
   if not config.persist_size then
     return valid_size and size or config.size
   end
-
-  local psize = config.direction == "horizontal" and persistent.height or persistent.width
-  return valid_size and size or psize or config.size
+  return valid_size and size or persistent[direction] or config.size
 end
 
 --- Add terminal buffer specific options
@@ -173,15 +190,13 @@ end
 
 local split_commands = {
   horizontal = {
-    existing = "vsplit",
-    new = "split",
-    position = "wincmd J",
+    existing = "rightbelow vsplit",
+    new = "botright split",
     resize = "resize",
   },
   vertical = {
-    existing = "split",
-    new = "vsplit",
-    position = "wincmd L",
+    existing = "rightbelow split",
+    new = "botright vsplit",
     resize = "vertical resize",
   },
 }
@@ -222,18 +237,21 @@ end
 function M.open_split(size, term)
   local has_open, win_ids = M.find_open_windows()
   local commands = split_commands[term.direction]
+  local persist_size = require("toggleterm.config").get("persist_size")
 
-  size = M._resolve_size(M.get_size(size), term)
   if has_open then
     -- we need to be in the terminal window most recently opened
-    -- in order to split to the right of it
-    api.nvim_set_current_win(win_ids[#win_ids])
+    -- in order to split it
+    local split_win = win_ids[#win_ids]
+    if persist_size then
+      M.save_window_size(term.direction, split_win)
+    end
+    api.nvim_set_current_win(split_win)
     vim.cmd(commands.existing)
   else
-    vim.cmd(size .. commands.new)
-    -- move horizontal split to the bottom
-    vim.cmd(commands.position)
+    vim.cmd(commands.new)
   end
+
   M.resize_split(term, size)
   create_term_buf_if_needed(term)
 end
@@ -252,7 +270,10 @@ end
 ---@param term Terminal
 local function close_split(term)
   if api.nvim_win_is_valid(term.window) then
-    M.save_window_size()
+    local persist_size = require("toggleterm.config").get("persist_size")
+    if persist_size then
+      M.save_window_size(term.direction, term.window)
+    end
     api.nvim_win_close(term.window, true)
   end
   if api.nvim_win_is_valid(origin_window) then
@@ -296,7 +317,6 @@ function M.open_float(term)
     vim.wo[win].winblend = opts.winblend
   end
   M.set_options(term.window, term.bufnr, term)
-  vim.cmd("autocmd! WinLeave <buffer> close!")
 end
 
 ---Close given terminal's ui
@@ -317,10 +337,11 @@ end
 ---@param term Terminal
 ---@param size number
 function M.resize_split(term, size)
-  if term:is_split() then
-    size = M._resolve_size(size or M.get_size(), term)
-    vim.cmd(split_commands[term.direction].resize .. " " .. size)
+  size = M._resolve_size(M.get_size(size, term.direction), term)
+  if require("toggleterm.config").get("persist_size") then
+    M.save_direction_size(term.direction, size)
   end
+  vim.cmd(split_commands[term.direction].resize .. " " .. size)
 end
 
 ---Determine if a window is a float

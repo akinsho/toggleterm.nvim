@@ -110,8 +110,20 @@ end
 function M.handle_term_enter()
   local _, term = terms.identify()
   if term then
-    term:resize()
+    local ui = require("toggleterm.ui")
+    local persist_size = require("toggleterm.config").get("persist_size")
+    if term:is_split() and (not persist_size or not ui.has_saved_size(term.direction)) then
+      -- On session resurrect, neovim may incorrectly resize splits after TermOpen
+      require("toggleterm.ui").resize_split(term)
+    end
     close_last_window(term)
+  end
+end
+
+function M.handle_term_leave()
+  local _, term = terms.identify()
+  if term and term:is_float() then
+    term:close()
   end
 end
 
@@ -244,10 +256,14 @@ function M.setup(user_prefs)
   setup_global_mappings()
   local autocommands = {
     {
-      "BufEnter",
+      "WinEnter",
       "term://*toggleterm#*",
-      "nested",
       "lua require'toggleterm'.handle_term_enter()",
+    },
+    {
+      "WinLeave",
+      "term://*toggleterm#*",
+      "lua require'toggleterm'.handle_term_leave()",
     },
     {
       "TermOpen",

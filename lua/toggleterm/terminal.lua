@@ -106,13 +106,7 @@ local function setup_buffer_autocommands(term)
       "startinsert!",
     })
   end
-  if conf.persist_size and term:is_split() then
-    table.insert(commands, {
-      "CursorHold",
-      fmt("<buffer=%d>", term.bufnr),
-      "lua require'toggleterm.ui'.save_window_size()",
-    })
-  end
+
   utils.create_augroups({ ["ToggleTerm" .. term.bufnr] = commands })
 end
 
@@ -289,7 +283,9 @@ end
 function Terminal:__resurrect()
   self:__add()
   ui.set_options(self.window, self.bufnr, self)
-  self:resize()
+  if self:is_split() and (not config.get("persist_size") or ui.has_saved_size(self.direction)) then
+    ui.resize_split(self)
+  end
 end
 
 ---Open a terminal in a type of window i.e. a split,full window or tab
