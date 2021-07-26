@@ -240,6 +240,13 @@ function Terminal:change_dir(dir)
   end
 end
 
+---Update the direction of an already opened terminal
+---@param direction string
+function Terminal:change_direction(direction)
+  self.direction = direction
+  self.window = nil
+end
+
 --- Handle when a terminal process exits
 ---@param term Terminal
 local function __handle_exit(term)
@@ -289,32 +296,49 @@ end
 ---@param size number
 ---@param term table
 local function opener(size, term)
-  local direction = term.direction
   if term:is_split() then
     ui.open_split(size, term)
-  elseif direction == "window" then
-    ui.open_window(term)
-  elseif direction == "tab" then
-    ui.open_tab(term)
-  elseif direction == "float" then
-    ui.open_float(term)
+    return true
   end
+  local direction = term.direction
+  if direction == "window" then
+    ui.open_window(term)
+    return true
+  end
+  if direction == "tab" then
+    ui.open_tab(term)
+    return true
+  end
+  if direction == "float" then
+    ui.open_float(term)
+    return true
+  end
+  utils.echomsg("Invalid direction", "Error")
+  return false
 end
 
 ---Open a terminal window
 ---@param size number
+---@param direction string
 ---@param is_new boolean
-function Terminal:open(size, is_new)
+function Terminal:open(size, direction, is_new)
   self.dir = _get_dir(self.dir)
   ui.set_origin_window()
+  if direction then
+    self:change_direction(direction)
+  end
   if fn.bufexists(self.bufnr) == 0 then
-    opener(size, self)
+    if not opener(size, self) then
+      return
+    end
     self:__add()
     self:__spawn()
     setup_buffer_autocommands(self)
     setup_buffer_mappings(self.bufnr)
   else
-    opener(size, self)
+    if not opener(size, self) then
+      return
+    end
     ui.switch_buf(self.bufnr)
     if not is_new then
       self:change_dir(self.dir)
@@ -329,11 +353,12 @@ end
 
 ---Open if closed and close if opened
 ---@param size number
-function Terminal:toggle(size)
+---@param direction string
+function Terminal:toggle(size, direction)
   if self:is_open() then
     self:close()
   else
-    self:open(size)
+    self:open(size, direction)
   end
   return self
 end
@@ -362,6 +387,7 @@ end
 ---get existing terminal or create an empty term table
 ---@param num number
 ---@param dir string
+---@param direction string
 ---@return Terminal
 ---@return boolean
 function M.get_or_create_term(num, dir, direction)
