@@ -138,21 +138,26 @@ This plugin provides 2 commands
 
 This is the command the mappings call under the hood. You can use it directly
 and prefix it with a count to target a specific terminal. This function also takes
-a the `size` and `dir` as an argument e.g.
+arguments `size`, `dir` and `direction`. e.g.
 
 ```vim
-:ToggleTerm size=40 dir=~/Desktop
+:ToggleTerm size=40 dir=~/Desktop direction=horizontal
 ```
+
+If `dir` is specified on creation toggle term will open at the specified directory.
+If the terminal has already been opened at a particular directory it will remain in that directory.
 
 The directory can also be specified as `git_dir` which toggleterm will then
 use to try and derive the git repo directory.
 *NOTE*: This currently will not work for work tree's or other more complex setups
 
-If specified on creation toggle term will open at the specified directory at the
-specified height.
+If `size` is specified and the command opens a split (horizontal/vertical) terminal,
+the height/width of all terminals in the same direction will be changed to `size`.
 
-_NOTE_: If the terminal has already been opened at a particular directory it will
-remain in that directory.
+If `direction` is specified and the command opens a terminal,
+the terminal will be changed to the specified direction.
+
+`size` and `direction` are ignored if the command closes a terminal.
 
 ### `ToggleTermOpenAll` and `ToggleTermCloseAll`
 These commands allow you to open all the previously toggled terminal in one go
@@ -168,6 +173,12 @@ note that the `cmd` argument **must be quoted**.
 
 The `cmd` and `dir` arguments can also expand the same special keywords as `:h expand` e.g.
 `TermExec cmd="echo %"` will be expanded to `TermExec cmd="echo /file/example"`
+
+The `size` and `direction` arguments are like the `size` and `direction` arguments of `ToggleTerm`.
+
+By default focus is returned to the original window after executing the command
+(except for floating terminals).  Use argument `go_back=0` to disable this behaviour.
+
 see `:h expand()` for more details
 
 ### Set terminal shading
@@ -195,9 +206,10 @@ setting `"none"` will allow normal terminal buffers to be highlighted.
 
 ### Set persistent size
 
-By default, this plugin will persist the size of the terminal split. You can disable
-this behaviour by setting `persist_size = false` in the setup object. Disabling this
-behaviour forces the opening terminal size to the `size` defined in the setup object.
+By default, this plugin will persist the size of horizontal and vertical terminals.
+Split terminals in the same direction always have the same size.
+You can disable this behaviour by setting `persist_size = false` in the setup object.
+Disabling this behaviour forces the opening terminal size to the `size` defined in the setup object.
 
 ```lua
 require'toggleterm'.setup{
@@ -302,3 +314,7 @@ You can create your on commands by using the lua functions this plugin provides 
 command! -count=1 TermGitPush  lua require'toggleterm'.exec("git push",    <count>, 12)
 command! -count=1 TermGitPushF lua require'toggleterm'.exec("git push -f", <count>, 12)
 ```
+
+### Caveats
+
+- Having multiple terminals with different directions open at the same time is currently unsupported.
