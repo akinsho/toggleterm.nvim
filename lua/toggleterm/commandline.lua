@@ -41,6 +41,8 @@ function M.parse(args)
         local key, value = arg[1], arg[2]
         if key == "size" then
           value = tonumber(value)
+        elseif key == "go_back" then
+          value = value ~= "0"
         end
         result[key] = value
       end

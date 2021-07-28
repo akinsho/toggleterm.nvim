@@ -60,14 +60,14 @@ end
 --Create a new terminal or close beginning from the last opened
 ---@param _ number
 ---@param size number
----@param directory string
+---@param dir string
 ---@param direction string
-local function smart_toggle(_, size, directory, direction)
+local function smart_toggle(_, size, dir, direction)
   local ui = require("toggleterm.ui")
   local terminals = terms.get_all()
   if not ui.find_open_windows() then
     -- Re-open the first terminal toggled
-    terms.get_or_create_term(terms.get_toggled_id(), directory, direction):open(size)
+    terms.get_or_create_term(terms.get_toggled_id(), dir, direction):open(size, direction)
   else
     local target
     -- count backwards from the end of the list
@@ -87,12 +87,12 @@ end
 
 --- @param num number
 --- @param size number
---- @param directory string
+--- @param dir string
 --- @param direction string
-local function toggle_nth_term(num, size, directory, direction)
-  local term = terms.get_or_create_term(num, directory, direction)
+local function toggle_nth_term(num, size, dir, direction)
+  local term = terms.get_or_create_term(num, dir, direction)
   require("toggleterm.ui").update_origin_window(term.window)
-  term:toggle(size)
+  term:toggle(size, direction)
 end
 
 ---Close the last window if only a terminal *split* is open
@@ -101,7 +101,6 @@ local function close_last_window(term)
   local only_one_window = fn.winnr("$") == 1
   if only_one_window and vim.bo[term.bufnr].filetype == term_ft then
     if term:is_split() then
-      term:close()
       vim.cmd("keepalt bnext")
     end
   end
@@ -110,8 +109,14 @@ end
 function M.handle_term_enter()
   local _, term = terms.identify()
   if term then
-    term:resize()
     close_last_window(term)
+  end
+end
+
+function M.handle_term_leave()
+  local _, term = terms.identify()
+  if term and term:is_float() then
+    term:close()
   end
 end
 
@@ -141,40 +146,53 @@ function M.exec_command(args, count)
   local parsed = require("toggleterm.commandline").parse(args)
   vim.validate({
     cmd = { parsed.cmd, "string" },
-    dir = { parsed.dir, "string", true },
     size = { parsed.size, "number", true },
+    dir = { parsed.dir, "string", true },
+    direction = { parsed.direction, "string", true },
+    go_back = { parsed.go_back, "boolean", true },
   })
-  M.exec(parsed.cmd, count, parsed.size, parsed.dir)
+  M.exec(parsed.cmd, count, parsed.size, parsed.dir, parsed.direction, parsed.go_back)
 end
 
 --- @param cmd string
 --- @param num number
 --- @param size number
 --- @param dir string
-function M.exec(cmd, num, size, dir)
+--- @param direction string
+--- @param go_back boolean whether or not to return to original window
+function M.exec(cmd, num, size, dir, direction, go_back)
   vim.validate({
     cmd = { cmd, "string" },
     num = { num, "number" },
     size = { size, "number", true },
     dir = { dir, "string", true },
+    direction = { direction, "string", true },
+    go_back = { go_back, "boolean", true },
   })
   -- count
   num = num >= 1 and num or terms.get_toggled_id()
-  local term, created = terms.get_or_create_term(num, dir)
+  local term, created = terms.get_or_create_term(num, dir, direction)
   if not term:is_open() then
-    term:open(size, created)
+    term:open(size, direction, created)
   end
   if not created and dir then
     term:change_dir(dir)
   end
-  term:send(cmd, true)
+  -- going back from floating window closes it
+  if term:is_float() then
+    go_back = false
+  end
+  if go_back == nil then
+    go_back = true
+  end
+  term:send(cmd, go_back)
 end
 
 function M.toggle_command(args, count)
   local parsed = require("toggleterm.commandline").parse(args)
   vim.validate({
     size = { parsed.size, "number", true },
-    directory = { parsed.dir, "string", true },
+    dir = { parsed.dir, "string", true },
     direction = { parsed.direction, "string", true },
   })
   if parsed.size then
@@ -231,10 +249,15 @@ function M.setup(user_prefs)
   setup_global_mappings()
   local autocommands = {
     {
-      "BufEnter",
+      "WinEnter",
       "term://*toggleterm#*",
-      "nested",
+      "nested", -- this is necessary in case the buffer is the last
       "lua require'toggleterm'.handle_term_enter()",
+    },
+    {
+      "WinLeave",
+      "term://*toggleterm#*",
+      "lua require'toggleterm'.handle_term_leave()",
     },
     {
       "TermOpen",

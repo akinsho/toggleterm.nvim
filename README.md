@@ -22,23 +22,24 @@ A _neovim_ plugin to persist and toggle multiple terminals during an editing ses
 
 ![exec](https://user-images.githubusercontent.com/22454918/112119367-36d1e980-8bb5-11eb-9787-5936391127a3.gif)
 
-
 ## Notices
 
 - **23/03/2021**: `TermExec` command syntax has been refactored to use `TermExec cmd='my-command'`
 
 ## Requirements
 
-This plugin only works in *Neovim 0.5* or newer.
+This plugin only works in _Neovim 0.5_ or newer.
 
 ## Installation
 
 Using packer in lua
+
 ```lua
 use {"akinsho/nvim-toggleterm.lua"}
 ```
 
 Using vim-plug in vimscript
+
 ```vim
 Plug 'akinsho/nvim-toggleterm.lua'
 ```
@@ -138,23 +139,33 @@ This plugin provides 2 commands
 
 This is the command the mappings call under the hood. You can use it directly
 and prefix it with a count to target a specific terminal. This function also takes
-a the `size` and `dir` as an argument e.g.
+arguments `size`, `dir` and `direction`. e.g.
 
 ```vim
-:ToggleTerm size=40 dir=~/Desktop
+:ToggleTerm size=40 dir=~/Desktop direction=horizontal
 ```
+
+If `dir` is specified on creation toggle term will open at the specified directory.
+If the terminal has already been opened at a particular directory it will remain in that directory.
 
 The directory can also be specified as `git_dir` which toggleterm will then
 use to try and derive the git repo directory.
-*NOTE*: This currently will not work for work tree's or other more complex setups
+_NOTE_: This currently will not work for `git-worktrees` or other more complex setups.
 
-If specified on creation toggle term will open at the specified directory at the
-specified height.
+If `size` is specified and the command opens a split (horizontal/vertical) terminal,
+the height/width of all terminals in the same direction will be changed to `size`.
 
-_NOTE_: If the terminal has already been opened at a particular directory it will
-remain in that directory.
+If `direction` is specified and the command opens a terminal,
+the terminal will be changed to the specified direction.
+
+`size` and `direction` are ignored if the command closes a terminal.
+
+#### Caveats
+
+- Having multiple terminals with different directions open at the same time is currently unsupported.
 
 ### `ToggleTermOpenAll` and `ToggleTermCloseAll`
+
 These commands allow you to open all the previously toggled terminal in one go
 or close all the currently open terminals at once.
 
@@ -164,10 +175,16 @@ This command allows you to open a terminal with a specific action.
 e.g. `2TermExec cmd="git status" dir=~/<my-repo-path>` will run git status in terminal 2.
 note that the `cmd` argument **must be quoted**.
 
-*NOTE:* the `dir` argument can also be *optionally* quoted if it contains spaces.
+_NOTE:_ the `dir` argument can also be _optionally_ quoted if it contains spaces.
 
 The `cmd` and `dir` arguments can also expand the same special keywords as `:h expand` e.g.
 `TermExec cmd="echo %"` will be expanded to `TermExec cmd="echo /file/example"`
+
+The `size` and `direction` arguments are like the `size` and `direction` arguments of `ToggleTerm`.
+
+By default focus is returned to the original window after executing the command
+(except for floating terminals). Use argument `go_back=0` to disable this behaviour.
+
 see `:h expand()` for more details
 
 ### Set terminal shading
@@ -176,7 +193,7 @@ This plugin automatically shades terminal filetypes to be darker than other wind
 you can disable this by setting `shade_terminals = false` in the setup object
 
 ```lua
-require'toggleterm'.setup{
+require'toggleterm'.setup {
   shade_terminals = false
 }
 ```
@@ -185,7 +202,7 @@ alternatively you can set _which_ filetypes should be shaded by setting
 
 ```lua
 -- fzf is just an example
-require'toggleterm'.setup{
+require'toggleterm'.setup {
   shade_filetypes = { "none", "fzf" }
 }
 
@@ -195,9 +212,10 @@ setting `"none"` will allow normal terminal buffers to be highlighted.
 
 ### Set persistent size
 
-By default, this plugin will persist the size of the terminal split. You can disable
-this behaviour by setting `persist_size = false` in the setup object. Disabling this
-behaviour forces the opening terminal size to the `size` defined in the setup object.
+By default, this plugin will persist the size of horizontal and vertical terminals.
+Split terminals in the same direction always have the same size.
+You can disable this behaviour by setting `persist_size = false` in the setup object.
+Disabling this behaviour forces the opening terminal size to the `size` defined in the setup object.
 
 ```lua
 require'toggleterm'.setup{
@@ -208,12 +226,13 @@ require'toggleterm'.setup{
 ### Custom Terminals
 
 ![lazy git](https://user-images.githubusercontent.com/22454918/116447435-e69f1480-a84f-11eb-86dd-19fa29646aa1.png)
-*using [lazygit](https://github.com/jesseduffield/lazygit)*
+_using [lazygit](https://github.com/jesseduffield/lazygit)_
 
 Toggleterm also exposes the `Terminal` class so that this can be used to create custom terminals
 for showing terminal UIs like `lazygit`, `htop` etc.
 
 Each terminal can take the following arguments:
+
 ```lua
 Terminal:new {
   cmd = string -- command to execute when creating the terminal e.g. 'top'
@@ -230,6 +249,7 @@ Terminal:new {
 ```
 
 #### Usage
+
 ```lua
 local Terminal  = require('toggleterm.terminal').Terminal
 local lazygit = Terminal:new({ cmd = "lazygit", hidden = true })
@@ -255,6 +275,7 @@ local lazygit = Terminal:new({ cmd = "lazygit", count = 5 })
 ```
 
 You can also set a custom layout for a terminal.
+
 ```lua
 local lazygit = Terminal:new({
   cmd = "lazygit",
