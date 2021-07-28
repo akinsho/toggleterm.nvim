@@ -58,7 +58,11 @@ end
 --- @param term Terminal
 function M.set_options(win, buf, term)
   if term:is_split() then
-    vim.wo[win].winfixheight = true
+    if term.direction == "horizontal" then
+      vim.wo[win].winfixheight = true
+    else
+      vim.wo[win].winfixwidth = true
+    end
   end
   vim.bo[buf].buflisted = false
   vim.bo[buf].filetype = constants.term_ft
