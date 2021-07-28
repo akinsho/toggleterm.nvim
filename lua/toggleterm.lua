@@ -101,7 +101,6 @@ local function close_last_window(term)
   local only_one_window = fn.winnr("$") == 1
   if only_one_window and vim.bo[term.bufnr].filetype == term_ft then
     if term:is_split() then
-      term:close()
       vim.cmd("keepalt bnext")
     end
   end
@@ -252,6 +251,7 @@ function M.setup(user_prefs)
     {
       "WinEnter",
       "term://*toggleterm#*",
+      "nested", -- this is necessary in case the buffer is the last
       "lua require'toggleterm'.handle_term_enter()",
     },
     {
