@@ -67,8 +67,7 @@ function M.set_options(win, buf, term)
   vim.bo[buf].buflisted = false
   vim.bo[buf].filetype = constants.term_ft
 
-  local conf = require("toggleterm.config").get()
-  if conf.hide_numbers then
+  if require("toggleterm.config").get("hide_numbers") then
     vim.wo[win].number = false
     vim.wo[win].relativenumber = false
   end
