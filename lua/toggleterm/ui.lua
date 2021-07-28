@@ -75,9 +75,9 @@ function M.set_options(win, buf, term)
   api.nvim_buf_set_var(buf, "toggle_number", term.id)
 end
 
----Darken the colour of a terminal
+---apply highlights to a terminal
 ---@param term Terminal
-function M.darken_terminal(term)
+function M.hl_term(term)
   local highlights
   if term and term:is_float() or M.is_float() then
     local config = require("toggleterm.config")

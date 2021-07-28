@@ -26,7 +26,7 @@ function M.__apply_colors()
   local is_enabled_ft = vim.tbl_contains(allow_list, ft)
   if vim.bo.buftype == "terminal" and is_enabled_ft then
     local _, term = terms.identify()
-    require("toggleterm.ui").darken_terminal(term)
+    require("toggleterm.ui").hl_term(term)
   end
 end
 
