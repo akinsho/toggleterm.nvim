@@ -21,8 +21,6 @@ function M.__apply_colors()
   local ft = vim.bo.filetype
   ft = (not ft or ft == "") and "none" or ft
   local allow_list = require("toggleterm.config").get("shade_filetypes") or {}
-  table.insert(allow_list, term_ft)
-
   local is_enabled_ft = vim.tbl_contains(allow_list, ft)
   if vim.bo.buftype == "terminal" and is_enabled_ft then
     local _, term = terms.identify()

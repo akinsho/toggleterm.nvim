@@ -337,8 +337,10 @@ function Terminal:open(size, direction, is_new)
       self:change_dir(self.dir)
     end
   end
-  -- NOTE: it is important that this function is called at this point.
-  -- i.e. the buffer has been correctly assigned
+  if config.get("shade_terminals") then
+    ui.hl_term(term)
+  end
+  -- NOTE: it is important that this function is called at this point. i.e. the buffer has been correctly assigned
   if self.on_open then
     self:on_open()
   end
