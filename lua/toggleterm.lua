@@ -19,20 +19,11 @@ local M = {
 --- only shade explicitly specified filetypes
 function M.__apply_colors()
   local ft = vim.bo.filetype
-  if not ft or ft == "" then
-    ft = "none"
-  end
-
+  ft = (not ft or ft == "") and "none" or ft
   local allow_list = require("toggleterm.config").get("shade_filetypes") or {}
   table.insert(allow_list, term_ft)
 
-  local is_enabled_ft = false
-  for _, filetype in ipairs(allow_list) do
-    if ft == filetype then
-      is_enabled_ft = true
-      break
-    end
-  end
+  local is_enabled_ft = vim.tbl_contains(allow_list, ft)
   if vim.bo.buftype == "terminal" and is_enabled_ft then
     local _, term = terms.identify()
     require("toggleterm.ui").darken_terminal(term)
