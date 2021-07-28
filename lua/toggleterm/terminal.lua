@@ -283,9 +283,11 @@ end
 function Terminal:__resurrect()
   self:__add()
   ui.set_options(self.window, self.bufnr, self)
-  if self:is_split() and (not config.get("persist_size") or ui.has_saved_size(self.direction)) then
+  if self:is_split() then
     ui.resize_split(self)
   end
+  -- set the window options including fixing height or width once the window is resized
+  ui.set_options(self.window, self.bufnr, self)
 end
 
 ---Open a terminal in a type of window i.e. a split,full window or tab
