@@ -282,12 +282,12 @@ end
 ---Add an orphaned terminal to the list of terminal and re-apply settings
 function Terminal:__resurrect()
   self:__add()
-  ui.set_options(self.window, self.bufnr, self)
   if self:is_split() then
     ui.resize_split(self)
   end
   -- set the window options including fixing height or width once the window is resized
   ui.set_options(self.window, self.bufnr, self)
+  ui.hl_term(term)
 end
 
 ---Open a terminal in a type of window i.e. a split,full window or tab
@@ -337,9 +337,7 @@ function Terminal:open(size, direction, is_new)
       self:change_dir(self.dir)
     end
   end
-  if config.get("shade_terminals") then
-    ui.hl_term(term)
-  end
+  ui.hl_term(self)
   -- NOTE: it is important that this function is called at this point. i.e. the buffer has been correctly assigned
   if self.on_open then
     self:on_open()

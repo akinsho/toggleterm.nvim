@@ -78,14 +78,14 @@ end
 ---@param term Terminal
 function M.hl_term(term)
   local highlights
+  local config = require("toggleterm.config")
   if term and term:is_float() or M.is_float() then
-    local config = require("toggleterm.config")
     local opts = term and term.float_opts or config.get("float_opts") or {}
     highlights = {
       fmt("NormalFloat:%s", opts.highlights.background),
       fmt("FloatBorder:%s", opts.highlights.border),
     }
-  else
+  elseif config.get("shade_terminals") then
     highlights = {
       "Normal:DarkenedPanel",
       "EndOfBuffer:DarkenedPanel",
@@ -95,7 +95,9 @@ function M.hl_term(term)
       "SignColumn:DarkenedPanel",
     }
   end
-  vim.cmd("setlocal winhighlight=" .. table.concat(highlights, ","))
+  if highlights then
+    vim.cmd("setlocal winhighlight=" .. table.concat(highlights, ","))
+  end
 end
 
 ---Create a terminal buffer with the correct buffer/window options
