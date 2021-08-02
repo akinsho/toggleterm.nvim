@@ -287,7 +287,7 @@ function Terminal:__resurrect()
   end
   -- set the window options including fixing height or width once the window is resized
   ui.set_options(self.window, self.bufnr, self)
-  ui.hl_term(term)
+  ui.hl_term(self)
 end
 
 ---Open a terminal in a type of window i.e. a split,full window or tab
