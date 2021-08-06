@@ -70,8 +70,12 @@ this especially if it isn't broken "on my machine". I'm also going to be pretty 
 
 This plugin must be explicitly enabled by using `require("toggleterm").setup{}`
 
-Setting the key to use for toggling the terminal(s) will setup mappings for _insert, normal and terminal_ modes
+Setting the _open_mapping_ key to use for toggling the terminal(s) will setup mappings for _normal_ mode
 If you prefix the mapping with a number that particular terminal will be opened.
+
+If you set the _insert_mappings_ key to true, the mapping will also take effect in insert mode.
+
+However the mapping will have no effect in terminal mode, so we recommend to create buffer specific mappings to exit terminal mode which you can see later in the documentation under the chapter *Terminal window mappings* and use them before opening a new terminal
 
 **NOTE**: Please ensure you have set `hidden` in your neovim config, otherwise the terminals will be discarded
 when closed.
