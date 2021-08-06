@@ -75,7 +75,7 @@ If you prefix the mapping with a number that particular terminal will be opened.
 
 If you set the _insert_mappings_ key to true, the mapping will also take effect in insert mode.
 
-However the mapping will have no effect in terminal mode, so we recommend to create buffer specific mappings to exit terminal mode which you can see later in the documentation under the chapter *Terminal window mappings* and use them before opening a new terminal
+However you will not be able to use a count with the open mapping in terminal and insert modes. You can create buffer specific mappings to exit terminal mode and then use a count with the open mapping. Check *Terminal window mappings* for an example of how to do this.
 
 **NOTE**: Please ensure you have set `hidden` in your neovim config, otherwise the terminals will be discarded
 when closed.
