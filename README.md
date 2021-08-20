@@ -189,6 +189,8 @@ The `size` and `direction` arguments are like the `size` and `direction` argumen
 By default focus is returned to the original window after executing the command
 (except for floating terminals). Use argument `go_back=0` to disable this behaviour.
 
+You can send commands to a terminal without opening its window by using the `open=0` argument.
+
 see `:h expand()` for more details
 
 ### Set terminal shading

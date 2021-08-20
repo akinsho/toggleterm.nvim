@@ -139,8 +139,9 @@ function M.exec_command(args, count)
     dir = { parsed.dir, "string", true },
     direction = { parsed.direction, "string", true },
     go_back = { parsed.go_back, "boolean", true },
+    open = { parsed.open, "boolean", true },
   })
-  M.exec(parsed.cmd, count, parsed.size, parsed.dir, parsed.direction, parsed.go_back)
+  M.exec(parsed.cmd, count, parsed.size, parsed.dir, parsed.direction, parsed.go_back, parsed.open)
 end
 
 --- @param cmd string
@@ -149,7 +150,8 @@ end
 --- @param dir string
 --- @param direction string
 --- @param go_back boolean whether or not to return to original window
-function M.exec(cmd, num, size, dir, direction, go_back)
+--- @param open boolean whether or not to open terminal window
+function M.exec(cmd, num, size, dir, direction, go_back, open)
   vim.validate({
     cmd = { cmd, "string" },
     num = { num, "number" },
@@ -157,9 +159,11 @@ function M.exec(cmd, num, size, dir, direction, go_back)
     dir = { dir, "string", true },
     direction = { direction, "string", true },
     go_back = { go_back, "boolean", true },
+    open = { open, "boolean", true },
   })
   -- count
   num = num >= 1 and num or terms.get_toggled_id()
+  open = open == nil or open
   local term, created = terms.get_or_create_term(num, dir, direction)
   if not term:is_open() then
     term:open(size, direction, created)
@@ -173,6 +177,10 @@ function M.exec(cmd, num, size, dir, direction, go_back)
   end
   if go_back == nil then
     go_back = true
+  end
+  if not open then
+    term:close()
+    go_back = false
   end
   term:send(cmd, go_back)
 end
