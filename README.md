@@ -1,6 +1,8 @@
-# nvim-toggleterm.lua
+<h1 align="center">
+  toggleterm.nvim
+</h1>
 
-A _neovim_ plugin to persist and toggle multiple terminals during an editing session
+<p align="center">A <i>neovim</i> plugin to persist and toggle multiple terminals during an editing session</p>
 
 ![screenshot](./github/toggleterm.gif "Toggleterm in action")
 
@@ -35,13 +37,13 @@ This plugin only works in _Neovim 0.5_ or newer.
 Using packer in lua
 
 ```lua
-use {"akinsho/nvim-toggleterm.lua"}
+use {"akinsho/toggleterm.nvim"}
 ```
 
 Using vim-plug in vimscript
 
 ```vim
-Plug 'akinsho/nvim-toggleterm.lua'
+Plug 'akinsho/toggleterm.nvim'
 ```
 
 ## Why?
@@ -75,7 +77,7 @@ If you prefix the mapping with a number that particular terminal will be opened.
 
 If you set the _insert_mappings_ key to true, the mapping will also take effect in insert mode.
 
-However you will not be able to use a count with the open mapping in terminal and insert modes. You can create buffer specific mappings to exit terminal mode and then use a count with the open mapping. Check *Terminal window mappings* for an example of how to do this.
+However you will not be able to use a count with the open mapping in terminal and insert modes. You can create buffer specific mappings to exit terminal mode and then use a count with the open mapping. Check _Terminal window mappings_ for an example of how to do this.
 
 **NOTE**: Please ensure you have set `hidden` in your neovim config, otherwise the terminals will be discarded
 when closed.
