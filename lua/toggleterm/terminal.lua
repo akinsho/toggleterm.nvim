@@ -79,7 +79,7 @@ local function setup_buffer_mappings(bufnr)
   local conf = config.get()
   local mapping = conf.open_mapping
   if mapping and conf.insert_mappings then
-    api.nvim_buf_set_keymap(bufnr, "t", mapping, [[<C-\><C-N>:execute v:count . "ToggleTerm"<CR>]], {
+    api.nvim_buf_set_keymap(bufnr, "t", mapping, "<Cmd>ToggleTerm<CR>", {
       silent = true,
       noremap = true,
     })

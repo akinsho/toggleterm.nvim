@@ -38,7 +38,7 @@ local function setup_global_mappings()
       noremap = true,
     })
     if conf.insert_mappings then
-      api.nvim_set_keymap("i", mapping, '<Esc><Cmd>execute v:count . "ToggleTerm"<CR>', {
+      api.nvim_set_keymap("i", mapping, "<Esc><Cmd>ToggleTerm<CR>", {
         silent = true,
         noremap = true,
       })
