@@ -154,15 +154,14 @@ end
 function M.exec(cmd, num, size, dir, direction, go_back, open)
   vim.validate({
     cmd = { cmd, "string" },
-    num = { num, "number" },
+    num = { num, "number", true },
     size = { size, "number", true },
     dir = { dir, "string", true },
     direction = { direction, "string", true },
     go_back = { go_back, "boolean", true },
     open = { open, "boolean", true },
   })
-  -- count
-  num = num >= 1 and num or terms.get_toggled_id()
+  num = (num and num >= 1) and num or terms.get_toggled_id()
   open = open == nil or open
   local term, created = terms.get_or_create_term(num, dir, direction)
   if not term:is_open() then
