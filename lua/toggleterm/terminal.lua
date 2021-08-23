@@ -99,11 +99,11 @@ local function setup_buffer_autocommands(term)
   }
 
   if conf.start_in_insert then
-    vim.cmd("startinsert!")
+    vim.cmd("startinsert")
     table.insert(commands, {
       "BufEnter",
       fmt("<buffer=%d>", term.bufnr),
-      "startinsert!",
+      "startinsert",
     })
   end
 
