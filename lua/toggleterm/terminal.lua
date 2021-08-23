@@ -89,6 +89,7 @@ end
 ---Terminal buffer autocommands
 ---@param term Terminal
 local function setup_buffer_autocommands(term)
+  local conf = config.get()
   local commands = {
     {
       "TermClose",
@@ -96,6 +97,15 @@ local function setup_buffer_autocommands(term)
       fmt('lua require"toggleterm.terminal".delete(%d)', term.id),
     },
   }
+
+  if conf.start_in_insert then
+    vim.cmd("startinsert")
+    table.insert(commands, {
+      "BufEnter",
+      fmt("<buffer=%d>", term.bufnr),
+      "startinsert",
+    })
+  end
 
   utils.create_augroups({ ["ToggleTerm" .. term.bufnr] = commands })
 end
@@ -285,8 +295,6 @@ end
 ---@param term table
 local function opener(size, term)
   local direction = term.direction
-  local conf = config.get()
-
   if term:is_split() then
     ui.open_split(size, term)
   elseif direction == "window" then
@@ -298,11 +306,6 @@ local function opener(size, term)
   else
     error("Invalid terminal direction")
   end
-
-  if conf.start_in_insert then
-    vim.cmd('startinsert!')
-  end
-
 end
 
 ---Open a terminal window
