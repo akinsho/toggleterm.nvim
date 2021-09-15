@@ -351,3 +351,25 @@ You can create your on commands by using the lua functions this plugin provides 
 command! -count=1 TermGitPush  lua require'toggleterm'.exec("git push",    <count>, 12)
 command! -count=1 TermGitPushF lua require'toggleterm'.exec("git push -f", <count>, 12)
 ```
+
+### Open multiple terminals side-by-side
+| Direction | Tested |
+| --- | --- |
+| vertical | ✔️ |
+| horizontal | ✔️ |
+| window | ⚠️ |
+| float | ⚠️ |
+
+✔️: tested, working.
+
+⚠️: not tested, may not working.
+
+On your first terminal, you need to escape the `TERMINAL` mode via the `<Esc>` key that has been mapped with the combination `<C-\><C-n>`.
+![image](https://user-images.githubusercontent.com/31947091/133395516-22fef1e6-633d-4964-9175-f76fabf66794.png)
+
+Then you type on: `2<C-\>`, and the result:
+![image](https://user-images.githubusercontent.com/31947091/133396789-fdf68b30-3a8c-440b-822f-6549f282c4fc.png)
+
+Explain:
+- `2`: this is the terminal identity, your first terminal is `1` (e.g. your 3rd terminal will be `3<C-\>`, so on).
+- `<C-\>`: this is the combined key mapping to the command `:ToggleTerm`.
