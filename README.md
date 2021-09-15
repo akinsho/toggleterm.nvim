@@ -16,9 +16,9 @@
 
 ![vertical orientation](./github/vertical-terms.png)
 
-- **Window**
+- **Tab**
 
-![window orientation](https://user-images.githubusercontent.com/22454918/115306273-82999380-a15f-11eb-9c2b-57266ca16493.png)
+![tab orientation](https://user-images.githubusercontent.com/22454918/133490969-6a59e623-79db-4ca7-a73b-ef4b24a73b91.gif)
 
 ### Send commands to different terminals
 
@@ -26,6 +26,7 @@
 
 ## Notices
 
+- 15/09/2021: `window` layout was deprecated in favour of the `tab` layout
 - **23/03/2021**: `TermExec` command syntax has been refactored to use `TermExec cmd='my-command'`
 
 ## Requirements

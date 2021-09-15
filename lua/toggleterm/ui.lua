@@ -261,14 +261,16 @@ function M.open_split(size, term)
   create_term_buf_if_needed(term)
 end
 
-function M.open_window(term)
+--- @param term Terminal
+function M.open_tab(term)
+  -- Open the current buffer in a tab
+  vim.cmd("tabedit %")
+  -- Replace the current window with a tab
   create_term_buf_if_needed(term)
 end
 
---- @param term Terminal
-function M.open_tab(term)
-  vim.cmd("tabnew")
-  create_term_buf_if_needed(term)
+local function close_tab()
+  vim.cmd("tabclose")
 end
 
 ---Close terminal window
@@ -286,10 +288,6 @@ local function close_split(term)
   else
     origin_window = nil
   end
-end
-
-local function close_window()
-  vim.cmd("keepalt b#")
 end
 
 local curved = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
@@ -329,8 +327,8 @@ end
 function M.close(term)
   if term:is_split() then
     close_split(term)
-  elseif term.direction == "window" then
-    close_window()
+  elseif term.direction == "tab" then
+    close_tab()
   else
     if api.nvim_win_is_valid(term.window) then
       api.nvim_win_close(term.window, true)

@@ -138,6 +138,9 @@ function Terminal:new(term)
   local conf = config.get()
   self.__index = self
   term.direction = term.direction or conf.direction
+  -- HACK: temporarily re-assign window layout to "tab" whilst user's migrate
+  -- 15/09/2021 -> remove 7-10 days from now
+  term.direction = term.direction == "window" and "tab" or term.direction
   term.id = id or next_id()
   term.hidden = term.hidden or false
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
@@ -297,8 +300,6 @@ local function opener(size, term)
   local direction = term.direction
   if term:is_split() then
     ui.open_split(size, term)
-  elseif direction == "window" then
-    ui.open_window(term)
   elseif direction == "tab" then
     ui.open_tab(term)
   elseif direction == "float" then
