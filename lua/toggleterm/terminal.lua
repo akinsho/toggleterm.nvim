@@ -10,8 +10,9 @@ local fmt = string.format
 local fn = vim.fn
 
 local is_windows = fn.has("win32") == 1
-local command_sep = is_windows and "&" or ";"
-local comment_sep = is_windows and "::" or "#"
+local is_cmd = string.find(vim.o.shell, 'cmd')
+local command_sep = is_windows and is_cmd and "&" or ";"
+local comment_sep = is_windows and is_cmd and "::" or "#"
 
 ---@type Terminal[]
 local terminals = {}
