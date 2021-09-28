@@ -13,19 +13,23 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - run: date +%F > todays-date
-      - name: Restore cache for today's nightly.
+
+      - name: Get neovim v0.5.1
         uses: actions/cache@v2
         with:
-          path: _neovim
-          key: ${{ runner.os }}-x64-${{ hashFiles('todays-date') }}
+          path: build/neovim/v0.5.1
+          key: ${{ runner.os }}-appimage-0.5.1
 
-      - name: Prepare plenary
+      - name: Fetch dependencies
         run: |
           git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
           ln -s $(pwd) ~/.local/share/nvim/site/pack/vendor/start
+
       - name: Run tests
         run: |
-          curl -OL https://raw.githubusercontent.com/norcalli/bot-ci/master/scripts/github-actions-setup.sh
-          source github-actions-setup.sh nightly-x64
-          nvim --headless --noplugin -u tests/minimal.vim -c "PlenaryBustedDirectory tests/ {minimal_init = 'tests/minimal.vim'}"
+          test -d build/neovim/v0.5.1 || {
+            mkdir -p build/neovim/v0.5.1
+            curl -Lo build/neovim/v0.5.1/nvim https://github.com/neovim/neovim/releases/download/v0.5.1/nvim.appimage
+            chmod +x build/neovim/v0.5.1/nvim
+          }
+          build/neovim/v0.5.1/nvim --headless --noplugin -u tests/minimal.vim -c "PlenaryBustedDirectory tests/ {minimal_init = 'tests/minimal.vim'}"
