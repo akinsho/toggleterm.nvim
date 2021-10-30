@@ -240,6 +240,21 @@ function M.toggle_all(command)
   end
 end
 
+function M.toggle_all_terms()
+  local ui = require("toggleterm.ui")
+  local terminals = terms.get_all()
+
+  if not ui.find_open_windows() then
+	for _, term in pairs(terms.get_all()) do
+		term:open()
+    end
+  else
+	for _, term in pairs(terms.get_all()) do
+		term:close()
+    end
+  end
+end
+
 function M.setup(user_prefs)
   local conf = require("toggleterm.config").set(user_prefs)
   setup_global_mappings()
