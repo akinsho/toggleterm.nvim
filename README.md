@@ -1,8 +1,8 @@
-<!-- panvimdoc-ignore-start -->
 <h1 align="center">
   toggleterm.nvim
 </h1>
 
+<!-- panvimdoc-ignore-start -->
 <p align="center">A <i>neovim</i> plugin to persist and toggle multiple terminals during an editing session</p>
 
 ![screenshot](./github/toggleterm.gif "Toggleterm in action")
