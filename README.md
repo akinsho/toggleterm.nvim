@@ -1,3 +1,4 @@
+<!-- panvimdoc-ignore-start -->
 <h1 align="center">
   toggleterm.nvim
 </h1>
@@ -28,6 +29,7 @@
 
 - 15/09/2021: `window` layout was deprecated in favour of the `tab` layout
 - **23/03/2021**: `TermExec` command syntax has been refactored to use `TermExec cmd='my-command'`
+<!-- panvimdoc-ignore-end -->
 
 ## Requirements
 
