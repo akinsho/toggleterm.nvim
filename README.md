@@ -2,13 +2,10 @@
   toggleterm.nvim
 </h1>
 
-<!-- panvimdoc-ignore-start -->
 <p align="center">A <i>neovim</i> plugin to persist and toggle multiple terminals during an editing session</p>
-<!-- panvimdoc-ignore-end -->
 
 ![screenshot](./github/toggleterm.gif "Toggleterm in action")
 
-<!-- panvimdoc-ignore-start -->
 ### Multiple orientations
 
 - **Float**
@@ -22,7 +19,6 @@
 - **Tab**
 
 ![tab orientation](https://user-images.githubusercontent.com/22454918/133490969-6a59e623-79db-4ca7-a73b-ef4b24a73b91.gif)
-<!-- panvimdoc-ignore-end -->
 
 ### Send commands to different terminals
 
