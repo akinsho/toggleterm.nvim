@@ -263,8 +263,11 @@ end
 
 --- @param term Terminal
 function M.open_tab(term)
-  -- Open the current buffer in a tab
-  vim.cmd("tabedit %")
+  -- Open the current buffer in a tab (use tabnew due to issue #95)
+  vim.cmd("tabedit new")
+  -- tabnew creates an empty no name buffer so we set it to be wiped once it's replaced
+  -- by the terminal buffer
+  vim.bo.bufhidden = "wipe"
   -- Replace the current window with a tab
   create_term_buf_if_needed(term)
 end
