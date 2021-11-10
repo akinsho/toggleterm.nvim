@@ -249,12 +249,12 @@ function M.toggle_all_terms()
   local terminals = terms.get_all()
 
   if not ui.find_open_windows() then
-	for _, term in pairs(terms.get_all()) do
-		term:open()
+    for _, term in pairs(terms.get_all()) do
+      term:open()
     end
   else
-	for _, term in pairs(terms.get_all()) do
-		term:close()
+    for _, term in pairs(terms.get_all()) do
+      term:close()
     end
   end
 end
