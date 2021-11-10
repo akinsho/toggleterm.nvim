@@ -240,6 +240,10 @@ function M.toggle_all(command)
   end
 end
 
+-- Toggle all terminals
+-- If any terminal is open it will be closed
+-- If no terminal exists it will do nothing
+-- If any terminal exists but is not open it will be open
 function M.toggle_all_terms()
   local ui = require("toggleterm.ui")
   local terminals = terms.get_all()

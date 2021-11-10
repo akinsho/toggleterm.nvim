@@ -171,9 +171,9 @@ the terminal will be changed to the specified direction.
 
 - Having multiple terminals with different directions open at the same time is currently unsupported.
 
-### `ToggleTermOpenAll` and `ToggleTermCloseAll`
+### `ToggleTermToggleAll`
 
-These commands allow you to open all the previously toggled terminal in one go
+This command allows you to open all the previously toggled terminal in one go
 or close all the currently open terminals at once.
 
 ### `TermExec`
