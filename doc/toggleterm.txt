@@ -229,9 +229,9 @@ be changed to the specified direction.
 - Having multiple terminals with different directions open at the same time is currently unsupported.
 
 
-`TOGGLETERMOPENALL` AND `TOGGLETERMCLOSEALL` ~
+`TOGGLETERMTOGGLEALL` ~
 
-These commands allow you to open all the previously toggled terminal in one go
+This command allows you to open all the previously toggled terminal in one go
 or close all the currently open terminals at once.
 
 `TERMEXEC` ~
