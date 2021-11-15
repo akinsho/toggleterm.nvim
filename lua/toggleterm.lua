@@ -218,28 +218,6 @@ function M.toggle(count, size, dir, direction)
   end
 end
 
----@alias command '"close"' | '"open"'
-
----Close or Open all toggle terms
----@param command command
-function M.toggle_all(command)
-  if command ~= "close" and command ~= "open" then
-    return
-  end
-  for _, term in pairs(terms.get_all()) do
-    local is_open = term:is_open()
-    if command == "close" then
-      if is_open then
-        term:close()
-      end
-    else
-      if not is_open then
-        term:open()
-      end
-    end
-  end
-end
-
 -- Toggle all terminals
 -- If any terminal is open it will be closed
 -- If no terminal exists it will do nothing
