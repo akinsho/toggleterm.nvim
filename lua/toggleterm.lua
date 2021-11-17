@@ -222,16 +222,23 @@ end
 -- If any terminal is open it will be closed
 -- If no terminal exists it will do nothing
 -- If any terminal exists but is not open it will be open
-function M.toggle_all()
+function M.toggle_all(force)
   local ui = require("toggleterm.ui")
   local terminals = terms.get_all()
-  if not ui.find_open_windows() then
-    for _, term in pairs(terminals) do
-      term:open()
-    end
-  else
+
+  if force == true and ui.find_open_windows() then
     for _, term in pairs(terminals) do
       term:close()
+    end
+  else
+    if not ui.find_open_windows() then
+      for _, term in pairs(terminals) do
+        term:open()
+      end
+    else
+      for _, term in pairs(terminals) do
+        term:close()
+      end
     end
   end
 end
