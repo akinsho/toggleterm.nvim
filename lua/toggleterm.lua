@@ -226,7 +226,7 @@ function M.toggle_all(force)
   local ui = require("toggleterm.ui")
   local terminals = terms.get_all()
 
-  if force == true and ui.find_open_windows() then
+  if force and ui.find_open_windows() then
     for _, term in pairs(terminals) do
       term:close()
     end
