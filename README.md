@@ -94,6 +94,7 @@ require("toggleterm").setup{
     end
   end,
   open_mapping = [[<c-\>]],
+  on_open = fun(t: Terminal), -- function to run when the terminal opens
   hide_numbers = true, -- hide the number column in toggleterm buffers
   shade_filetypes = {},
   shade_terminals = true,
@@ -354,12 +355,13 @@ command! -count=1 TermGitPushF lua require'toggleterm'.exec("git push -f", <coun
 ```
 
 ### Open multiple terminals side-by-side
-| Direction | Supported |
-| --- | --- |
-| vertical | ✔️ |
-| horizontal | ✔️ |
-| window | ✖️ |
-| float | ✖️ |
+
+| Direction  | Supported |
+| ---------- | --------- |
+| vertical   | ✔️        |
+| horizontal | ✔️        |
+| window     | ✖️        |
+| float      | ✖️        |
 
 In your first terminal, you need to leave the `TERMINAL` mode using <kbd>C-\\</kbd><kbd>C-N</kbd> which can be remapped to <kbd>Esc</kbd> for ease of use.
 ![image](https://user-images.githubusercontent.com/31947091/133395516-22fef1e6-633d-4964-9175-f76fabf66794.png)
@@ -368,5 +370,6 @@ Then you type on: `2<C-\>`, and the result:
 ![image](https://user-images.githubusercontent.com/31947091/133396789-fdf68b30-3a8c-440b-822f-6549f282c4fc.png)
 
 Explain:
+
 - `2`: this is the terminal's number (or ID), your first terminal is `1` (e.g. your 3rd terminal will be `3<C-\>`, so on).
 - <kbd>C-\\</kbd>: this is the combined key mapping to the command `:ToggleTerm`.
