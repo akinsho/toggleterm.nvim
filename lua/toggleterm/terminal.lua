@@ -187,6 +187,8 @@ function Terminal:is_open()
 end
 
 function Terminal:close()
+  local conf = config.get()
+  self.on_close = self.on_close or conf.on_close
   if self.on_close then
     self:on_close()
   end
