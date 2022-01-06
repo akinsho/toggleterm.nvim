@@ -95,6 +95,7 @@ require("toggleterm").setup{
   end,
   open_mapping = [[<c-\>]],
   on_open = fun(t: Terminal), -- function to run when the terminal opens
+  on_close = fun(t: Terminal), -- function to run when the terminal closes
   hide_numbers = true, -- hide the number column in toggleterm buffers
   shade_filetypes = {},
   shade_terminals = true,

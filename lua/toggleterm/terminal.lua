@@ -146,6 +146,7 @@ function Terminal:new(term)
   term.hidden = term.hidden or false
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
   term.on_open = term.on_open or conf.on_open
+  term.on_close = term.on_close or conf.on_close
   if term.close_on_exit == nil then
     term.close_on_exit = conf.close_on_exit
   end
