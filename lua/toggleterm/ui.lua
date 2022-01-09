@@ -121,7 +121,7 @@ local function create_term_buf_if_needed(term)
 end
 
 function M.delete_buf(term)
-  if api.nvim_buf_is_valid(term.bufnr) then
+  if term.bufnr and api.nvim_buf_is_valid(term.bufnr) then
     api.nvim_buf_delete(term.bufnr, { force = true })
   end
 end
@@ -279,14 +279,14 @@ end
 ---Close terminal window
 ---@param term Terminal
 local function close_split(term)
-  if api.nvim_win_is_valid(term.window) then
+  if term.window and api.nvim_win_is_valid(term.window) then
     local persist_size = require("toggleterm.config").get("persist_size")
     if persist_size then
       M.save_window_size(term.direction, term.window)
     end
     api.nvim_win_close(term.window, true)
   end
-  if api.nvim_win_is_valid(origin_window) then
+  if origin_window and api.nvim_win_is_valid(origin_window) then
     api.nvim_set_current_win(origin_window)
   else
     origin_window = nil
@@ -333,7 +333,7 @@ function M.close(term)
   elseif term.direction == "tab" then
     close_tab()
   else
-    if api.nvim_win_is_valid(term.window) then
+    if term.window and api.nvim_win_is_valid(term.window) then
       api.nvim_win_close(term.window, true)
     end
   end
