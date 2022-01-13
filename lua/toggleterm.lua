@@ -249,18 +249,18 @@ function M.setup(user_prefs)
   local autocommands = {
     {
       "WinEnter",
-      "term://*toggleterm#*",
+      "term://*toggleterm*",
       "nested", -- this is necessary in case the buffer is the last
       "lua require'toggleterm'.handle_term_enter()",
     },
     {
       "WinLeave",
-      "term://*toggleterm#*",
+      "term://*toggleterm*",
       "lua require'toggleterm'.handle_term_leave()",
     },
     {
       "TermOpen",
-      "term://*toggleterm#*",
+      "term://*toggleterm*",
       "lua require'toggleterm'.on_term_open()",
     },
   }
