@@ -76,7 +76,7 @@ This plugin must be explicitly enabled by using `require("toggleterm").setup{}`
 Setting the _open_mapping_ key to use for toggling the terminal(s) will setup mappings for _normal_ mode
 If you prefix the mapping with a number that particular terminal will be opened.
 
-If you set the _insert_mappings_ key to true, the mapping will also take effect in insert mode.
+If you set the _insert_mappings_ key to true, the mapping will also take effect in insert mode; similarly setting _terminal_mappings_ to will have the mappings take effect in the opened terminal.
 
 However you will not be able to use a count with the open mapping in terminal and insert modes. You can create buffer specific mappings to exit terminal mode and then use a count with the open mapping. Check _Terminal window mappings_ for an example of how to do this.
 
@@ -102,6 +102,7 @@ require("toggleterm").setup{
   shading_factor = '<number>', -- the degree by which to darken to terminal colour, default: 1 for dark backgrounds, 3 for light
   start_in_insert = true,
   insert_mappings = true, -- whether or not the open mapping applies in insert mode
+  terminal_mappings = true, -- whether or not the open mapping applies in the opened terminals
   persist_size = true,
   direction = 'vertical' | 'horizontal' | 'window' | 'float',
   close_on_exit = true, -- close the terminal window when the process exits

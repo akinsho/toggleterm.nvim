@@ -8,6 +8,7 @@ local config = {
   hide_numbers = true,
   shade_terminals = true,
   insert_mappings = true,
+  terminal_mappings = true,
   start_in_insert = true,
   persist_size = true,
   close_on_exit = true,
