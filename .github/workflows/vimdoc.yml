@@ -11,7 +11,7 @@ jobs:
       - name: panvimdoc
         uses: kdheepak/panvimdoc@main
         with:
-          vimdoc: Toggleterm
+          vimdoc: toggleterm
           description: persist and toggle multiple terminals
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
