@@ -1,4 +1,4 @@
-*toggleterm.txt*plugin to persist and toggle multiple terminals during an editing session
+*toggleterm.txt*                         persist and toggle multiple terminals
 
 ==============================================================================
 Table of Contents                               *toggleterm-table-of-contents*
