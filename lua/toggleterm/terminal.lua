@@ -11,8 +11,10 @@ local fn = vim.fn
 
 local is_windows = fn.has("win32") == 1
 local is_cmd = string.find(vim.o.shell, "cmd")
+local is_pwsh = string.find(vim.o.shell, "pwsh") or string.find(vim.o.shell, "powershell")
 local command_sep = is_windows and is_cmd and "&" or ";"
 local comment_sep = is_windows and is_cmd and "::" or "#"
+local newline_chr = is_windows and (is_pwsh and "\r" or "\r\n") or "\n"
 
 ---@type Terminal[]
 local terminals = {}
@@ -209,7 +211,7 @@ end
 local function with_cr(...)
   local result = {}
   for _, str in ipairs({ ... }) do
-    table.insert(result, str .. "\n")
+    table.insert(result, str .. newline_chr)
   end
   return table.concat(result, "")
 end
