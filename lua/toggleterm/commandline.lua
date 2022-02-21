@@ -7,6 +7,8 @@ local p = {
   double = '"(.-)"',
 }
 
+local is_windows = vim.loop.os_uname().version:match("Windows")
+
 ---Take a users command arguments in the format "cmd='git commit' dir=~/dotfiles"
 ---and parse this into a table of arguments
 ---{cmd = "git commit", dir = "~/dotfiles"}
@@ -24,10 +26,11 @@ function M.parse(args)
         -- Check if the current OS is Windows so we can determine if +shellslash
         -- exists and if it exists, then determine if it is enabled. In that way,
         -- we can determine if we should match the value with single or double quotes.
-        quotes = jit.os ~= "Windows" and p.single
-          or vim.g.shellslash == "yes" and quotes
-          or p.single
-
+        if is_windows then
+          quotes = not vim.opt.shellslash:get() and quotes or p.single
+        else
+          quotes = p.single
+        end
         value = fn.shellescape(value)
         result[vim.trim(key)] = fn.expandcmd(value:match(quotes))
       end
