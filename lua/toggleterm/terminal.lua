@@ -32,9 +32,9 @@ local terminals = {}
 --- @field hidden boolean whether or not to include this terminal in the terminals list
 --- @field close_on_exit boolean whether or not to close the terminal window when the process exits
 --- @field float_opts table<string, any>
---- @field on_stdout fun(job: number, exit_code: number, type: string)
---- @field on_stderr fun(job: number, data: string[], name: string)
---- @field on_exit fun(job: number, data: string[], name: string)
+--- @field on_stdout fun(t: Terminal, job: number, data: string[], name: string)
+--- @field on_stderr fun(t: Terminal, job: number, data: string[], name: string)
+--- @field on_exit fun(t: Terminal, job: number, exit_code: number, name: string)
 --- @field on_open fun(term:Terminal)
 --- @field on_close fun(term:Terminal)
 local Terminal = {}
@@ -149,6 +149,9 @@ function Terminal:new(term)
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
   term.on_open = term.on_open or conf.on_open
   term.on_close = term.on_close or conf.on_close
+  term.on_stdout = term.on_stdout or conf.on_stdout
+  term.on_stderr = term.on_stderr or conf.on_stderr
+  term.on_exit = term.on_exit or conf.on_exit
   if term.close_on_exit == nil then
     term.close_on_exit = conf.close_on_exit
   end
@@ -184,8 +187,8 @@ function Terminal:is_open()
   if not self.window then
     return false
   end
-  --- TODO: try open will actually attempt to switch to this window
-  local win_open = ui.try_open(self.window)
+  -- empty string corresponds to a normal window
+  local win_open = fn.win_gettype(self.window) == ""
   return win_open and api.nvim_win_get_buf(self.window) == self.bufnr
 end
 
@@ -266,6 +269,26 @@ local function __handle_exit(term)
 end
 
 ---@private
+---Pass self as first parameter to callback
+function Terminal:__stdout()
+  if type(self.on_stdout) == "function" then
+    return function(...)
+      self.on_stdout(self, ...)
+    end
+  end
+end
+
+---@private
+---Pass self as first parameter to callback
+function Terminal:__stderr()
+  if type(self.on_stderr) == "function" then
+    return function(...)
+      self.on_stderr(self, ...)
+    end
+  end
+end
+
+---@private
 function Terminal:__spawn()
   local cmd = self.cmd or config.get("shell")
   cmd = table.concat({
@@ -280,8 +303,8 @@ function Terminal:__spawn()
     detach = 1,
     cwd = _get_dir(self.dir),
     on_exit = __handle_exit(self),
-    on_stdout = self.on_stdout,
-    on_stderr = self.on_stderr,
+    on_stdout = self:__stdout(),
+    on_stderr = self:__stderr(),
   })
   self.name = cmd
 end
