@@ -239,89 +239,89 @@ describe("ToggleTerm tests:", function()
   --     assert.spy(test1.send).was_called_with(test1, fmt("g++ -std=c++17 %s -o run", file), true)
   --   end)
   -- end)
-  --
-  -- describe("terminal mappings behaviour", function()
-  --   it("should respect terminal_mappings in terminal mode", function()
-  --     toggleterm.setup({ open_mapping = [[<space>t]], terminal_mappings = false })
-  --     t.Terminal:new():toggle()
-  --     local result = vim.fn.mapcheck("<space>t", "t")
-  --     assert.equal("", result)
-  --   end)
-  --
-  --   it("should map in terminal mode if terminal_mappings is true", function()
-  --     toggleterm.setup({ open_mapping = [[<space>t]], terminal_mappings = true })
-  --     t.Terminal:new():toggle()
-  --     local result = vim.fn.mapcheck("<space>t", "t")
-  --     assert.is_true(#result > 0)
-  --   end)
-  -- end)
-  --
-  -- describe("layout options - ", function()
-  --   before_each(function()
-  --     toggleterm.setup({
-  --       open_mapping = [[<c-\>]],
-  --       shade_filetypes = { "none" },
-  --       direction = "horizontal",
-  --       float_opts = {
-  --         height = 10,
-  --         width = 20,
-  --       },
-  --     })
-  --   end)
-  --
-  --   it("should open with the correct layout", function()
-  --     local term = Terminal:new({ direction = "float" }):toggle()
-  --     local _, wins = term_has_windows(term)
-  --     assert.equal(#wins, 1)
-  --     assert.equal("popup", fn.win_gettype(fn.win_id2win(wins[1])))
-  --   end)
-  --
-  --   it("should not change numbers when resolving size", function()
-  --     local term = Terminal:new()
-  --     local size = 20
-  --     assert.equal(size, ui._resolve_size(size))
-  --     assert.equal(size, ui._resolve_size(size, term))
-  --   end)
-  --
-  --   it("should evaluate custom functions when resolving size", function()
-  --     local term = Terminal:new({ direction = "vertical" })
-  --     local size1 = 20
-  --     local size2 = function(_t)
-  --       if _t.direction == "vertical" then
-  --         return size1
-  --       end
-  --       return 0
-  --     end
-  --     assert.equal(ui._resolve_size(size2, term), size1)
-  --   end)
-  --
-  --   -- FIXME the height is passed in correctly but is returned as 15
-  --   -- which seems to be an nvim quirk not the code
-  --   it("should open with user configuration if set", function()
-  --     local term = Terminal:new({ direction = "float" }):toggle()
-  --     local _, wins = term_has_windows(term)
-  --     local config = api.nvim_win_get_config(wins[1])
-  --     assert.equal(config.width, 20)
-  --   end)
-  --
-  --   it("should use a user's selected highlights", function()
-  --     local term = Terminal
-  --       :new({
-  --         direction = "float",
-  --         float_opts = {
-  --           winblend = 12,
-  --           highlights = {
-  --             border = "ErrorMsg",
-  --             background = "Statement",
-  --           },
-  --         },
-  --       })
-  --       :toggle()
-  --     local winhighlight = vim.wo[term.window].winhighlight
-  --     local winblend = vim.wo[term.window].winblend
-  --     assert.equal(12, winblend)
-  --     assert.is.truthy(winhighlight:match("NormalFloat:Statement"))
-  --     assert.is.truthy(winhighlight:match("FloatBorder:ErrorMsg"))
-  --   end)
-  -- end)
+
+  describe("terminal mappings behaviour", function()
+    it("should respect terminal_mappings in terminal mode", function()
+      toggleterm.setup({ open_mapping = [[<space>t]], terminal_mappings = false })
+      t.Terminal:new():toggle()
+      local result = vim.fn.mapcheck("<space>t", "t")
+      assert.equal("", result)
+    end)
+
+    it("should map in terminal mode if terminal_mappings is true", function()
+      toggleterm.setup({ open_mapping = [[<space>t]], terminal_mappings = true })
+      t.Terminal:new():toggle()
+      local result = vim.fn.mapcheck("<space>t", "t")
+      assert.is_true(#result > 0)
+    end)
+  end)
+
+  describe("layout options - ", function()
+    before_each(function()
+      toggleterm.setup({
+        open_mapping = [[<c-\>]],
+        shade_filetypes = { "none" },
+        direction = "horizontal",
+        float_opts = {
+          height = 10,
+          width = 20,
+        },
+      })
+    end)
+
+    it("should open with the correct layout", function()
+      local term = Terminal:new({ direction = "float" }):toggle()
+      local _, wins = term_has_windows(term)
+      assert.equal(#wins, 1)
+      assert.equal("popup", fn.win_gettype(fn.win_id2win(wins[1])))
+    end)
+
+    it("should not change numbers when resolving size", function()
+      local term = Terminal:new()
+      local size = 20
+      assert.equal(size, ui._resolve_size(size))
+      assert.equal(size, ui._resolve_size(size, term))
+    end)
+
+    it("should evaluate custom functions when resolving size", function()
+      local term = Terminal:new({ direction = "vertical" })
+      local size1 = 20
+      local size2 = function(_t)
+        if _t.direction == "vertical" then
+          return size1
+        end
+        return 0
+      end
+      assert.equal(ui._resolve_size(size2, term), size1)
+    end)
+
+    -- FIXME the height is passed in correctly but is returned as 15
+    -- which seems to be an nvim quirk not the code
+    it("should open with user configuration if set", function()
+      local term = Terminal:new({ direction = "float" }):toggle()
+      local _, wins = term_has_windows(term)
+      local config = api.nvim_win_get_config(wins[1])
+      assert.equal(config.width, 20)
+    end)
+
+    it("should use a user's selected highlights", function()
+      local term = Terminal
+        :new({
+          direction = "float",
+          float_opts = {
+            winblend = 12,
+            highlights = {
+              border = "ErrorMsg",
+              background = "Statement",
+            },
+          },
+        })
+        :toggle()
+      local winhighlight = vim.wo[term.window].winhighlight
+      local winblend = vim.wo[term.window].winblend
+      assert.equal(12, winblend)
+      assert.is.truthy(winhighlight:match("NormalFloat:Statement"))
+      assert.is.truthy(winhighlight:match("FloatBorder:ErrorMsg"))
+    end)
+  end)
 end)
