@@ -271,7 +271,7 @@ end
 ---@private
 ---Pass self as first parameter to callback
 function Terminal:__stdout()
-  if type(self.on_stdout) == "function" then
+  if self.on_stdout then
     return function(...)
       self.on_stdout(self, ...)
     end
@@ -281,7 +281,7 @@ end
 ---@private
 ---Pass self as first parameter to callback
 function Terminal:__stderr()
-  if type(self.on_stderr) == "function" then
+  if self.on_stderr then
     return function(...)
       self.on_stderr(self, ...)
     end
