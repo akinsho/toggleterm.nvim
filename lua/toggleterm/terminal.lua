@@ -394,7 +394,7 @@ function M.get_or_create_term(num, dir, direction)
   if term then
     return term, false
   end
-  return Terminal:new({ dir = dir, direction = direction }), true
+  return Terminal:new({ id = num, dir = dir, direction = direction }), true
 end
 
 ---Get a single terminal by id, unless it is hidden
