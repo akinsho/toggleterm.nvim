@@ -187,8 +187,9 @@ function Terminal:is_open()
   if not self.window then
     return false
   end
-  -- empty string corresponds to a normal window
-  local win_open = fn.win_gettype(self.window) == ""
+  local win_type = fn.win_gettype(self.window)
+  -- empty string window type corresponds to a normal window
+  local win_open = win_type == "" or win_type == "popup"
   return win_open and api.nvim_win_get_buf(self.window) == self.bufnr
 end
 
