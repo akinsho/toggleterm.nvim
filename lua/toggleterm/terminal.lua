@@ -146,6 +146,14 @@ function Terminal:new(term)
   term.direction = term.direction == "window" and "tab" or term.direction
   term.id = id or next_id()
   term.hidden = term.hidden or false
+  term.highlights = vim.tbl_deep_extend("keep", term.highlights or {}, {
+    Normal = "ToggleTermNormal",
+    EndOfBuffer = "ToggleTermEndOfBuffer",
+    VertSplit = "ToggleTermVertSplit",
+    StatusLine = "ToggleTermStatusLine",
+    StatusLineNC = "ToggleTermStatusLineNC",
+    SignColumn = "ToggleTermSignColumn",
+  })
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
   term.on_open = term.on_open or conf.on_open
   term.on_close = term.on_close or conf.on_close

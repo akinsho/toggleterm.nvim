@@ -77,7 +77,7 @@ end
 ---apply highlights to a terminal
 ---@param term Terminal
 function M.hl_term(term)
-  local highlights
+  local highlights = {}
   local config = require("toggleterm.config")
   if term and term:is_float() or M.is_float() then
     local opts = term and term.float_opts or config.get("float_opts") or {}
@@ -85,6 +85,10 @@ function M.hl_term(term)
       fmt("NormalFloat:%s", opts.highlights.background),
       fmt("FloatBorder:%s", opts.highlights.border),
     }
+  elseif not vim.tbl_isempty(term.highlights) then
+    for key, value in pairs(term.highlights) do
+      highlights[#highlights + 1] = key .. ":" .. value
+    end
   elseif config.get("shade_terminals") then
     highlights = {
       "Normal:DarkenedPanel",
