@@ -10,11 +10,27 @@ local fmt = string.format
 local fn = vim.fn
 
 local is_windows = fn.has("win32") == 1
-local is_cmd = string.find(vim.o.shell, "cmd")
-local is_pwsh = string.find(vim.o.shell, "pwsh") or string.find(vim.o.shell, "powershell")
-local command_sep = is_windows and is_cmd and "&" or ";"
-local comment_sep = is_windows and is_cmd and "::" or "#"
-local newline_chr = is_windows and (is_pwsh and "\r" or "\r\n") or "\n"
+local function is_cmd()
+  local shell = config.get("shell")
+  return string.find(shell, "cmd")
+end
+
+local function is_pwsh()
+  local shell = config.get("shell")
+  return string.find(shell, "pwsh") or string.find(shell, "powershell")
+end
+
+local function get_command_sep()
+  return is_windows and is_cmd() and "&" or ";"
+end
+
+local function get_comment_sep()
+  return is_windows and is_cmd() and "::" or "#"
+end
+
+local function get_newline_chr()
+  return is_windows and (is_pwsh() and "\r" or "\r\n") or "\n"
+end
 
 ---@type Terminal[]
 local terminals = {}
@@ -214,6 +230,7 @@ end
 ---@return string
 local function with_cr(...)
   local result = {}
+  local newline_chr = get_newline_chr()
   for _, str in ipairs({ ... }) do
     table.insert(result, str .. newline_chr)
   end
@@ -292,6 +309,8 @@ end
 ---@private
 function Terminal:__spawn()
   local cmd = self.cmd or config.get("shell")
+  local command_sep = get_command_sep()
+  local comment_sep = get_comment_sep()
   cmd = table.concat({
     cmd,
     command_sep,
@@ -393,6 +412,7 @@ end
 --- @return number
 function M.identify(name)
   name = name or api.nvim_buf_get_name(api.nvim_get_current_buf())
+  local comment_sep = get_comment_sep()
   local parts = vim.split(name, comment_sep)
   local id = tonumber(parts[#parts])
   return id, terminals[id]
