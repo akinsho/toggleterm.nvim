@@ -99,6 +99,11 @@ local function setup_buffer_autocommands(term)
       fmt("<buffer=%d>", term.bufnr),
       fmt('lua require"toggleterm.terminal".delete(%d)', term.id),
     },
+    term:is_float() and {
+      "VimResized",
+      fmt("<buffer=%d>", term.bufnr),
+      fmt('lua require"toggleterm.terminal".__on_vim_resized(%d)', term.id),
+    } or nil,
   }
 
   if conf.start_in_insert then
@@ -384,6 +389,16 @@ function Terminal:toggle(size, direction)
     self:open(size, direction)
   end
   return self
+end
+
+---@private
+---@param id number terminal id
+function M.__on_vim_resized(id)
+  local term = M.get(id)
+  if not term or not term:is_float() or not term:is_open() then
+    return
+  end
+  ui.update_float(term)
 end
 
 --- get the toggle term number from
