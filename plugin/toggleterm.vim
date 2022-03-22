@@ -12,3 +12,5 @@ endif
 command! -count -complete=shellcmd -nargs=* TermExec lua require'toggleterm'.exec_command(<q-args>, <count>)
 command! -count -nargs=* ToggleTerm lua require'toggleterm'.toggle_command(<q-args>, <count>)
 command! -bang ToggleTermToggleAll lua require'toggleterm'.toggle_all(<q-bang>)
+command! -range ToggleTermSendCurrentVisual '<,'> lua require'toggleterm'.send_lines_to_terminal('visual')<CR>
+command! ToggleTermSendCurrentLine lua require'toggleterm'.send_lines_to_terminal('single_line')<CR>

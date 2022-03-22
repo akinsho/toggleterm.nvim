@@ -184,6 +184,53 @@ function M.exec(cmd, num, size, dir, direction, go_back, open)
   term:send(cmd, go_back)
 end
 
+--- @param selection_type string
+--- @param trim_spaces boolean
+function M.send_lines_to_terminal(selection_type, trim_spaces)
+    -- trim_spaces defines if we should trim the spaces from lines which are sent to the terminal
+    if trim_spaces == nil then
+      trim_spaces = true
+  end
+
+  vim.validate({
+    selection_type = { selection_type, "string", true },
+    trim_spaces = { trim_spaces, "boolean", true },
+  })
+
+  -- Window number from where we are calling the function (needed so we can get back to it automatically)
+  local current_window = vim.api.nvim_get_current_win()
+  -- Line texts - these will be sent over to the terminal one by one
+  local lines = {}
+  -- Beginning of the selection: line number, column number
+  local b_line, b_col
+
+  if selection_type == "visual" then
+      -- Get the start and the end of the visual selection
+      b_line, b_col = unpack(vim.fn.getpos("'<"),2,3)
+      local e_line, e_col = unpack(vim.fn.getpos("'>"),2,3)
+      lines = vim.api.nvim_buf_get_lines(0, b_line - 1, e_line, 0)
+  elseif selection_type == "single_line" then
+      b_line, b_col = unpack(vim.api.nvim_win_get_cursor(0))
+      table.insert(lines, vim.fn.getline(b_line))
+  end
+
+  -- If no lines are fetched we don't need to do anything
+  if #lines == 0 then return end
+
+  -- Send each line to the terminal after some preprocessing if required
+  for _, v in ipairs(lines) do
+      -- Trim whitespaces from the strings
+      if trim_spaces then
+          v = v:gsub("^%s+", ""):gsub("%s+$", "")
+      end
+      M.exec(v, terms.get_toggled_id())
+  end
+
+  -- Jump back with the cursor where we were at the begiining of the selection
+  vim.api.nvim_set_current_win(current_window)
+  vim.fn.cursor(b_line, b_col)
+end
+
 function M.toggle_command(args, count)
   local parsed = require("toggleterm.commandline").parse(args)
   vim.validate({
