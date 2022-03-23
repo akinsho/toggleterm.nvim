@@ -194,7 +194,7 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
   end
 
   if terminal_id == nil then
-      -- If not terminal id provided fall back to the default
+      -- If no terminal id provided fall back to the default
       terminal_id = 1
   end
   terminal_id = tonumber(terminal_id)
