@@ -189,7 +189,7 @@ end
 --- @param terminal_id number
 function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
   -- trim_spaces defines if we should trim the spaces from lines which are sent to the terminal
-  trim_spaces = trim_spaces or true
+  trim_spaces = trim_spaces == nil or trim_spaces
 
   -- If no terminal id provided fall back to the default
   terminal_id = terminal_id or 1
