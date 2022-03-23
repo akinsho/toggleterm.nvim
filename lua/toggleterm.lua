@@ -189,10 +189,10 @@ end
 --- @param terminal_id number
 function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
   -- trim_spaces defines if we should trim the spaces from lines which are sent to the terminal
-  if trim_spaces == nil then trim_spaces = true end
+  trim_spaces = trim_spaces or true
 
   -- If no terminal id provided fall back to the default
-  if terminal_id == nil then terminal_id = 1 end
+  terminal_id = terminal_id or 1
   terminal_id = tonumber(terminal_id)
 
   vim.validate({
