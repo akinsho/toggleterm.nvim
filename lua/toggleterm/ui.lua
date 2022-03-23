@@ -231,6 +231,30 @@ function M._resolve_size(size, term)
   utils.echomsg(string.format('The input %s is not of type "number" or "function".', size), "Error")
 end
 
+local curved = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
+
+--- @private
+--- @param term Terminal
+--- @param opening boolean
+function M._get_float_config(term, opening)
+  local opts = term.float_opts or {}
+  local width = M._resolve_size(opts.width, term)
+    or math.ceil(math.min(vim.o.columns, math.max(80, vim.o.columns - 20)))
+  local height = M._resolve_size(opts.height, term)
+    or math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 10)))
+  local border = opts.border == "curved" and curved or opts.border or "single"
+
+  return {
+    row = (opts.row or math.ceil(vim.o.lines - height) / 2) - 1,
+    col = (opts.col or math.ceil(vim.o.columns - width) / 2) - 1,
+    relative = opts.relative or "editor",
+    style = opening and "minimal" or nil,
+    width = width,
+    height = height,
+    border = opening and border or nil,
+  }
+end
+
 --- @param size number
 --- @param term Terminal
 function M.open_split(size, term)
@@ -287,29 +311,13 @@ local function close_split(term)
   end
 end
 
-local curved = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
-
 ---Open a floating window
 ---@param term Terminal
 function M.open_float(term)
   local opts = term.float_opts or {}
   local valid_buf = term.bufnr and api.nvim_buf_is_valid(term.bufnr)
   local buf = valid_buf and term.bufnr or api.nvim_create_buf(false, false)
-  local width = M._resolve_size(opts.width, term)
-    or math.ceil(math.min(vim.o.columns, math.max(80, vim.o.columns - 20)))
-  local height = M._resolve_size(opts.height, term)
-    or math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 10)))
-
-  local border = opts.border == "curved" and curved or opts.border or "single"
-  local win = api.nvim_open_win(buf, true, {
-    row = (opts.row or math.ceil(vim.o.lines - height) / 2) - 1,
-    col = (opts.col or math.ceil(vim.o.columns - width) / 2) - 1,
-    relative = opts.relative or "editor",
-    style = "minimal",
-    width = width,
-    height = height,
-    border = border,
-  })
+  local win = api.nvim_open_win(buf, true, M._get_float_config(term, true))
 
   term.window, term.bufnr = win, buf
 
@@ -317,6 +325,15 @@ function M.open_float(term)
     vim.wo[win].winblend = opts.winblend
   end
   M.set_options(term.window, term.bufnr, term)
+end
+
+---Updates the floating terminal size
+---@param term Terminal
+function M.update_float(term)
+  if not vim.api.nvim_win_is_valid(term.window) then
+    return
+  end
+  vim.api.nvim_win_set_config(term.window, M._get_float_config(term, false))
 end
 
 ---Close given terminal's ui
