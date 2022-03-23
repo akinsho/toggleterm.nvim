@@ -186,6 +186,7 @@ end
 
 --- @param selection_type string
 --- @param trim_spaces boolean
+--- @param terminal_id number
 function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
     -- trim_spaces defines if we should trim the spaces from lines which are sent to the terminal
     if trim_spaces == nil then
