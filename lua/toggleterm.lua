@@ -208,7 +208,7 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
   -- Beginning of the selection: line number, column number
   local b_line, b_col
 
-  local function _line_selection(mode)
+  local function line_selection(mode)
     local start_char, end_char
     if mode == "visual" then
       start_char = "'<"
@@ -226,7 +226,7 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
   end
 
   if selection_type == "visual_lines" or selection_type == "visual_selection" then
-    local res = _line_selection("visual")
+    local res = line_selection("visual")
     b_line, b_col = unpack(res.start_pos)
     lines = res.selected_lines
 
