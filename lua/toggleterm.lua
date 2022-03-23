@@ -188,15 +188,11 @@ end
 --- @param trim_spaces boolean
 --- @param terminal_id number
 function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
-    -- trim_spaces defines if we should trim the spaces from lines which are sent to the terminal
-    if trim_spaces == nil then
-      trim_spaces = true
-  end
+  -- trim_spaces defines if we should trim the spaces from lines which are sent to the terminal
+  if trim_spaces == nil then trim_spaces = true end
 
-  if terminal_id == nil then
-      -- If no terminal id provided fall back to the default
-      terminal_id = 1
-  end
+  -- If no terminal id provided fall back to the default
+  if terminal_id == nil then terminal_id = 1 end
   terminal_id = tonumber(terminal_id)
 
   vim.validate({
@@ -213,37 +209,37 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
   local b_line, b_col
 
   local function _line_selection(mode)
-      local start_char, end_char
-      if mode == "visual" then
-          start_char = "'<"
-          end_char = "'>"
-      elseif mode == "motion" then
-          start_char = "'["
-          end_char = "']"
-      end
+    local start_char, end_char
+    if mode == "visual" then
+      start_char = "'<"
+      end_char = "'>"
+    elseif mode == "motion" then
+      start_char = "'["
+      end_char = "']"
+    end
 
-      -- Get the start and the end of the selection
-      local start_line, start_col = unpack(vim.fn.getpos(start_char), 2, 3)
-      local end_line, end_col = unpack(vim.fn.getpos(end_char), 2, 3)
-      local selected_lines = vim.api.nvim_buf_get_lines(0, start_line - 1, end_line, 0)
-      return {start_pos={start_line, start_col}, end_pos={end_line, end_col}, selected_lines=selected_lines}
+    -- Get the start and the end of the selection
+    local start_line, start_col = unpack(vim.fn.getpos(start_char), 2, 3)
+    local end_line, end_col = unpack(vim.fn.getpos(end_char), 2, 3)
+    local selected_lines = vim.api.nvim_buf_get_lines(0, start_line - 1, end_line, 0)
+    return {start_pos={start_line, start_col}, end_pos={end_line, end_col}, selected_lines=selected_lines}
   end
 
   if selection_type == "visual_lines" or selection_type == "visual_selection" then
-      local res = _line_selection("visual")
-      b_line, b_col = unpack(res.start_pos)
-      lines = res.selected_lines
-      local _, e_col = unpack(res.end_pos)
+    local res = _line_selection("visual")
+    b_line, b_col = unpack(res.start_pos)
+    lines = res.selected_lines
 
-      if selection_type == "visual_selection" then
-          -- Visual selection is more accurate, as we get the sub-string of every line based on the visual selection
-         for i, v in ipairs(lines) do
-             lines[i] = v:sub(b_col, e_col)
-         end
-      end
+    if selection_type == "visual_selection" then
+      -- Visual selection is more accurate, as we get the sub-string of every line based on the visual selection
+      local _, e_col = unpack(res.end_pos)
+     for i, v in ipairs(lines) do
+         lines[i] = v:sub(b_col, e_col)
+     end
+    end
   elseif selection_type == "single_line" then
-      b_line, b_col = unpack(vim.api.nvim_win_get_cursor(0))
-      table.insert(lines, vim.fn.getline(b_line))
+    b_line, b_col = unpack(vim.api.nvim_win_get_cursor(0))
+    table.insert(lines, vim.fn.getline(b_line))
   end
 
   -- If no lines are fetched we don't need to do anything
@@ -251,11 +247,11 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
 
   -- Send each line to the terminal after some preprocessing if required
   for _, v in ipairs(lines) do
-      -- Trim whitespaces from the strings
-      if trim_spaces then
-          v = v:gsub("^%s+", ""):gsub("%s+$", "")
-      end
-      M.exec(v, terminal_id)
+    -- Trim whitespaces from the strings
+    if trim_spaces then
+      v = v:gsub("^%s+", ""):gsub("%s+$", "")
+    end
+    M.exec(v, terminal_id)
   end
 
   -- Jump back with the cursor where we were at the begiining of the selection
