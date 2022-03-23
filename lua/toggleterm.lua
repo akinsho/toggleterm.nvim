@@ -186,15 +186,22 @@ end
 
 --- @param selection_type string
 --- @param trim_spaces boolean
-function M.send_lines_to_terminal(selection_type, trim_spaces)
+function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
     -- trim_spaces defines if we should trim the spaces from lines which are sent to the terminal
     if trim_spaces == nil then
       trim_spaces = true
   end
 
+  if terminal_id == nil then
+      -- If not terminal id provided fall back to the default
+      terminal_id = 1
+  end
+  terminal_id = tonumber(terminal_id)
+
   vim.validate({
     selection_type = { selection_type, "string", true },
     trim_spaces = { trim_spaces, "boolean", true },
+    terminal_id = { terminal_id, "number", true }
   })
 
   -- Window number from where we are calling the function (needed so we can get back to it automatically)
@@ -218,13 +225,21 @@ function M.send_lines_to_terminal(selection_type, trim_spaces)
       local start_line, start_col = unpack(vim.fn.getpos(start_char), 2, 3)
       local end_line, end_col = unpack(vim.fn.getpos(end_char), 2, 3)
       local selected_lines = vim.api.nvim_buf_get_lines(0, start_line - 1, end_line, 0)
-      return {start_line, start_col, selected_lines}
+      return {start_pos={start_line, start_col}, end_pos={end_line, end_col}, selected_lines=selected_lines}
   end
 
-  if selection_type == "visual" then
-      b_line, b_col, lines = unpack(_line_selection("visual"))
-  elseif selection_type == "motion" then
-      b_line, b_col, lines = unpack(_line_selection("motion"))
+  if selection_type == "visual_lines" or selection_type == "visual_selection" then
+      local res = _line_selection("visual")
+      b_line, b_col = unpack(res.start_pos)
+      lines = res.selected_lines
+      local _, e_col = unpack(res.end_pos)
+
+      if selection_type == "visual_selection" then
+          -- Visual selection is more accurate, as we get the sub-string of every line based on the visual selection
+         for i, v in ipairs(lines) do
+             lines[i] = v:sub(b_col, e_col)
+         end
+      end
   elseif selection_type == "single_line" then
       b_line, b_col = unpack(vim.api.nvim_win_get_cursor(0))
       table.insert(lines, vim.fn.getline(b_line))
@@ -239,7 +254,7 @@ function M.send_lines_to_terminal(selection_type, trim_spaces)
       if trim_spaces then
           v = v:gsub("^%s+", ""):gsub("%s+$", "")
       end
-      M.exec(v, terms.get_toggled_id())
+      M.exec(v, terminal_id)
   end
 
   -- Jump back with the cursor where we were at the begiining of the selection
