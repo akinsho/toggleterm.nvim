@@ -204,18 +204,34 @@ function M.send_lines_to_terminal(selection_type, trim_spaces)
   -- Beginning of the selection: line number, column number
   local b_line, b_col
 
+  local function _line_selection(mode)
+      local start_char, end_char
+      if mode == "visual" then
+          start_char = "'<"
+          end_char = "'>"
+      elseif mode == "motion" then
+          start_char = "'["
+          end_char = "']"
+      end
+
+      -- Get the start and the end of the selection
+      local start_line, start_col = unpack(vim.fn.getpos(start_char), 2, 3)
+      local end_line, end_col = unpack(vim.fn.getpos(end_char), 2, 3)
+      local selected_lines = vim.api.nvim_buf_get_lines(0, start_line - 1, end_line, 0)
+      return {start_line, start_col, selected_lines}
+  end
+
   if selection_type == "visual" then
-      -- Get the start and the end of the visual selection
-      b_line, b_col = unpack(vim.fn.getpos("'<"),2,3)
-      local e_line, e_col = unpack(vim.fn.getpos("'>"),2,3)
-      lines = vim.api.nvim_buf_get_lines(0, b_line - 1, e_line, 0)
+      b_line, b_col, lines = unpack(_line_selection("visual"))
+  elseif selection_type == "motion" then
+      b_line, b_col, lines = unpack(_line_selection("motion"))
   elseif selection_type == "single_line" then
       b_line, b_col = unpack(vim.api.nvim_win_get_cursor(0))
       table.insert(lines, vim.fn.getline(b_line))
   end
 
   -- If no lines are fetched we don't need to do anything
-  if #lines == 0 then return end
+  if #lines == 0 or lines == nil then return end
 
   -- Send each line to the terminal after some preprocessing if required
   for _, v in ipairs(lines) do
@@ -227,8 +243,7 @@ function M.send_lines_to_terminal(selection_type, trim_spaces)
   end
 
   -- Jump back with the cursor where we were at the begiining of the selection
-  vim.api.nvim_set_current_win(current_window)
-  vim.fn.cursor(b_line, b_col)
+  vim.api.nvim_win_set_cursor(current_window, {b_line, b_col})
 end
 
 function M.toggle_command(args, count)
