@@ -202,7 +202,7 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
   })
 
   -- Window number from where we are calling the function (needed so we can get back to it automatically)
-  local current_window = vim.api.nvim_get_current_win()
+  local current_window = api.nvim_get_current_win()
   -- Line texts - these will be sent over to the terminal one by one
   local lines = {}
   -- Beginning of the selection: line number, column number
@@ -219,9 +219,9 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
     end
 
     -- Get the start and the end of the selection
-    local start_line, start_col = unpack(vim.fn.getpos(start_char), 2, 3)
-    local end_line, end_col = unpack(vim.fn.getpos(end_char), 2, 3)
-    local selected_lines = vim.api.nvim_buf_get_lines(0, start_line - 1, end_line, 0)
+    local start_line, start_col = unpack(fn.getpos(start_char), 2, 3)
+    local end_line, end_col = unpack(fn.getpos(end_char), 2, 3)
+    local selected_lines = api.nvim_buf_get_lines(0, start_line - 1, end_line, 0)
     return {start_pos={start_line, start_col}, end_pos={end_line, end_col}, selected_lines=selected_lines}
   end
 
@@ -238,8 +238,8 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
      end
     end
   elseif selection_type == "single_line" then
-    b_line, b_col = unpack(vim.api.nvim_win_get_cursor(0))
-    table.insert(lines, vim.fn.getline(b_line))
+    b_line, b_col = unpack(api.nvim_win_get_cursor(0))
+    table.insert(lines, fn.getline(b_line))
   end
 
   -- If no lines are fetched we don't need to do anything
@@ -248,14 +248,12 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
   -- Send each line to the terminal after some preprocessing if required
   for _, v in ipairs(lines) do
     -- Trim whitespaces from the strings
-    if trim_spaces then
-      v = v:gsub("^%s+", ""):gsub("%s+$", "")
-    end
+    v = trim_spaces and v:gsub("^%s+", ""):gsub("%s+$", "") or v
     M.exec(v, terminal_id)
   end
 
   -- Jump back with the cursor where we were at the begiining of the selection
-  vim.api.nvim_win_set_cursor(current_window, {b_line, b_col})
+  api.nvim_win_set_cursor(current_window, {b_line, b_col})
 end
 
 function M.toggle_command(args, count)
