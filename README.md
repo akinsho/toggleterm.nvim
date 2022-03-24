@@ -406,3 +406,15 @@ Explain:
 
 - `2`: this is the terminal's number (or ID), your first terminal is `1` (e.g. your 3rd terminal will be `3<C-\>`, so on).
 - <kbd>C-\\</kbd>: this is the combined key mapping to the command `:ToggleTerm`.
+
+### Sending lines to the terminal
+
+You can "send lines" to the toggled terminals with the following commands:
+- `:ToggleTermSendCurrentLine <T_ID>`: sends the whole line where you are currently standing with your cursor
+- `:ToggleTermSendVisualLines <T_ID>`: sends all of the (whole) lines in your visual selection
+- `:ToggleTermSendVisualSelection <T_ID>`: sends only the visually selected text (this can be a block of text or a selection ina  single line)
+
+(`<T_ID` is an optional terminal ID parameter which defines where should we send the lines.
+If the parameter is not provided, then the default is the `first terminal`)
+
+
