@@ -244,7 +244,7 @@ If the parameter is not provided, then the default is the `first terminal`)
 
 Example:
 
-<video src="https://user-images.githubusercontent.com/18753533/159889865-724becab-877b-45a2-898e-820afd6a4ee1.mov" controls="controls" muted="muted" height="640px">
+<video src="https://user-images.githubusercontent.com/18753533/159889865-724becab-877b-45a2-898e-820afd6a4ee1.mov" controls="controls" muted="muted" height="640px"></video>
 
 <!-- panvimdoc-ignore-end -->
 
