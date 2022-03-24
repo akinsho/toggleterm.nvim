@@ -198,7 +198,7 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
   vim.validate({
     selection_type = { selection_type, "string", true },
     trim_spaces = { trim_spaces, "boolean", true },
-    terminal_id = { terminal_id, "number", true }
+    terminal_id = { terminal_id, "number", true },
   })
 
   -- Window number from where we are calling the function (needed so we can get back to it automatically)
@@ -222,7 +222,11 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
     local start_line, start_col = unpack(fn.getpos(start_char), 2, 3)
     local end_line, end_col = unpack(fn.getpos(end_char), 2, 3)
     local selected_lines = api.nvim_buf_get_lines(0, start_line - 1, end_line, 0)
-    return {start_pos={start_line, start_col}, end_pos={end_line, end_col}, selected_lines=selected_lines}
+    return {
+      start_pos = { start_line, start_col },
+      end_pos = { end_line, end_col },
+      selected_lines = selected_lines,
+    }
   end
 
   if selection_type == "visual_lines" or selection_type == "visual_selection" then
@@ -233,9 +237,9 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
     if selection_type == "visual_selection" then
       -- Visual selection is more accurate, as we get the sub-string of every line based on the visual selection
       local _, e_col = unpack(res.end_pos)
-     for i, v in ipairs(lines) do
-         lines[i] = v:sub(b_col, e_col)
-     end
+      for i, v in ipairs(lines) do
+        lines[i] = v:sub(b_col, e_col)
+      end
     end
   elseif selection_type == "single_line" then
     b_line, b_col = unpack(api.nvim_win_get_cursor(0))
@@ -243,7 +247,9 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
   end
 
   -- If no lines are fetched we don't need to do anything
-  if #lines == 0 or lines == nil then return end
+  if #lines == 0 or lines == nil then
+    return
+  end
 
   -- Send each line to the terminal after some preprocessing if required
   for _, v in ipairs(lines) do
@@ -253,7 +259,7 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
   end
 
   -- Jump back with the cursor where we were at the begiining of the selection
-  api.nvim_win_set_cursor(current_window, {b_line, b_col})
+  api.nvim_win_set_cursor(current_window, { b_line, b_col })
 end
 
 function M.toggle_command(args, count)
