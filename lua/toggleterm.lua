@@ -184,6 +184,78 @@ function M.exec(cmd, num, size, dir, direction, go_back, open)
   term:send(cmd, go_back)
 end
 
+--- @param selection_type string
+--- @param trim_spaces boolean
+--- @param terminal_id number
+function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
+  -- trim_spaces defines if we should trim the spaces from lines which are sent to the terminal
+  trim_spaces = trim_spaces == nil or trim_spaces
+
+  -- If no terminal id provided fall back to the default
+  terminal_id = terminal_id or 1
+  terminal_id = tonumber(terminal_id)
+
+  vim.validate({
+    selection_type = { selection_type, "string", true },
+    trim_spaces = { trim_spaces, "boolean", true },
+    terminal_id = { terminal_id, "number", true }
+  })
+
+  -- Window number from where we are calling the function (needed so we can get back to it automatically)
+  local current_window = api.nvim_get_current_win()
+  -- Line texts - these will be sent over to the terminal one by one
+  local lines = {}
+  -- Beginning of the selection: line number, column number
+  local b_line, b_col
+
+  local function line_selection(mode)
+    local start_char, end_char
+    if mode == "visual" then
+      start_char = "'<"
+      end_char = "'>"
+    elseif mode == "motion" then
+      start_char = "'["
+      end_char = "']"
+    end
+
+    -- Get the start and the end of the selection
+    local start_line, start_col = unpack(fn.getpos(start_char), 2, 3)
+    local end_line, end_col = unpack(fn.getpos(end_char), 2, 3)
+    local selected_lines = api.nvim_buf_get_lines(0, start_line - 1, end_line, 0)
+    return {start_pos={start_line, start_col}, end_pos={end_line, end_col}, selected_lines=selected_lines}
+  end
+
+  if selection_type == "visual_lines" or selection_type == "visual_selection" then
+    local res = line_selection("visual")
+    b_line, b_col = unpack(res.start_pos)
+    lines = res.selected_lines
+
+    if selection_type == "visual_selection" then
+      -- Visual selection is more accurate, as we get the sub-string of every line based on the visual selection
+      local _, e_col = unpack(res.end_pos)
+     for i, v in ipairs(lines) do
+         lines[i] = v:sub(b_col, e_col)
+     end
+    end
+  elseif selection_type == "single_line" then
+    b_line, b_col = unpack(api.nvim_win_get_cursor(0))
+    table.insert(lines, fn.getline(b_line))
+  end
+
+  -- If no lines are fetched we don't need to do anything
+  if #lines == 0 or lines == nil then return end
+
+  -- Send each line to the terminal after some preprocessing if required
+  for _, v in ipairs(lines) do
+    -- Trim whitespaces from the strings
+    v = trim_spaces and v:gsub("^%s+", ""):gsub("%s+$", "") or v
+    M.exec(v, terminal_id)
+  end
+
+  -- Jump back with the cursor where we were at the begiining of the selection
+  api.nvim_win_set_cursor(current_window, {b_line, b_col})
+end
+
 function M.toggle_command(args, count)
   local parsed = require("toggleterm.commandline").parse(args)
   vim.validate({
