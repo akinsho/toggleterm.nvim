@@ -417,4 +417,10 @@ You can "send lines" to the toggled terminals with the following commands:
 (`<T_ID` is an optional terminal ID parameter which defines where should we send the lines.
 If the parameter is not provided, then the default is the `first terminal`)
 
+<!-- panvimdoc-ignore-start -->
 
+Example:
+
+<video src="https://user-images.githubusercontent.com/18753533/159889865-724becab-877b-45a2-898e-820afd6a4ee1.mov" controls="controls" muted="muted" height="640px">
+
+<!-- panvimdoc-ignore-end -->
