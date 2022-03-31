@@ -71,7 +71,7 @@ end
 --- Check if background is bright
 --- @return boolean
 function M.is_bright_background()
-  local bg_color = fn.synIDattr(fn.hlID("Normal"), "bg")
+  local bg_color = M.get_hex("Normal", "bg")
   return M.color_is_bright(bg_color)
 end
 
