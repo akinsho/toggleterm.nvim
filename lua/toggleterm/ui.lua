@@ -77,31 +77,29 @@ end
 ---apply highlights to a terminal
 ---@param term Terminal
 function M.hl_term(term)
-  local highlights = {}
-  local config = require("toggleterm.config")
-  if term and term:is_float() or M.is_float() then
-    local opts = term and term.float_opts or config.get("float_opts") or {}
-    highlights = {
-      fmt("NormalFloat:%s", opts.highlights.background),
-      fmt("FloatBorder:%s", opts.highlights.border),
-    }
-  elseif not vim.tbl_isempty(term.highlights) then
-    for key, value in pairs(term.highlights) do
-      highlights[#highlights + 1] = key .. ":" .. value
+  if type(term.highlights) ~= "table" or vim.tbl_isempty(term.highlights) then
+    return
+  end
+
+  local highlights = vim.tbl_map(function(hl_group_name)
+    local hi_def = constants.highlight_group_name_prefix .. term.id .. hl_group_name
+    local hi_target = hl_group_name .. ":" .. hi_def
+
+    local hi_attrs = term.highlights[hl_group_name]
+
+    if hi_attrs.link then
+      vim.cmd(fmt("highlight default link %s %s", hi_def, hi_attrs.link))
+    else
+      local id_attrs = vim.tbl_map(function(hi_attr)
+        return fmt("%s=%s", hi_attr, hi_attrs[hi_attr])
+      end, vim.tbl_keys(hi_attrs))
+      vim.cmd(fmt("highlight %s %s", hi_def, table.concat(id_attrs, " ")))
     end
-  elseif config.get("shade_terminals") then
-    highlights = {
-      "Normal:DarkenedPanel",
-      "EndOfBuffer:DarkenedPanel",
-      "VertSplit:DarkenedPanel",
-      "StatusLine:DarkenedStatusline",
-      "StatusLineNC:DarkenedStatuslineNC",
-      "SignColumn:DarkenedPanel",
-    }
-  end
-  if highlights then
-    vim.cmd("setlocal winhighlight=" .. table.concat(highlights, ","))
-  end
+
+    return hi_target
+  end, vim.tbl_keys(term.highlights))
+
+  vim.cmd("setlocal winhighlight=" .. table.concat(highlights, ","))
 end
 
 ---Create a terminal buffer with the correct buffer/window options

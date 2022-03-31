@@ -5,14 +5,6 @@ if !has('nvim-0.5')
   finish
 endif
 
-" ToggleTerm Highlights
-highlight default link ToggleTermNormal Normal
-highlight default link ToggleTermEndOfBuffer EndOfBuffer
-highlight default link ToggleTermVertSplit VertSplit
-highlight default link ToggleTermStatusLine StatusLine
-highlight default link ToggleTermStatusLineNC StatusLineNC
-highlight default link ToggleTermSignColumn SignColumn
-
 "--------------------------------------------------------------------------------
 " Commands
 "--------------------------------------------------------------------------------

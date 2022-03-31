@@ -178,7 +178,7 @@ describe("ToggleTerm tests:", function()
       local test1 = Terminal:new({ direction = "horizontal" }):toggle()
       assert.is_true(test1:is_split())
       local winhighlight = vim.wo[test1.window].winhighlight
-      assert.is.truthy(winhighlight:match("Normal:ToggleTermNormal"))
+      assert.is.truthy(winhighlight:match("Normal:ToggleTerm" .. test1.id .. "Normal"))
     end)
 
     it("should set the correct filetype", function()
@@ -307,23 +307,31 @@ describe("ToggleTerm tests:", function()
     end)
 
     it("should use a user's selected highlights", function()
+      local normal = "#000000"
+      local border = "#ffffff"
+
       local term = Terminal
         :new({
           direction = "float",
+          highlights = {
+            NormalFloat = {
+              guibg = normal,
+            },
+            FloatBorder = {
+              guifg = border,
+            },
+          },
           float_opts = {
             winblend = 12,
-            highlights = {
-              border = "ErrorMsg",
-              background = "Statement",
-            },
           },
         })
         :toggle()
       local winhighlight = vim.wo[term.window].winhighlight
       local winblend = vim.wo[term.window].winblend
       assert.equal(12, winblend)
-      assert.is.truthy(winhighlight:match("NormalFloat:Statement"))
-      assert.is.truthy(winhighlight:match("FloatBorder:ErrorMsg"))
+
+      assert.is.truthy(winhighlight:match("NormalFloat:ToggleTerm" .. term.id .. "NormalFloat"))
+      assert.is.truthy(winhighlight:match("FloatBorder:ToggleTerm" .. term.id .. "FloatBorder"))
     end)
   end)
 end)

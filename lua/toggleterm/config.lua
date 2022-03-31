@@ -1,3 +1,6 @@
+local colors = require("toggleterm.colors")
+local constants = require("toggleterm.constants")
+
 local M = {}
 
 local L = vim.log.levels
@@ -17,10 +20,34 @@ local config = {
   shell = vim.o.shell,
   float_opts = {
     winblend = 0,
-    highlights = {
-      background = "Normal",
-      border = "Normal",
-    },
+  },
+}
+
+config.highlights = {
+  Normal = {
+    guibg = colors.shade_color(colors.get_hex("Normal", "bg"), constants.shading_amount),
+  },
+  NormalFloat = {
+    guibg = colors.get_hex("NormalFloat", "bg"),
+  },
+  FloatBorder = {
+    guifg = colors.get_hex("FloatBorder", "fg"),
+    guibg = colors.get_hex("FloatBorder", "bg"),
+  },
+  EndOfBuffer = {
+    guibg = colors.shade_color(colors.get_hex("Normal", "bg"), constants.shading_amount),
+  },
+  StatusLine = {
+    gui = "NONE",
+    guibg = colors.shade_color(colors.get_hex("Normal", "bg"), constants.shading_amount),
+  },
+  StatusLineNC = {
+    cterm = "italic",
+    gui = "NONE",
+    guibg = colors.shade_color(colors.get_hex("StatusLineNC", "bg"), constants.shading_amount),
+  },
+  SignColumn = {
+    guibg = colors.shade_color(colors.get_hex("SignColumn", "bg"), constants.shading_amount),
   },
 }
 

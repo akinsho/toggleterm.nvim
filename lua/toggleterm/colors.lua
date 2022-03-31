@@ -1,4 +1,7 @@
+local constants = require("toggleterm.constants")
+
 local fn = vim.fn
+local fmt = string.format
 -----------------------------------------------------------
 -- Export
 -----------------------------------------------------------
@@ -16,7 +19,11 @@ local function to_rgb(color)
 end
 
 -- SOURCE: https://stackoverflow.com/questions/5560248/programmatically-lighten-or-darken-a-hex-color-or-rgb-and-blend-colors
-local function shade_color(color, percent)
+--- Shade Color generate
+--- @param color string hex color
+--- @param percent number
+--- @return string
+function M.shade_color(color, percent)
   local r, g, b = to_rgb(color)
   -- If any of the colors are missing return "NONE" i.e. no highlight
   if not r or not g or not b then
@@ -32,7 +39,7 @@ local function shade_color(color, percent)
   return "#" .. r .. g .. b
 end
 
---- Determine whether to use black or white text
+--- Determine whether toNormal use black or white text
 --- Ref:
 --- 1. https://stackoverflow.com/a/1855903/837964
 --- 2. https://stackoverflow.com/a/596243
@@ -51,6 +58,18 @@ function M.color_is_bright(hex)
   return luminance > 0.5
 end
 
+--- Get hex color
+---@param hlgroup_name string highlight group name
+---@param attr string attr name 'bg', 'fg'
+---@return string
+function M.get_hex(hlgroup_name, attr)
+  local hlgroup_ID = fn.synIDtrans(fn.hlID(hlgroup_name))
+  local hex = fn.synIDattr(hlgroup_ID, attr)
+  return hex ~= "" and hex or "NONE"
+end
+
+--- Check if background is bright
+--- @return boolean
 function M.is_bright_background()
   local bg_color = fn.synIDattr(fn.hlID("Normal"), "bg")
   return M.color_is_bright(bg_color)
@@ -60,13 +79,18 @@ end
 -- Darken Terminal
 -----------------------------------------------------------
 function M.set_highlights(amount)
-  local bg_color = fn.synIDattr(fn.hlID("Normal"), "bg")
-  local darkened_bg = shade_color(bg_color, amount)
-  vim.cmd("highlight DarkenedPanel guibg=" .. darkened_bg)
-  vim.cmd("highlight DarkenedStatusline gui=NONE guibg=" .. darkened_bg)
+  local bg_color = M.get_hex("Normal", "bg")
+  local darkened_bg = M.shade_color(bg_color, amount)
+
+  local hl_group_name = constants.highlight_group_name_prefix
+
+  vim.cmd(fmt("highlight %s guibg=%s", hl_group_name .. "Normal", darkened_bg))
+  vim.cmd(fmt("highlight %s gui=NONE guibg=%s", hl_group_name .. "StatusLine", darkened_bg))
   -- setting cterm to italic is a hack
   -- to prevent the statusline caret issue
-  vim.cmd("highlight DarkenedStatuslineNC cterm=italic gui=NONE guibg=" .. darkened_bg)
+  vim.cmd(
+    fmt("highlight %s cterm=italic gui=NONE guibg=%s", hl_group_name .. "StatusLineNC", darkened_bg)
+  )
 end
 
 return M

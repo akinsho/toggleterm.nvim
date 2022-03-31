@@ -129,6 +129,7 @@ require("toggleterm").setup{
   on_exit = fun(t: Terminal, job: number, exit_code: number, name: string) -- function to run when terminal process exits
   hide_numbers = true, -- hide the number column in toggleterm buffers
   shade_filetypes = {},
+  highlights = {}, -- highlights
   shade_terminals = true,
   shading_factor = '<number>', -- the degree by which to darken to terminal colour, default: 1 for dark backgrounds, 3 for light
   start_in_insert = true,
@@ -148,10 +149,6 @@ require("toggleterm").setup{
     width = <value>,
     height = <value>,
     winblend = 3,
-    highlights = {
-      border = "Normal",
-      background = "Normal",
-    }
   }
 }
 ```
@@ -302,7 +299,7 @@ Terminal:new {
   direction = string -- the layout for the terminal, same as the main config options
   dir = string -- the directory for the terminal
   close_on_exit = bool -- close the terminal window when the process exits
-  highlights = table -- a table with highlights (float terminal not supported)
+  highlights = table -- a table with highlights
   on_open = fun(t: Terminal) -- function to run when the terminal opens
   on_close = fun(t: Terminal) -- function to run when the terminal closes
   -- callbacks for processing the output
@@ -344,6 +341,14 @@ You can also set a custom layout for a terminal.
 local lazygit = Terminal:new({
   cmd = "lazygit",
   dir = "git_dir",
+  highlights = {
+    NormalFloat = {
+      guibg = '#000000'
+    },
+    FloatBorder = {
+      guifg = '#fffff'
+    }
+  },
   direction = "float",
   float_opts = {
     border = "double",
