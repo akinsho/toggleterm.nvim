@@ -178,7 +178,7 @@ describe("ToggleTerm tests:", function()
       local test1 = Terminal:new({ direction = "horizontal" }):toggle()
       assert.is_true(test1:is_split())
       local winhighlight = vim.wo[test1.window].winhighlight
-      assert.is.truthy(winhighlight:match("Normal:DarkenedPanel"))
+      assert.is.truthy(winhighlight:match("Normal:ToggleTermNormal"))
     end)
 
     it("should set the correct filetype", function()
