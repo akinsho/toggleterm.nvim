@@ -39,7 +39,7 @@ function M.shade_color(color, percent)
   return "#" .. r .. g .. b
 end
 
---- Determine whether toNormal use black or white text
+--- Determine whether to use black or white text
 --- Ref:
 --- 1. https://stackoverflow.com/a/1855903/837964
 --- 2. https://stackoverflow.com/a/596243
