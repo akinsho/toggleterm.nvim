@@ -21,7 +21,7 @@ local function is_pwsh()
 end
 
 local function get_command_sep()
-  return is_windows and is_cmd() and "&" or ";"
+  return is_windows and "&" or ";"
 end
 
 local function get_comment_sep()
