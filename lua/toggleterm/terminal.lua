@@ -10,26 +10,25 @@ local fmt = string.format
 local fn = vim.fn
 
 local is_windows = fn.has("win32") == 1
-local function is_cmd()
-  local shell = config.get("shell")
+local function is_cmd(shell)
   return string.find(shell, "cmd")
 end
 
-local function is_pwsh()
-  local shell = config.get("shell")
+local function is_pwsh(shell)
   return string.find(shell, "pwsh") or string.find(shell, "powershell")
 end
 
 local function get_command_sep()
-  return is_windows and is_cmd() and "&" or ";"
+  return is_windows and is_cmd(vim.o.shell) and "&" or ";"
 end
 
 local function get_comment_sep()
-  return is_windows and is_cmd() and "::" or "#"
+  return is_windows and is_cmd(vim.o.shell) and "::" or "#"
 end
 
 local function get_newline_chr()
-  return is_windows and (is_pwsh() and "\r" or "\r\n") or "\n"
+  local shell = config.get("shell")
+  return is_windows and (is_pwsh(shell) and "\r" or "\r\n") or "\n"
 end
 
 ---@type Terminal[]
