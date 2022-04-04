@@ -23,9 +23,15 @@ local config = {
   },
 }
 
+local function shade(color)
+  return colors.shade_color(color, constants.shading_amount)
+end
+
+local normal_bg = colors.get_hex("Normal", "bg")
+
 config.highlights = {
   Normal = {
-    guibg = colors.shade_color(colors.get_hex("Normal", "bg"), constants.shading_amount),
+    guibg = shade(normal_bg),
   },
   NormalFloat = {
     guibg = colors.get_hex("NormalFloat", "bg"),
@@ -35,19 +41,19 @@ config.highlights = {
     guibg = colors.get_hex("FloatBorder", "bg"),
   },
   EndOfBuffer = {
-    guibg = colors.shade_color(colors.get_hex("Normal", "bg"), constants.shading_amount),
+    guibg = shade(normal_bg),
   },
   StatusLine = {
     gui = "NONE",
-    guibg = colors.shade_color(colors.get_hex("Normal", "bg"), constants.shading_amount),
+    guibg = shade(normal_bg),
   },
   StatusLineNC = {
     cterm = "italic",
     gui = "NONE",
-    guibg = colors.shade_color(colors.get_hex("StatusLineNC", "bg"), constants.shading_amount),
+    guibg = shade(colors.get_hex("StatusLineNC", "bg")),
   },
   SignColumn = {
-    guibg = colors.shade_color(colors.get_hex("SignColumn", "bg"), constants.shading_amount),
+    guibg = shade(colors.get_hex("StatusLineNC", "bg")),
   },
 }
 
