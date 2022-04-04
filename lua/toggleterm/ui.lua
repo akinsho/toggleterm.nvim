@@ -88,18 +88,15 @@ function M.hl_term(term)
     local hi_attrs = term.highlights[hl_group_name]
 
     if hi_attrs.link then
-      vim.cmd(fmt("highlight default link %s %s", hi_def, hi_attrs.link))
+      vim.highlight.link(hi_def, hi_attrs.link)
     else
-      local id_attrs = vim.tbl_map(function(hi_attr)
-        return fmt("%s=%s", hi_attr, hi_attrs[hi_attr])
-      end, vim.tbl_keys(hi_attrs))
-      vim.cmd(fmt("highlight %s %s", hi_def, table.concat(id_attrs, " ")))
+      vim.highlight.create(hi_def, hi_attrs)
     end
 
     return hi_target
   end, vim.tbl_keys(term.highlights))
 
-  vim.cmd("setlocal winhighlight=" .. table.concat(highlights, ","))
+  vim.api.nvim_win_set_option(term.window, "winhighlight", table.concat(highlights, ","))
 end
 
 ---Create a terminal buffer with the correct buffer/window options
