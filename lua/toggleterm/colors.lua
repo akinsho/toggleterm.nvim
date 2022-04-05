@@ -84,13 +84,24 @@ function M.set_highlights(amount)
 
   local hl_group_name = constants.highlight_group_name_prefix
 
-  vim.cmd(fmt("highlight %s guibg=%s", hl_group_name .. "Normal", darkened_bg))
-  vim.cmd(fmt("highlight %s gui=NONE guibg=%s", hl_group_name .. "StatusLine", darkened_bg))
-  -- setting cterm to italic is a hack
-  -- to prevent the statusline caret issue
-  vim.cmd(
-    fmt("highlight %s cterm=italic gui=NONE guibg=%s", hl_group_name .. "StatusLineNC", darkened_bg)
-  )
+  local highlights = {
+    [hl_group_name .. "Normal"] = {
+      guibg = darkened_bg
+    },
+    [hl_group_name .. "StatusLine"] = {
+      guibg = darkened_bg
+    },
+    [hl_group_name .. "StatusLineNC"] = {
+      -- setting cterm to italic is a hack
+      -- to prevent the statusline caret issue
+      cterm = 'italic', gui = 'NONE', guibg = darkened_bg
+    }
+  }
+
+  for hl_group, options in pairs(highlights) do
+    vim.highlight.create(hl_group, options)
+  end
+
 end
 
 return M
