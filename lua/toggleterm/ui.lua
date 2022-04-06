@@ -156,6 +156,10 @@ function M.stopinsert()
   vim.cmd("stopinsert!")
 end
 
+local function compare_ft(buf)
+  return vim.bo[buf].filetype == constants.term_ft
+end
+
 --- Find the first open terminal window
 --- by iterating all windows and matching the
 --- containing buffers filetype with the passed in
@@ -163,16 +167,12 @@ end
 --- the filetype
 --- @param comparator function
 function M.find_open_windows(comparator)
-  comparator = comparator
-    or function(buf)
-      return vim.bo[buf].filetype == constants.term_ft
-    end
+  comparator = comparator or compare_ft
   local wins = api.nvim_list_wins()
   local is_open = false
   local term_wins = {}
   for _, win in pairs(wins) do
-    local buf = api.nvim_win_get_buf(win)
-    if comparator(buf) then
+    if comparator(api.nvim_win_get_buf(win)) then
       is_open = true
       table.insert(term_wins, win)
     end
