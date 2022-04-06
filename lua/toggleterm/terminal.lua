@@ -4,7 +4,6 @@ local ui = require("toggleterm.ui")
 local config = require("toggleterm.config")
 local utils = require("toggleterm.utils")
 local term_ft = require("toggleterm.constants").term_ft
-local constants = require("toggleterm.constants")
 
 local api = vim.api
 local fmt = string.format
@@ -27,6 +26,7 @@ local terminals = {}
 --- @field bufnr number
 --- @field window number
 --- @field job_id number
+--- @field highlights table<string, table<string, string>>
 --- @field dir string the directory for the terminal
 --- @field name string the name of the terminal
 --- @field count number the count that triggers that specific terminal
