@@ -96,7 +96,7 @@ function M.hl_term(term)
     return hi_target
   end, vim.tbl_keys(term.highlights))
 
-  vim.api.nvim_win_set_option(term.window, "winhighlight", table.concat(highlights, ","))
+  api.nvim_win_set_option(term.window, "winhighlight", table.concat(highlights, ","))
 end
 
 ---Create a terminal buffer with the correct buffer/window options
