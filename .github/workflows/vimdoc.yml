@@ -15,5 +15,5 @@ jobs:
           description: persist and toggle multiple terminals
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Auto generate docs"
+          commit_message: "chore(ci): auto generate docs"
           branch: ${{ github.head_ref }}
