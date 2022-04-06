@@ -354,14 +354,6 @@ You can also set a custom layout for a terminal.
 local lazygit = Terminal:new({
   cmd = "lazygit",
   dir = "git_dir",
-  highlights = {
-    NormalFloat = {
-      guibg = '#000000'
-    },
-    FloatBorder = {
-      guifg = '#fffff'
-    }
-  },
   direction = "float",
   float_opts = {
     border = "double",
