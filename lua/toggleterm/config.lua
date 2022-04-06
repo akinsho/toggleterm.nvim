@@ -32,11 +32,11 @@ local config = {
       guibg = shade(normal_bg),
     },
     NormalFloat = {
-      guibg = colors.get_hex("NormalFloat", "bg"),
+      guibg = colors.get_hex("Normal", "bg"),
     },
     FloatBorder = {
-      guifg = colors.get_hex("FloatBorder", "fg"),
-      guibg = colors.get_hex("FloatBorder", "bg"),
+      guifg = colors.get_hex("Normal", "fg"),
+      guibg = colors.get_hex("Normal", "bg"),
     },
     EndOfBuffer = {
       guibg = shade(normal_bg),
