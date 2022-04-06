@@ -77,27 +77,30 @@ end
 ---apply highlights to a terminal
 ---@param term Terminal
 function M.hl_term(term)
-  local highlights
-  local config = require("toggleterm.config")
-  if term and term:is_float() or M.is_float() then
-    local opts = term and term.float_opts or config.get("float_opts") or {}
-    highlights = {
-      fmt("NormalFloat:%s", opts.highlights.background),
-      fmt("FloatBorder:%s", opts.highlights.border),
-    }
-  elseif config.get("shade_terminals") then
-    highlights = {
-      "Normal:DarkenedPanel",
-      "EndOfBuffer:DarkenedPanel",
-      "VertSplit:DarkenedPanel",
-      "StatusLine:DarkenedStatusline",
-      "StatusLineNC:DarkenedStatuslineNC",
-      "SignColumn:DarkenedPanel",
-    }
+  if type(term.highlights) ~= "table" or vim.tbl_isempty(term.highlights) then
+    return
   end
-  if highlights then
-    vim.cmd("setlocal winhighlight=" .. table.concat(highlights, ","))
-  end
+
+  -- If the terminal is a floating window we only want to set the background and border
+  -- not the statusline etc. which are not applicable to floating windows
+  local hl_names = term:is_float() and { "NormalFloat", "FloatBorder" }
+    or vim.tbl_keys(term.highlights)
+
+  local highlights = vim.tbl_map(function(hl_group_name)
+    local hi_def = constants.highlight_group_name_prefix .. term.id .. hl_group_name
+    local hi_target = fmt("%s:%s", hl_group_name, hi_def)
+    local hi_attrs = term.highlights[hl_group_name]
+
+    if hi_attrs.link then
+      vim.highlight.link(hi_def, hi_attrs.link)
+    else
+      vim.highlight.create(hi_def, hi_attrs)
+    end
+
+    return hi_target
+  end, hl_names)
+
+  api.nvim_win_set_option(term.window, "winhighlight", table.concat(highlights, ","))
 end
 
 ---Create a terminal buffer with the correct buffer/window options

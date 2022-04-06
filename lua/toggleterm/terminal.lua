@@ -41,6 +41,7 @@ local terminals = {}
 --- @field bufnr number
 --- @field window number
 --- @field job_id number
+--- @field highlights table<string, table<string, string>>
 --- @field dir string the directory for the terminal
 --- @field name string the name of the terminal
 --- @field count number the count that triggers that specific terminal
@@ -163,6 +164,7 @@ function Terminal:new(term)
   term.direction = term.direction or conf.direction
   term.id = id or next_id()
   term.hidden = term.hidden or false
+  term.highlights = term.highlights or conf.highlights
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
   term.on_open = term.on_open or conf.on_open
   term.on_close = term.on_close or conf.on_close
