@@ -129,7 +129,20 @@ require("toggleterm").setup{
   on_exit = fun(t: Terminal, job: number, exit_code: number, name: string) -- function to run when terminal process exits
   hide_numbers = true, -- hide the number column in toggleterm buffers
   shade_filetypes = {},
-  highlights = {}, -- highlights
+  highlights = {
+    -- highlights which map to a highlight group name and a table of it's values
+    -- NOTE: this is only a subset of values, any group placed here will be set for the terminal window split
+    Normal = {
+      guibg = <VALUE-HERE>,
+    },
+    NormalFloat = {
+      link = 'Normal'
+    },
+    FloatBorder = {
+      guifg = <VALUE-HERE>,
+      guibg = <VALUE-HERE>,
+    },
+  },
   shade_terminals = true,
   shading_factor = '<number>', -- the degree by which to darken to terminal colour, default: 1 for dark backgrounds, 3 for light
   start_in_insert = true,
