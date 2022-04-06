@@ -117,7 +117,7 @@ function M.on_term_open()
         id = id,
         bufnr = api.nvim_get_current_buf(),
         window = api.nvim_get_current_win(),
-        highlights = config.get("highlights"),
+        highlights = require("toggleterm.config").get("highlights"),
         job_id = vim.b.terminal_job_id,
         direction = require("toggleterm.ui").guess_direction(),
       })
