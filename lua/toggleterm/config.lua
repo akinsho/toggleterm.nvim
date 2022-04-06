@@ -10,6 +10,7 @@ local function shade(color)
 end
 
 local normal_bg = colors.get_hex("Normal", "bg")
+local darkened_normal_bg = shade(normal_bg)
 
 local config = {
   size = 12,
@@ -29,29 +30,29 @@ local config = {
   },
   highlights = {
     Normal = {
-      guibg = shade(normal_bg),
+      guibg = darkened_normal_bg,
     },
     NormalFloat = {
-      guibg = colors.get_hex("Normal", "bg"),
+      guibg = normal_bg,
     },
     FloatBorder = {
       guifg = colors.get_hex("Normal", "fg"),
-      guibg = colors.get_hex("Normal", "bg"),
+      guibg = normal_bg,
+    },
+    SignColumn = {
+      guibg = darkened_normal_bg,
     },
     EndOfBuffer = {
-      guibg = shade(normal_bg),
+      guibg = darkened_normal_bg,
     },
     StatusLine = {
       gui = "NONE",
-      guibg = shade(normal_bg),
+      guibg = darkened_normal_bg,
     },
     StatusLineNC = {
       cterm = "italic",
       gui = "NONE",
-      guibg = shade(colors.get_hex("StatusLineNC", "bg")),
-    },
-    SignColumn = {
-      guibg = shade(colors.get_hex("StatusLineNC", "bg")),
+      guibg = darkened_normal_bg,
     },
   },
 }
