@@ -81,10 +81,14 @@ function M.hl_term(term)
     return
   end
 
+  -- If the terminal is a floating window we only want to set the background and border
+  -- not the statusline etc. which are not applicable to floating windows
+  local hl_names = term:is_float() and { "NormalFloat", "FloatBorder" }
+    or vim.tbl_keys(term.highlights)
+
   local highlights = vim.tbl_map(function(hl_group_name)
     local hi_def = constants.highlight_group_name_prefix .. term.id .. hl_group_name
-    local hi_target = hl_group_name .. ":" .. hi_def
-
+    local hi_target = fmt("%s:%s", hl_group_name, hi_def)
     local hi_attrs = term.highlights[hl_group_name]
 
     if hi_attrs.link then
@@ -94,7 +98,7 @@ function M.hl_term(term)
     end
 
     return hi_target
-  end, vim.tbl_keys(term.highlights))
+  end, hl_names)
 
   api.nvim_win_set_option(term.window, "winhighlight", table.concat(highlights, ","))
 end
