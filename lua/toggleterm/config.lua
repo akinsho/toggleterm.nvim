@@ -5,6 +5,12 @@ local M = {}
 
 local L = vim.log.levels
 
+local function shade(color)
+  return colors.shade_color(color, constants.shading_amount)
+end
+
+local normal_bg = colors.get_hex("Normal", "bg")
+
 local config = {
   size = 12,
   shade_filetypes = {},
@@ -21,39 +27,32 @@ local config = {
   float_opts = {
     winblend = 0,
   },
-}
-
-local function shade(color)
-  return colors.shade_color(color, constants.shading_amount)
-end
-
-local normal_bg = colors.get_hex("Normal", "bg")
-
-config.highlights = {
-  Normal = {
-    guibg = shade(normal_bg),
-  },
-  NormalFloat = {
-    guibg = colors.get_hex("NormalFloat", "bg"),
-  },
-  FloatBorder = {
-    guifg = colors.get_hex("FloatBorder", "fg"),
-    guibg = colors.get_hex("FloatBorder", "bg"),
-  },
-  EndOfBuffer = {
-    guibg = shade(normal_bg),
-  },
-  StatusLine = {
-    gui = "NONE",
-    guibg = shade(normal_bg),
-  },
-  StatusLineNC = {
-    cterm = "italic",
-    gui = "NONE",
-    guibg = shade(colors.get_hex("StatusLineNC", "bg")),
-  },
-  SignColumn = {
-    guibg = shade(colors.get_hex("StatusLineNC", "bg")),
+  highlights = {
+    Normal = {
+      guibg = shade(normal_bg),
+    },
+    NormalFloat = {
+      guibg = colors.get_hex("NormalFloat", "bg"),
+    },
+    FloatBorder = {
+      guifg = colors.get_hex("FloatBorder", "fg"),
+      guibg = colors.get_hex("FloatBorder", "bg"),
+    },
+    EndOfBuffer = {
+      guibg = shade(normal_bg),
+    },
+    StatusLine = {
+      gui = "NONE",
+      guibg = shade(normal_bg),
+    },
+    StatusLineNC = {
+      cterm = "italic",
+      gui = "NONE",
+      guibg = shade(colors.get_hex("StatusLineNC", "bg")),
+    },
+    SignColumn = {
+      guibg = shade(colors.get_hex("StatusLineNC", "bg")),
+    },
   },
 }
 
