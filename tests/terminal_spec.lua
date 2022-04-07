@@ -300,6 +300,19 @@ describe("ToggleTerm tests:", function()
       assert.equal(ui._resolve_size(size2, term), size1)
     end)
 
+    it("should correctly merge a users highlights", function()
+      toggleterm.setup({
+        highlights = {
+          Normal = {
+            guibg = "Red",
+          },
+        },
+      })
+      local config = require("toggleterm.config").get("highlights")
+      assert.equal(config.Normal.guibg, "Red")
+      assert.truthy(config.StatusLine.guibg)
+    end)
+
     -- FIXME the height is passed in correctly but is returned as 15
     -- which seems to be an nvim quirk not the code
     it("should open with user configuration if set", function()
