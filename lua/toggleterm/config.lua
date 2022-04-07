@@ -9,9 +9,6 @@ local function shade(color)
   return colors.shade_color(color, constants.shading_amount)
 end
 
-local normal_bg = colors.get_hex("Normal", "bg")
-local darkened_normal_bg = shade(normal_bg)
-
 local config = {
   size = 12,
   shade_filetypes = {},
@@ -28,9 +25,15 @@ local config = {
   float_opts = {
     winblend = 0,
   },
-  highlights = {
+}
+
+local function get_highlights(conf)
+  conf = conf or config
+  local normal_bg = colors.get_hex("Normal", "bg")
+  local terminal_bg = conf.shade_terminals and shade(normal_bg) or normal_bg
+  local highlights = {
     Normal = {
-      guibg = darkened_normal_bg,
+      guibg = terminal_bg,
     },
     NormalFloat = {
       guibg = normal_bg,
@@ -40,22 +43,23 @@ local config = {
       guibg = normal_bg,
     },
     SignColumn = {
-      guibg = darkened_normal_bg,
+      guibg = terminal_bg,
     },
     EndOfBuffer = {
-      guibg = darkened_normal_bg,
+      guibg = terminal_bg,
     },
     StatusLine = {
       gui = "NONE",
-      guibg = darkened_normal_bg,
+      guibg = terminal_bg,
     },
     StatusLineNC = {
       cterm = "italic",
       gui = "NONE",
-      guibg = darkened_normal_bg,
+      guibg = terminal_bg,
     },
-  },
-}
+  }
+  return highlights
+end
 
 local function handle_deprecations(conf)
   if conf.direction == "window" then
@@ -82,8 +86,9 @@ end
 function M.set(user_conf)
   if user_conf and type(user_conf) == "table" then
     handle_deprecations(user_conf)
-    config = vim.tbl_deep_extend("force", config, user_conf)
   end
+  local highlights = get_highlights(user_conf)
+  config = vim.tbl_deep_extend("force", config, { highlights = highlights }, user_conf or {})
   return config
 end
 
