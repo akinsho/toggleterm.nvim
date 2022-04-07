@@ -5,9 +5,27 @@ local M = {}
 
 local L = vim.log.levels
 
-local function shade(color)
-  return colors.shade_color(color, constants.shading_amount)
+local function shade(color, factor)
+  return colors.shade_color(color, factor)
 end
+
+--- @alias ToggleTermHighlights table<string, table<string, string>>
+
+--- @class ToggleTermConfig
+--- @field size number
+--- @field shade_filetypes string[]
+--- @field hide_numbers boolean
+--- @field shade_terminals boolean
+--- @field insert_mappings boolean
+--- @field terminal_mappings boolean
+--- @field start_in_insert boolean
+--- @field persist_size boolean
+--- @field close_on_exit boolean
+--- @field direction  '"horizontal"' | '"vertical"' | '"float"'
+--- @field shading_factor number
+--- @field shell string
+--- @field float_opts table<string, any>
+--- @field highlights ToggleTermHighlights
 
 local config = {
   size = 12,
@@ -20,18 +38,20 @@ local config = {
   persist_size = true,
   close_on_exit = true,
   direction = "horizontal",
-  shading_factor = nil,
+  shading_factor = constants.shading_amount,
   shell = vim.o.shell,
   float_opts = {
     winblend = 0,
   },
 }
 
+---Derive the highlights for a toggleterm and merge these with the user's preferences
+---@param conf ToggleTermConfig
+---@return ToggleTermHighlights
 local function get_highlights(conf)
-  conf = conf or config
   local normal_bg = colors.get_hex("Normal", "bg")
-  local terminal_bg = conf.shade_terminals and shade(normal_bg) or normal_bg
-  local highlights = {
+  local terminal_bg = conf.shade_terminals and shade(normal_bg, conf.shading_factor) or normal_bg
+  return vim.tbl_deep_extend("force", {
     Normal = {
       guibg = terminal_bg,
     },
@@ -57,8 +77,7 @@ local function get_highlights(conf)
       gui = "NONE",
       guibg = terminal_bg,
     },
-  }
-  return highlights
+  }, conf.highlights or {})
 end
 
 local function handle_deprecations(conf)
@@ -83,12 +102,14 @@ function M.get(key)
   return config
 end
 
+---@param user_conf ToggleTermConfig
+---@return ToggleTermConfig
 function M.set(user_conf)
   if user_conf and type(user_conf) == "table" then
     handle_deprecations(user_conf)
   end
-  local highlights = get_highlights(user_conf)
-  config = vim.tbl_deep_extend("force", config, { highlights = highlights }, user_conf or {})
+  config = vim.tbl_deep_extend("force", config, user_conf or {})
+  config.highlights = get_highlights(config)
   return config
 end
 
