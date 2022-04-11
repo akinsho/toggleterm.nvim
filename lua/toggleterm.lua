@@ -261,6 +261,7 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
   end
 
   -- Jump back with the cursor where we were at the begiining of the selection
+  api.nvim_set_current_win(current_window)
   api.nvim_win_set_cursor(current_window, { b_line, b_col })
 end
 
