@@ -75,21 +75,28 @@ function M.set_options(win, buf, term)
 end
 
 ---apply highlights to a terminal
+---if no term is passed in we use default values instead
 ---@param term Terminal
 function M.hl_term(term)
-  if type(term.highlights) ~= "table" or vim.tbl_isempty(term.highlights) then
+  local config = require("toggleterm.config")
+
+  local hls = term and term.highlights or config.get("highlights")
+  if not hls or vim.tbl_isempty(hls) then
     return
   end
 
+  local window = term and term.window or api.nvim_get_current_win()
+  local id = term and term.id or "Default"
+  local is_float = M.is_float(window)
+
   -- If the terminal is a floating window we only want to set the background and border
   -- not the statusline etc. which are not applicable to floating windows
-  local hl_names = term:is_float() and { "NormalFloat", "FloatBorder" }
-    or vim.tbl_keys(term.highlights)
+  local hl_names = is_float and { "NormalFloat", "FloatBorder" } or vim.tbl_keys(hls)
 
   local highlights = vim.tbl_map(function(hl_group_name)
-    local hi_def = constants.highlight_group_name_prefix .. term.id .. hl_group_name
+    local hi_def = constants.highlight_group_name_prefix .. id .. hl_group_name
     local hi_target = fmt("%s:%s", hl_group_name, hi_def)
-    local hi_attrs = term.highlights[hl_group_name]
+    local hi_attrs = hls[hl_group_name]
 
     if hi_attrs.link then
       vim.highlight.link(hi_def, hi_attrs.link)
@@ -100,7 +107,7 @@ function M.hl_term(term)
     return hi_target
   end, hl_names)
 
-  api.nvim_win_set_option(term.window, "winhighlight", table.concat(highlights, ","))
+  api.nvim_win_set_option(window, "winhighlight", table.concat(highlights, ","))
 end
 
 ---Create a terminal buffer with the correct buffer/window options

@@ -327,21 +327,22 @@ end
 function M.setup(user_prefs)
   local conf = require("toggleterm.config").set(user_prefs)
   setup_global_mappings()
+  local toggleterm_pattern = "term://*#toggleterm#*"
   local autocommands = {
     {
       "WinEnter",
-      "term://*toggleterm*",
+      toggleterm_pattern,
       "nested", -- this is necessary in case the buffer is the last
       "lua require'toggleterm'.handle_term_enter()",
     },
     {
       "WinLeave",
-      "term://*toggleterm*",
+      toggleterm_pattern,
       "lua require'toggleterm'.handle_term_leave()",
     },
     {
       "TermOpen",
-      "term://*toggleterm*",
+      toggleterm_pattern,
       "lua require'toggleterm'.on_term_open()",
     },
   }
