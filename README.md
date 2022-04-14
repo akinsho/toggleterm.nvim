@@ -149,7 +149,7 @@ require("toggleterm").setup{
   insert_mappings = true, -- whether or not the open mapping applies in insert mode
   terminal_mappings = true, -- whether or not the open mapping applies in the opened terminals
   persist_size = true,
-  direction = 'vertical' | 'horizontal' | 'window' | 'float',
+  direction = 'vertical' | 'horizontal' | 'tab' | 'float',
   close_on_exit = true, -- close the terminal window when the process exits
   shell = vim.o.shell, -- change the default shell
   -- This field is only relevant if direction is set to 'float'
@@ -427,7 +427,7 @@ command! -count=1 TermGitPushF lua require'toggleterm'.exec("git push -f", <coun
 | ---------- | --------- |
 | vertical   | ✔️        |
 | horizontal | ✔️        |
-| window     | ✖️        |
+| tab        | ✖️        |
 | float      | ✖️        |
 
 In your first terminal, you need to leave the `TERMINAL` mode using <kbd>C-\\</kbd><kbd>C-N</kbd> which can be remapped to <kbd>Esc</kbd> for ease of use.
