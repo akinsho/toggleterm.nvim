@@ -56,11 +56,10 @@ local function get_highlights(conf)
       guibg = terminal_bg,
     },
     NormalFloat = {
-      guibg = normal_bg,
+      link = "Normal",
     },
     FloatBorder = {
-      guifg = colors.get_hex("Normal", "fg"),
-      guibg = normal_bg,
+      link = "Normal",
     },
     SignColumn = {
       guibg = terminal_bg,
