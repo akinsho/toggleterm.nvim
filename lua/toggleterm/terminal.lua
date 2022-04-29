@@ -360,6 +360,19 @@ local function opener(size, term)
   end
 end
 
+---Spawn terminal background job in a buffer without a window
+function Terminal:spawn()
+  if fn.bufexists(self.bufnr) == 0 then
+    self.bufnr = vim.api.nvim_create_buf(false, false)
+    self:__add()
+    vim.api.nvim_buf_call(self.bufnr, function()
+      self:__spawn()
+    end)
+    setup_buffer_autocommands(self)
+    setup_buffer_mappings(self.bufnr)
+  end
+end
+
 ---Open a terminal window
 ---@param size number
 ---@param direction string
