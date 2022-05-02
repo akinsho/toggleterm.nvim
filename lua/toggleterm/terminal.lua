@@ -362,7 +362,7 @@ end
 
 ---Spawn terminal background job in a buffer without a window
 function Terminal:spawn()
-  if fn.bufexists(self.bufnr) == 0 then
+  if not (self.bufnr and api.nvim_buf_is_valid(self.bufnr)) then
     self.bufnr = api.nvim_create_buf(false, false)
     self:__add()
     api.nvim_buf_call(self.bufnr, function()
@@ -383,7 +383,7 @@ function Terminal:open(size, direction, is_new)
   if direction then
     self:change_direction(direction)
   end
-  if fn.bufexists(self.bufnr) == 0 then
+  if not (self.bufnr and api.nvim_buf_is_valid(self.bufnr)) then
     local ok, err = pcall(opener, size, self)
     if not ok then
       return utils.notify(err, "error")
