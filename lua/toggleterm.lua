@@ -68,7 +68,7 @@ local function smart_toggle(_, size, dir, direction)
       end
     end
     if not target then
-      require("toggleterm.utils").echomsg("Couldn't find a terminal to close")
+      require("toggleterm.utils").notify("Couldn't find a terminal to close", "error")
       return
     end
     target:close()
