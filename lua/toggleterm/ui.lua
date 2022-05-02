@@ -130,6 +130,10 @@ local function create_term_buf_if_needed(term)
   term.window, term.bufnr = window, bufnr
 end
 
+function M.create_buf()
+    return api.nvim_create_buf(false, false)
+end
+
 function M.delete_buf(term)
   if term.bufnr and api.nvim_buf_is_valid(term.bufnr) then
     api.nvim_buf_delete(term.bufnr, { force = true })

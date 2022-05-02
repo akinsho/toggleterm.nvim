@@ -363,7 +363,7 @@ end
 ---Spawn terminal background job in a buffer without a window
 function Terminal:spawn()
   if not (self.bufnr and api.nvim_buf_is_valid(self.bufnr)) then
-    self.bufnr = api.nvim_create_buf(false, false)
+    self.bufnr = ui.create_buf()
     self:__add()
     api.nvim_buf_call(self.bufnr, function()
       self:__spawn()
