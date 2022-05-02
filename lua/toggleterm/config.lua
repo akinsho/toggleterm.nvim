@@ -92,7 +92,7 @@ local function handle_deprecations(conf)
 end
 
 --- get the full user config or just a specified value
----@param key string
+---@param key string?
 ---@return any
 function M.get(key)
   if key then

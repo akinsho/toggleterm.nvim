@@ -176,7 +176,7 @@ end
 --- containing buffers filetype with the passed in
 --- comparator function or the default which matches
 --- the filetype
---- @param comparator function
+--- @param comparator function?
 function M.find_open_windows(comparator)
   comparator = comparator or compare_ft
   local wins = api.nvim_list_wins()
@@ -366,7 +366,7 @@ end
 
 ---Resize a split window
 ---@param term Terminal
----@param size number
+---@param size number?
 function M.resize_split(term, size)
   size = M._resolve_size(M.get_size(size, term.direction), term)
   if require("toggleterm.config").get("persist_size") then

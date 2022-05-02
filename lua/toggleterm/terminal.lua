@@ -48,9 +48,9 @@ local terminals = {}
 --- @field hidden boolean whether or not to include this terminal in the terminals list
 --- @field close_on_exit boolean whether or not to close the terminal window when the process exits
 --- @field float_opts table<string, any>
---- @field on_stdout fun(t: Terminal, job: number, data: string[], name: string)
+--- @field on_stdout fun(t: Terminal, job: number, data: string[]?, name: string?)
 --- @field on_stderr fun(t: Terminal, job: number, data: string[], name: string)
---- @field on_exit fun(t: Terminal, job: number, exit_code: number, name: string)
+--- @field on_exit fun(t: Terminal, job: number, exit_code: number?, name: string?)
 --- @field on_open fun(term:Terminal)
 --- @field on_close fun(term:Terminal)
 local Terminal = {}
@@ -85,7 +85,7 @@ local function decrement_id(num)
 end
 
 ---Get an opened (valid) toggle terminal by id, defaults to the first opened
----@param position number
+---@param position number?
 ---@return nil
 function M.get_toggled_id(position)
   position = position or 1
@@ -245,7 +245,7 @@ end
 
 ---Send a command to a running terminal
 ---@param cmd string|string[]
----@param go_back boolean whether or not to return to original window
+---@param go_back boolean? whether or not to return to original window
 function Terminal:send(cmd, go_back)
   cmd = type(cmd) == "table" and with_cr(unpack(cmd)) or with_cr(cmd)
   fn.chansend(self.job_id, cmd)
@@ -377,9 +377,9 @@ function Terminal:spawn()
 end
 
 ---Open a terminal window
----@param size number
----@param direction string
----@param is_new boolean
+---@param size number?
+---@param direction string?
+---@param is_new boolean?
 function Terminal:open(size, direction, is_new)
   self.dir = _get_dir(self.dir)
   ui.set_origin_window()
@@ -437,7 +437,7 @@ end
 --- get the toggle term number from
 --- the name e.g. term://~/.dotfiles//3371887:/usr/bin/zsh;#toggleterm#1
 --- the number in this case is 1
---- @param name string
+--- @param name string?
 --- @return number
 function M.identify(name)
   name = name or api.nvim_buf_get_name(api.nvim_get_current_buf())
@@ -459,7 +459,7 @@ end
 ---get existing terminal or create an empty term table
 ---@param num number
 ---@param dir string
----@param direction string
+---@param direction string?
 ---@return Terminal
 ---@return boolean
 function M.get_or_create_term(num, dir, direction)
@@ -479,7 +479,7 @@ function M.get(id)
 end
 
 ---Return the potentially non contiguous map of terminals as a sorted array
----@param include_hidden boolean whether or nor to filter out hidden
+---@param include_hidden boolean? whether or nor to filter out hidden
 ---@return Terminal[]
 function M.get_all(include_hidden)
   local result = {}

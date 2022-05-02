@@ -147,12 +147,12 @@ function M.exec_command(args, count)
 end
 
 --- @param cmd string
---- @param num number
---- @param size number
---- @param dir string
---- @param direction string
---- @param go_back boolean whether or not to return to original window
---- @param open boolean whether or not to open terminal window
+--- @param num number?
+--- @param size number?
+--- @param dir string?
+--- @param direction string?
+--- @param go_back? boolean whether or not to return to original window
+--- @param open? boolean whether or not to open terminal window
 function M.exec(cmd, num, size, dir, direction, go_back, open)
   vim.validate({
     cmd = { cmd, "string" },
