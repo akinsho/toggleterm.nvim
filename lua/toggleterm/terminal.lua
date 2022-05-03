@@ -123,7 +123,10 @@ local function setup_buffer_autocommands(term)
   }
 
   if conf.start_in_insert then
-    vim.cmd("startinsert")
+    -- Avoid entering insert mode when spawning terminal in the background
+    if term.window == api.nvim_get_current_win() then
+      vim.cmd("startinsert")
+    end
     table.insert(commands, {
       "BufEnter",
       fmt("<buffer=%d>", term.bufnr),
