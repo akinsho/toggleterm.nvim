@@ -123,7 +123,10 @@ local function setup_buffer_autocommands(term)
   }
 
   if conf.start_in_insert then
-    vim.cmd("startinsert")
+    -- Avoid entering insert mode when spawning terminal in the background
+    if term.window == api.nvim_get_current_win() then
+      vim.cmd("startinsert")
+    end
     table.insert(commands, {
       "BufEnter",
       fmt("<buffer=%d>", term.bufnr),
@@ -360,6 +363,19 @@ local function opener(size, term)
   end
 end
 
+---Spawn terminal background job in a buffer without a window
+function Terminal:spawn()
+  if not (self.bufnr and api.nvim_buf_is_valid(self.bufnr)) then
+    self.bufnr = ui.create_buf()
+    self:__add()
+    api.nvim_buf_call(self.bufnr, function()
+      self:__spawn()
+    end)
+    setup_buffer_autocommands(self)
+    setup_buffer_mappings(self.bufnr)
+  end
+end
+
 ---Open a terminal window
 ---@param size number
 ---@param direction string
@@ -370,7 +386,7 @@ function Terminal:open(size, direction, is_new)
   if direction then
     self:change_direction(direction)
   end
-  if fn.bufexists(self.bufnr) == 0 then
+  if not (self.bufnr and api.nvim_buf_is_valid(self.bufnr)) then
     local ok, err = pcall(opener, size, self)
     if not ok then
       return utils.notify(err, "error")

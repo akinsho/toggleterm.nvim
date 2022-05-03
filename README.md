@@ -358,10 +358,12 @@ end
 vim.api.nvim_set_keymap("n", "<leader>g", "<cmd>lua _lazygit_toggle()<CR>", {noremap = true, silent = true})
 ```
 
-This will create a new terminal that runs the specified command once toggled
-if the `hidden` key is set to true. This terminal will not be toggled by normal toggleterm
-commands such as `:ToggleTerm` or the open mapping. It will only open and close in response to a user
-specified mapping like the above.
+This will create a new terminal but the specified command is not being run immediately.
+The command will run once the terminal is opened. Alternatively `term:spawn()` can be used
+to start the command in a background buffer without opening a terminal window yet. If the
+`hidden` key is set to true, this terminal will not be toggled by normal toggleterm commands
+such as `:ToggleTerm` or the open mapping. It will only open and close by using the returned
+terminal object. A mapping for toggling the terminal can be set as in the example above.
 
 Alternatively the terminal can be specified with a count which is the number that can be used
 to trigger this specific terminal. This can then be triggered using the current count e.g.
