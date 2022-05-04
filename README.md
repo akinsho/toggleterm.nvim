@@ -61,7 +61,7 @@ This plugin only works in _Neovim 0.5_ or newer.
 Using packer in lua
 
 ```lua
-use {"akinsho/toggleterm.nvim", config = function()
+use {"akinsho/toggleterm.nvim", tag = 'v1.*', config = function()
   require("toggleterm").setup()
 end}
 ```
@@ -69,8 +69,11 @@ end}
 Using vim-plug in vimscript
 
 ```vim
-Plug 'akinsho/toggleterm.nvim'
+Plug 'akinsho/toggleterm.nvim', tag = 'v1.*'
 ```
+
+You can/should specify a tag for the current major version of the plugin, to avoid breaking changes as this plugin evolves.
+To use a version of this plugin compatible with nvim versions less than 0.7 please use the tag `v1.*`.
 
 ## Why?
 
