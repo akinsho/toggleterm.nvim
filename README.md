@@ -52,11 +52,6 @@
 
 <!-- panvimdoc-ignore-end -->
 
-## Notices
-
-- 15/09/2021: `window` layout was deprecated in favour of the `tab` layout
-- **23/03/2021**: `TermExec` command syntax has been refactored to use `TermExec cmd='my-command'`
-
 ## Requirements
 
 This plugin only works in _Neovim 0.5_ or newer.
@@ -66,7 +61,9 @@ This plugin only works in _Neovim 0.5_ or newer.
 Using packer in lua
 
 ```lua
-use {"akinsho/toggleterm.nvim"}
+use {"akinsho/toggleterm.nvim", config = function()
+  require("toggleterm").setup()
+end}
 ```
 
 Using vim-plug in vimscript
@@ -81,7 +78,7 @@ Neovim's terminal is a very cool, but not super ergonomic tool to use. I find th
 set a process going and leave it to continue to run in the background. I don't need to see it all the time.
 I just need to be able to refer back to it at intervals. I also sometimes want to create a new terminal and run a few commands.
 
-Sometimes I want these side by side, and I _really_ want these terminals to be easy to access and not clutter my buffer list.
+Sometimes I want these side by side, and I _really_ want these terminals to be easy to access.
 I also want my terminal to look different from non-terminal buffers so I use `winhighlight` to darken them based on the `Normal`
 background colour.
 
@@ -94,22 +91,37 @@ All I really want this plugin to be is what I described above. A wrapper around 
 It basically (almost) does all that I need it to.
 
 I won't be turning this into a REPL plugin or doing a bunch of complex stuff.
-If you find any issues, _please_ consider a _pull request_ not an issue. I won't be breaking my back to maintain
-this especially if it isn't broken "on my machine". I'm also going to be pretty conservative about what I add.
+If you find any issues, _please_ consider a _pull request_ not an issue.
+I'm also going to be pretty conservative about what I add.
 
 ### Setup
 
 This plugin must be explicitly enabled by using `require("toggleterm").setup{}`
 
-Setting the _open_mapping_ key to use for toggling the terminal(s) will setup mappings for _normal_ mode
+Setting the `open_mapping` key to use for toggling the terminal(s) will setup mappings for _normal_ mode
 If you prefix the mapping with a number that particular terminal will be opened.
 
-If you set the _insert_mappings_ key to true, the mapping will also take effect in insert mode; similarly setting _terminal_mappings_ to will have the mappings take effect in the opened terminal.
+If you set the `insert_mappings` key to true, the mapping will also take effect in insert mode; similarly setting `terminal_mappings` to will have the mappings take effect in the opened terminal.
 
 However you will not be able to use a count with the open mapping in terminal and insert modes. You can create buffer specific mappings to exit terminal mode and then use a count with the open mapping. Check _Terminal window mappings_ for an example of how to do this.
 
-**NOTE**: Please ensure you have set `hidden` in your neovim config, otherwise the terminals will be discarded
-when closed.
+alternatively you can do this manually (not recommended but, your prerogative)
+
+```vim
+" set
+autocmd TermEnter term://*toggleterm#*
+      \ tnoremap <silent><c-t> <Cmd>exe v:count1 . "ToggleTerm"<CR>
+
+" By applying the mappings this way you can pass a count to your
+" mapping to open a specific window.
+" For example: 2<C-t> will open terminal 2
+nnoremap <silent><c-t> <Cmd>exe v:count1 . "ToggleTerm"<CR>
+inoremap <silent><c-t> <Esc><Cmd>exe v:count1 . "ToggleTerm"<CR>
+```
+
+**NOTE**: Please ensure you have set `hidden` in your neovim config, otherwise the terminals will be discarded when closed.
+
+**WARNING**: Please do not copy and paste this configuration! It is here to show what options are available. It is not written be used as is.
 
 ```lua
 require("toggleterm").setup{
@@ -166,25 +178,7 @@ require("toggleterm").setup{
 }
 ```
 
-alternatively you can do this manually (not recommended but, your prerogative)
-
-```vim
-" set
-let g:toggleterm_terminal_mapping = '<C-t>'
-" or manually...
-autocmd TermEnter term://*toggleterm#*
-      \ tnoremap <silent><c-t> <Cmd>exe v:count1 . "ToggleTerm"<CR>
-
-" By applying the mappings this way you can pass a count to your
-" mapping to open a specific window.
-" For example: 2<C-t> will open terminal 2
-nnoremap <silent><c-t> <Cmd>exe v:count1 . "ToggleTerm"<CR>
-inoremap <silent><c-t> <Esc><Cmd>exe v:count1 . "ToggleTerm"<CR>
-```
-
 ### Usage
-
-This plugin provides 2 commands
 
 ### `ToggleTerm`
 
@@ -230,6 +224,8 @@ _NOTE:_ the `dir` argument can also be _optionally_ quoted if it contains spaces
 
 The `cmd` and `dir` arguments can also expand the same special keywords as `:h expand` e.g.
 `TermExec cmd="echo %"` will be expanded to `TermExec cmd="echo /file/example"`
+
+These special keywords can be escaped using the `\` character, if you want to print character as is.
 
 The `size` and `direction` arguments are like the `size` and `direction` arguments of `ToggleTerm`.
 
