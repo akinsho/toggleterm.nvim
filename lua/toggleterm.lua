@@ -1,6 +1,5 @@
 local api = vim.api
 local fn = vim.fn
-local fmt = string.format
 
 local constants = require("toggleterm.constants")
 local colors = require("toggleterm.colors")
@@ -9,15 +8,14 @@ local terms = require("toggleterm.terminal")
 
 local term_ft = constants.term_ft
 local SHADING_AMOUNT = constants.shading_amount
+local AUGROUP = "ToggleTermCommands"
 -----------------------------------------------------------
 -- Export
 -----------------------------------------------------------
-local M = {
-  __set_highlights = colors.set_highlights,
-}
+local M = {}
 
 --- only shade explicitly specified filetypes
-function M.__apply_colors()
+local function apply_colors()
   local ft = vim.bo.filetype
   ft = (not ft or ft == "") and "none" or ft
   local allow_list = require("toggleterm.config").get("shade_filetypes") or {}
@@ -96,21 +94,21 @@ local function close_last_window(term)
   end
 end
 
-function M.handle_term_enter()
+local function handle_term_enter()
   local _, term = terms.identify()
   if term then
     close_last_window(term)
   end
 end
 
-function M.handle_term_leave()
+local function handle_term_leave()
   local _, term = terms.identify()
   if term and term:is_float() then
     term:close()
   end
 end
 
-function M.on_term_open()
+local function on_term_open()
   local id, term = terms.identify()
   if not term then
     terms.Terminal
@@ -324,31 +322,32 @@ function M.toggle_all(force)
   end
 end
 
-function M.setup(user_prefs)
-  local conf = require("toggleterm.config").set(user_prefs)
-  setup_global_mappings()
+---@param conf ToggleTermConfig
+local function setup_autocommands(conf)
+  api.nvim_create_augroup(AUGROUP, { clear = true })
   local toggleterm_pattern = "term://*#toggleterm#*"
-  local autocommands = {
-    {
-      "WinEnter",
-      toggleterm_pattern,
-      "nested", -- this is necessary in case the buffer is the last
-      "lua require'toggleterm'.handle_term_enter()",
-    },
-    {
-      "WinLeave",
-      toggleterm_pattern,
-      "lua require'toggleterm'.handle_term_leave()",
-    },
-    {
-      "TermOpen",
-      toggleterm_pattern,
-      "lua require'toggleterm'.on_term_open()",
-    },
-  }
+
+  api.nvim_create_autocmd("WinEnter", {
+    pattern = toggleterm_pattern,
+    group = AUGROUP,
+    nested = true, -- this is necessary in case the buffer is the last
+    callback = handle_term_enter,
+  })
+
+  api.nvim_create_autocmd("WinLeave", {
+    pattern = toggleterm_pattern,
+    group = AUGROUP,
+    callback = handle_term_leave,
+  })
+
+  api.nvim_create_autocmd("TermOpen", {
+    pattern = toggleterm_pattern,
+    group = AUGROUP,
+    callback = on_term_open,
+  })
+
   if conf.shade_terminals then
     local is_bright = colors.is_bright_background()
-
     -- if background is light then darken the terminal a lot more to increase contrast
     local factor = conf.shading_factor
         and type(conf.shading_factor) == "number"
@@ -358,25 +357,30 @@ function M.setup(user_prefs)
     local amount = factor * SHADING_AMOUNT
     colors.set_highlights(amount)
 
-    vim.list_extend(autocommands, {
-      {
-        -- call set highlights once on vim start
-        -- as this plugin might not be initialised till
-        -- after the colorscheme autocommand has fired
-        -- reapply highlights when the colorscheme
-        -- is re-applied
-        "ColorScheme",
-        "*",
-        fmt("lua require'toggleterm'.__set_highlights(%d)", amount),
-      },
-      {
-        "TermOpen",
-        "term://*",
-        "lua require('toggleterm').__apply_colors()",
-      },
+    -- call set highlights once on vim start
+    -- as this plugin might not be initialised till
+    -- after the colorscheme autocommand has fired
+    -- reapply highlights when the colorscheme
+    -- is re-applied
+    api.nvim_create_autocmd("ColorScheme", {
+      group = AUGROUP,
+      callback = function()
+        colors.set_highlights(amount)
+      end,
+    })
+
+    api.nvim_create_autocmd("TermOpen", {
+      group = AUGROUP,
+      pattern = "term://*",
+      callback = apply_colors,
     })
   end
-  require("toggleterm.utils").create_augroups({ ToggleTerminal = autocommands })
+end
+
+function M.setup(user_prefs)
+  local conf = require("toggleterm.config").set(user_prefs)
+  setup_global_mappings()
+  setup_autocommands(conf)
 end
 
 return M

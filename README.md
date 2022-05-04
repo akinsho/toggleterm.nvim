@@ -54,7 +54,7 @@
 
 ## Requirements
 
-This plugin only works in _Neovim 0.5_ or newer.
+This plugin only works in _Neovim 0.7_ or newer.
 
 ## Installation
 
