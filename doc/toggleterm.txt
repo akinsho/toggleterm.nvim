@@ -33,7 +33,7 @@ INSTALLATION                                         *toggleterm-installation*
 Using packer in lua
 
 >
-    use {"akinsho/toggleterm.nvim", config = function()
+    use {"akinsho/toggleterm.nvim", tag = 'v1.*', config = function()
       require("toggleterm").setup()
     end}
 <
@@ -42,9 +42,13 @@ Using packer in lua
 Using vim-plug in vimscript
 
 >
-    Plug 'akinsho/toggleterm.nvim'
+    Plug 'akinsho/toggleterm.nvim', tag = 'v1.*'
 <
 
+
+You can/should specify a tag for the current major version of the plugin, to
+avoid breaking changes as this plugin evolves. To use a version of this plugin
+compatible with nvim versions less than 0.7 please use the tag `v1.*`.
 
 WHY?                                                         *toggleterm-why?*
 
