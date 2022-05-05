@@ -48,6 +48,8 @@ local terminals = {}
 --- @field hidden boolean whether or not to include this terminal in the terminals list
 --- @field close_on_exit boolean whether or not to close the terminal window when the process exits
 --- @field float_opts table<string, any>
+--- @field env table<string, string> environmental variables passed to jobstart()
+--- @field clear_env boolean use clean job environment, passed to jobstart()
 --- @field on_stdout fun(t: Terminal, job: number, data: string[]?, name: string?)
 --- @field on_stderr fun(t: Terminal, job: number, data: string[], name: string)
 --- @field on_exit fun(t: Terminal, job: number, exit_code: number?, name: string?)
@@ -169,6 +171,8 @@ function Terminal:new(term)
   term.hidden = term.hidden or false
   term.highlights = term.highlights or conf.highlights
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
+  term.env = term.env or conf.env
+  term.clear_env = term.clear_env
   term.on_open = term.on_open or conf.on_open
   term.on_close = term.on_close or conf.on_close
   term.on_stdout = term.on_stdout or conf.on_stdout
@@ -331,6 +335,8 @@ function Terminal:__spawn()
     on_exit = __handle_exit(self),
     on_stdout = self:__stdout(),
     on_stderr = self:__stderr(),
+    env = self.env,
+    clear_env = self.clear_env,
   })
   self.name = cmd
 end

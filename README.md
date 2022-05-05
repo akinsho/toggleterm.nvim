@@ -336,6 +336,8 @@ Terminal:new {
   dir = string -- the directory for the terminal
   close_on_exit = bool -- close the terminal window when the process exits
   highlights = table -- a table with highlights
+  env = table -- key:value table with environmental variables passed to jobstart()
+  clear_env = bool -- use only environmental variables from `env`, passed to jobstart()
   on_open = fun(t: Terminal) -- function to run when the terminal opens
   on_close = fun(t: Terminal) -- function to run when the terminal closes
   -- callbacks for processing the output
