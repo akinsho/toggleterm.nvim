@@ -117,6 +117,41 @@ describe("ToggleTerm tests:", function()
       assert.truthy(vim.b.term_title:match("ls"))
     end)
 
+    it("should spawn in the background", function()
+      local stdout = {}
+      local has_spawned = function()
+        return table.concat(stdout, ''):match('SPAWNED') ~= nil
+      end
+      Terminal:new({
+        cmd = [[echo SPAWNED]],
+        on_stdout = function(term, job, lines)
+          vim.list_extend(stdout, lines)
+        end
+      }):spawn()
+      -- Wait some time if job is not ready
+      vim.wait(500, has_spawned)
+      assert.is_true(has_spawned())
+    end)
+
+
+    it("should pass environmental variables", function()
+      local stdout = {}
+      local expected = 'TESTVAR = 0123456789'
+      local find_end = function()
+        return table.concat(stdout, ''):match(expected)
+      end
+      Terminal:new({
+        cmd = [[echo "TESTVAR = $TESTVAR END"]],
+        env = { TESTVAR = "0123456789" },
+        on_stdout = function(term, job, lines)
+          vim.list_extend(stdout, lines)
+        end
+      }):toggle()
+      -- Wait some time if job is not ready
+      vim.wait(500, find_end)
+      assert.are.equal(expected, table.concat(stdout, ' '):match('TESTVAR = %S+'))
+    end)
+
     it("should open the correct terminal if a user specifies a count", function()
       local term = Terminal:new({ count = 5 }):toggle()
       term:toggle()
