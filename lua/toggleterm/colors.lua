@@ -35,7 +35,7 @@ function M.shade_color(color, percent)
   r, g, b = r < 255 and r or 255, g < 255 and g or 255, b < 255 and b or 255
 
   -- see: https://stackoverflow.com/questions/37796287/convert-decimal-to-hex-in-lua-4
-  r, g, b = string.format("%0x", r), string.format("%0x", g), string.format("%0x", b)
+  r, g, b = string.format("%02x", r), string.format("%02x", g), string.format("%02x", b)
   return "#" .. r .. g .. b
 end
 
