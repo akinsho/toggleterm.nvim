@@ -26,7 +26,7 @@ SEND COMMANDS TO DIFFERENT TERMINALS ~
 
 REQUIREMENTS                                         *toggleterm-requirements*
 
-This plugin only works in _Neovim 0.5_ or newer.
+This plugin only works in _Neovim 0.7_ or newer.
 
 INSTALLATION                                         *toggleterm-installation*
 
