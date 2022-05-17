@@ -377,10 +377,45 @@ local function setup_autocommands(conf)
   end
 end
 
+---------------------------------------------------------------------------------
+-- Commands
+---------------------------------------------------------------------------------
+local function setup_commands()
+  -- Count is 0 by default
+  api.nvim_create_user_command("TermExec", function(opts)
+    M.exec_command(opts.args, opts.count)
+  end, { count = true, complete = "shellcmd", nargs = "*" })
+
+  api.nvim_create_user_command("ToggleTerm", function(opts)
+    M.toggle_command(opts.args, opts.count)
+  end, { count = true, nargs = "*" })
+
+  api.nvim_create_user_command("ToggleTermToggleAll", function(opts)
+    M.toggle_all(opts.bang)
+  end, { bang = true })
+
+  -- TODO: Convert this functions to use lua functions with the passed in line1,line2 args
+  api.nvim_create_user_command(
+    "ToggleTermSendVisualLines",
+    "'<,'> lua require'toggleterm'.send_lines_to_terminal('visual_lines', true, <q-args>)<CR>",
+    { range = true, nargs = "?" }
+  )
+  -- TODO: Convert this functions to use lua functions with the passed in line1,line2 args
+  api.nvim_create_user_command(
+    "ToggleTermSendVisualSelection",
+    "'<,'> lua require'toggleterm'.send_lines_to_terminal('visual_selection', true, <q-args>)<CR>",
+    { range = true, nargs = "?" }
+  )
+  api.nvim_create_user_command("ToggleTermSendCurrentLine", function(opts)
+    M.send_lines_to_terminal("single_line", true, opts.args)
+  end, { nargs = "?" })
+end
+
 function M.setup(user_prefs)
   local conf = require("toggleterm.config").set(user_prefs)
   setup_global_mappings()
   setup_autocommands(conf)
+  setup_commands()
 end
 
 return M
