@@ -138,6 +138,9 @@ local function on_term_open()
       })
       :__resurrect()
   end
+  if fn.exists("+winbar") == 1 then
+    require("toggleterm.ui").set_winbar(term)
+  end
 end
 
 function M.exec_command(args, count)

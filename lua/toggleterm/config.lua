@@ -69,6 +69,7 @@ local function get_highlights(conf)
     local normal_bg = colors.get_hex("Normal", "bg")
     local terminal_bg = conf.shade_terminals and shade(normal_bg, amount) or normal_bg
     overrides = {
+      WinBar = { guibg = terminal_bg },
       Normal = { guibg = terminal_bg },
       SignColumn = { guibg = terminal_bg },
       EndOfBuffer = { guibg = terminal_bg },
