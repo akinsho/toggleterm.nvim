@@ -131,7 +131,7 @@ local function create_term_buf_if_needed(term)
 end
 
 function M.create_buf()
-    return api.nvim_create_buf(false, false)
+  return api.nvim_create_buf(false, false)
 end
 
 function M.delete_buf(term)
