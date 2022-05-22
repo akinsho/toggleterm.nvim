@@ -56,9 +56,7 @@ local function get_highlights(conf, override)
   local amount = conf.shading_factor * degree
   local normal_bg = colors.get_hex("Normal", "bg")
   local terminal_bg = conf.shade_terminals and shade(normal_bg, amount) or normal_bg
-  -- TODO: this needs a way of checking against the user's values so we don't override
-  -- if they have actually manually set colours
-  local strategy = override and "keep" or "force"
+  local strategy = (override and not config.__has_user_highlights) and "keep" or "force"
 
   return vim.tbl_deep_extend(strategy, {
     Normal = {
@@ -121,6 +119,7 @@ function M.set(user_conf)
     handle_deprecations(user_conf)
   end
   config = vim.tbl_deep_extend("force", config, user_conf or {})
+  config.__has_user_highlights = not vim.tbl_isempty(config.highlights or {})
   config.highlights = get_highlights(config)
   return config
 end
