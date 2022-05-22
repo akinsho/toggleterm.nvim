@@ -1,8 +1,17 @@
 local api = vim.api
 local fn = vim.fn
 
+local lazy = require("toggleterm.lazy")
+---@module "toggleterm.utils"
+local utils = lazy.require("toggleterm.utils")
+---@module "toggleterm.constants"
 local constants = require("toggleterm.constants")
-local colors = require("toggleterm.colors")
+---@module "toggleterm.config"
+local config = lazy.require("toggleterm.config")
+---@module "toggleterm.ui"
+local ui = lazy.require("toggleterm.ui")
+---@module "toggleterm.commandline"
+local commandline = lazy.require("toggleterm.commandline")
 
 local terms = require("toggleterm.terminal")
 

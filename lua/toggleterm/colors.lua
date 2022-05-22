@@ -1,5 +1,3 @@
-local constants = require("toggleterm.constants")
-
 local fn = vim.fn
 local api = vim.api
 -----------------------------------------------------------
@@ -103,6 +101,7 @@ local function convert_options(opts)
     cterm = "cterm",
     ctermfg = "ctermfg",
     ctermbg = "ctermbg",
+    link = "link",
   }
   local result = {}
   for key, value in pairs(opts) do
