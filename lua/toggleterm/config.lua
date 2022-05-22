@@ -1,6 +1,5 @@
 local colors = require("toggleterm.colors")
 local constants = require("toggleterm.constants")
-local SHADING_AMOUNT = constants.shading_amount
 
 local M = {}
 
@@ -48,16 +47,20 @@ local config = {
 
 ---Derive the highlights for a toggleterm and merge these with the user's preferences
 ---@param conf ToggleTermConfig
+---@param override boolean? if true then refresh the highlights regardless of the existing values
 ---@return ToggleTermHighlights
-local function get_highlights(conf)
+local function get_highlights(conf, override)
   local is_bright = colors.is_bright_background()
   -- if background is light then darken the terminal a lot more to increase contrast
-  local degree = is_bright and 3 or 1
+  local degree = is_bright and -3 or 1
   local amount = conf.shading_factor * degree
   local normal_bg = colors.get_hex("Normal", "bg")
   local terminal_bg = conf.shade_terminals and shade(normal_bg, amount) or normal_bg
+  -- TODO: this needs a way of checking against the user's values so we don't override
+  -- if they have actually manually set colours
+  local strategy = override and "keep" or "force"
 
-  return vim.tbl_deep_extend("force", {
+  return vim.tbl_deep_extend(strategy, {
     Normal = {
       guibg = terminal_bg,
     },
@@ -108,7 +111,7 @@ function M.get(key)
 end
 
 function M.reset_highlights()
-  config.highlights = get_highlights(config)
+  config.highlights = get_highlights(config, true)
 end
 
 ---@param user_conf ToggleTermConfig
