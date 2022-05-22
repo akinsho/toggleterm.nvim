@@ -100,6 +100,7 @@ function M.hl_term(term)
     local name = constants.highlight_group_name_prefix .. id .. hl_group_name
     local hi_target = fmt("%s:%s", hl_group_name, name)
     local attrs = hls[hl_group_name]
+    attrs.default = true
     colors.set_hl(name, attrs)
     return hi_target
   end, hl_names)
