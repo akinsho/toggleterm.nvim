@@ -284,9 +284,9 @@ end
 --- this can be used with the count commands to allow specific operations
 --- per term or mass actions
 --- @param count number
---- @param size number
---- @param dir string
---- @param direction string
+--- @param size number?
+--- @param dir string?
+--- @param direction string?
 function M.toggle(count, size, dir, direction)
   vim.validate({ count = { count, "number", true }, size = { size, "number", true } })
   -- TODO this should toggle the specified term if any count is passed in

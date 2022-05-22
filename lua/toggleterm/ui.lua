@@ -232,7 +232,7 @@ end
 
 --- @private
 --- @param size number|function
---- @param term Terminal
+--- @param term Terminal?
 --- @return number?
 function M._resolve_size(size, term)
   if not size then

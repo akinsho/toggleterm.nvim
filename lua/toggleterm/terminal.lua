@@ -147,14 +147,14 @@ local function _get_dir(dir)
     dir = require("toggleterm.utils").git_dir()
   end
   if dir then
-    return vim.fn.expand(dir)
+    return fn.expand(dir)
   else
     return vim.loop.cwd()
   end
 end
 
 ---Create a new terminal object
----@param term Terminal
+---@param term Terminal?
 ---@return Terminal
 function Terminal:new(term)
   term = term or {}
@@ -419,8 +419,8 @@ function Terminal:open(size, direction, is_new)
 end
 
 ---Open if closed and close if opened
----@param size number
----@param direction string
+---@param size number?
+---@param direction string?
 function Terminal:toggle(size, direction)
   if self:is_open() then
     self:close()
