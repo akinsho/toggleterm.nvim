@@ -81,7 +81,9 @@ end
 function M.hl_term(term)
   local config = require("toggleterm.config")
 
-  local hls = term and term.highlights or config.get("highlights")
+  local hls = (term and (term.highlights and not vim.tbl_isempty(term.highlights)))
+      and term.highlights
+    or config.get("highlights")
   if not hls or vim.tbl_isempty(hls) then
     return
   end
