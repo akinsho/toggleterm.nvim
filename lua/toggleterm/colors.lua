@@ -1,6 +1,5 @@
-local constants = require("toggleterm.constants")
-
 local fn = vim.fn
+local api = vim.api
 -----------------------------------------------------------
 -- Export
 -----------------------------------------------------------
@@ -78,25 +77,49 @@ end
 -- Darken Terminal
 -----------------------------------------------------------
 
----Create prefixed highlight groups for toggleterms split buffers
----@param amount number
-function M.set_highlights(amount)
-  local bg_color = M.get_hex("Normal", "bg")
-  local darkened_bg = M.shade_color(bg_color, amount)
-
-  local hl_group_name = constants.highlight_group_name_prefix
-
-  local highlights = {
-    [hl_group_name .. "Normal"] = { guibg = darkened_bg },
-    [hl_group_name .. "StatusLine"] = { guibg = darkened_bg },
-    -- HACK: setting cterm to italic is a hack to prevent the statusline caret issue
-    -- i.e. the StatusLineNC and normal statusline MUST be different otherwise carets are inserted
-    [hl_group_name .. "StatusLineNC"] = { cterm = "italic", gui = "NONE", guibg = darkened_bg },
-  }
-
-  for hl_group, options in pairs(highlights) do
-    vim.highlight.create(hl_group, options)
+local function convert_attributes(result, key, value)
+  local target = result
+  if key == "cterm" then
+    result.cterm = {}
+    target = result.cterm
   end
+  if value:find(",") then
+    for _, v in vim.split(value, ",") do
+      target[v] = true
+    end
+  else
+    target[value] = true
+  end
+end
+
+local function convert_options(opts)
+  local keys = {
+    gui = true,
+    guifg = "foreground",
+    guibg = "background",
+    guisp = "sp",
+    cterm = "cterm",
+    ctermfg = "ctermfg",
+    ctermbg = "ctermbg",
+    link = "link",
+  }
+  local result = {}
+  for key, value in pairs(opts) do
+    if keys[key] then
+      if key == "gui" or key == "cterm" then
+        if value ~= "NONE" then
+          convert_attributes(result, key, value)
+        end
+      else
+        result[keys[key]] = value
+      end
+    end
+  end
+  return result
+end
+
+function M.set_hl(name, opts)
+  api.nvim_set_hl(0, name, convert_options(opts))
 end
 
 return M

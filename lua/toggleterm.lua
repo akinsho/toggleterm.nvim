@@ -2,23 +2,20 @@ local api = vim.api
 local fn = vim.fn
 
 local lazy = require("toggleterm.lazy")
----@module "toggleterm.constants"
-local constants = lazy.require("toggleterm.constants")
----@module "toggleterm.colors"
-local colors = lazy.require("toggleterm.colors")
----@module "toggleterm.terms"
-local terms = lazy.require("toggleterm.terminal")
----@module "toggleterm.ui"
-local ui = lazy.require("toggleterm.ui")
----@module "toggleterm.config"
-local config = lazy.require("toggleterm.config")
----@module "toggleterm.commandline"
-local commandline = lazy.require("toggleterm.commandline")
 ---@module "toggleterm.utils"
 local utils = lazy.require("toggleterm.utils")
+---@module "toggleterm.constants"
+local constants = require("toggleterm.constants")
+---@module "toggleterm.config"
+local config = lazy.require("toggleterm.config")
+---@module "toggleterm.ui"
+local ui = lazy.require("toggleterm.ui")
+---@module "toggleterm.commandline"
+local commandline = lazy.require("toggleterm.commandline")
+
+local terms = require("toggleterm.terminal")
 
 local term_ft = constants.term_ft
-local SHADING_AMOUNT = constants.shading_amount
 local AUGROUP = "ToggleTermCommands"
 -----------------------------------------------------------
 -- Export
@@ -331,8 +328,8 @@ function M.toggle_all(force)
   end
 end
 
----@param conf ToggleTermConfig
-local function setup_autocommands(conf)
+---@param _ ToggleTermConfig
+local function setup_autocommands(_)
   api.nvim_create_augroup(AUGROUP, { clear = true })
   local toggleterm_pattern = "term://*#toggleterm#*"
 
@@ -355,35 +352,25 @@ local function setup_autocommands(conf)
     callback = on_term_open,
   })
 
-  if conf.shade_terminals then
-    local is_bright = colors.is_bright_background()
-    -- if background is light then darken the terminal a lot more to increase contrast
-    local factor = conf.shading_factor
-        and type(conf.shading_factor) == "number"
-        and conf.shading_factor
-      or (is_bright and 3 or 1)
+  api.nvim_create_autocmd("ColorScheme", {
+    group = AUGROUP,
+    callback = function()
+      config.reset_highlights()
+      for _, term in pairs(terms.get_all()) do
+        if api.nvim_win_is_valid(term.window) then
+          api.nvim_win_call(term.window, function()
+            ui.hl_term(term)
+          end)
+        end
+      end
+    end,
+  })
 
-    local amount = factor * SHADING_AMOUNT
-    colors.set_highlights(amount)
-
-    -- call set highlights once on vim start
-    -- as this plugin might not be initialised till
-    -- after the colorscheme autocommand has fired
-    -- reapply highlights when the colorscheme
-    -- is re-applied
-    api.nvim_create_autocmd("ColorScheme", {
-      group = AUGROUP,
-      callback = function()
-        colors.set_highlights(amount)
-      end,
-    })
-
-    api.nvim_create_autocmd("TermOpen", {
-      group = AUGROUP,
-      pattern = "term://*",
-      callback = apply_colors,
-    })
-  end
+  api.nvim_create_autocmd("TermOpen", {
+    group = AUGROUP,
+    pattern = "term://*",
+    callback = apply_colors,
+  })
 end
 
 ---------------------------------------------------------------------------------

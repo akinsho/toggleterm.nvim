@@ -46,37 +46,39 @@ local config = {
 }
 
 ---Derive the highlights for a toggleterm and merge these with the user's preferences
+---A few caveats must be noted. Since I link the normal and float border to the Normal
+---highlight this has to be done carefully as if the user has speficied any Float highlights
+---themselves merging will result in a mix of user highlights and the link key which is invalid
+---so I check that they have not attempted to highlight these themselves. Also
+---if they have chosen to shade the terminal then this takes priority over their own highlights
+---since they can't have it both ways i.e. custom highlighting and shading
 ---@param conf ToggleTermConfig
 ---@return ToggleTermHighlights
 local function get_highlights(conf)
-  local normal_bg = colors.get_hex("Normal", "bg")
-  local terminal_bg = conf.shade_terminals and shade(normal_bg, conf.shading_factor) or normal_bg
-  return vim.tbl_deep_extend("force", {
-    Normal = {
-      guibg = terminal_bg,
-    },
-    NormalFloat = {
-      link = "Normal",
-    },
-    FloatBorder = {
-      link = "Normal",
-    },
-    SignColumn = {
-      guibg = terminal_bg,
-    },
-    EndOfBuffer = {
-      guibg = terminal_bg,
-    },
-    StatusLine = {
-      gui = "NONE",
-      guibg = terminal_bg,
-    },
-    StatusLineNC = {
-      cterm = "italic",
-      gui = "NONE",
-      guibg = terminal_bg,
-    },
-  }, conf.highlights or {})
+  local user = conf.highlights
+  local defaults = {
+    NormalFloat = vim.F.if_nil(user.NormalFloat, { link = "Normal" }),
+    FloatBorder = vim.F.if_nil(user.FloatBorder, { link = "Normal" }),
+    StatusLine = { gui = "NONE" },
+    StatusLineNC = { cterm = "italic", gui = "NONE" },
+  }
+  local overrides = {}
+
+  if conf.shade_terminals then
+    local is_bright = colors.is_bright_background()
+    local degree = is_bright and -3 or 1
+    local amount = conf.shading_factor * degree
+    local normal_bg = colors.get_hex("Normal", "bg")
+    local terminal_bg = conf.shade_terminals and shade(normal_bg, amount) or normal_bg
+    overrides = {
+      Normal = { guibg = terminal_bg },
+      SignColumn = { guibg = terminal_bg },
+      EndOfBuffer = { guibg = terminal_bg },
+      StatusLine = { guibg = terminal_bg },
+      StatusLineNC = { guibg = terminal_bg },
+    }
+  end
+  return vim.tbl_deep_extend("force", defaults, conf.highlights, overrides)
 end
 
 local function handle_deprecations(conf)
@@ -101,13 +103,19 @@ function M.get(key)
   return config
 end
 
+function M.reset_highlights()
+  config.highlights = get_highlights(config)
+end
+
 ---@param user_conf ToggleTermConfig
 ---@return ToggleTermConfig
 function M.set(user_conf)
+  user_conf = user_conf or {}
+  user_conf.highlights = user_conf.highlights or {}
   if user_conf and type(user_conf) == "table" then
     handle_deprecations(user_conf)
   end
-  config = vim.tbl_deep_extend("force", config, user_conf or {})
+  config = vim.tbl_deep_extend("force", config, user_conf)
   config.highlights = get_highlights(config)
   return config
 end

@@ -193,7 +193,6 @@ function Terminal:new(term)
   term.direction = term.direction or conf.direction
   term.id = id or next_id()
   term.hidden = term.hidden or false
-  term.highlights = term.highlights or conf.highlights
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
   term.env = term.env or conf.env
   term.clear_env = term.clear_env
