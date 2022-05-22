@@ -2,6 +2,7 @@ local M = {}
 
 local constants = require("toggleterm.constants")
 local utils = require("toggleterm.utils")
+local colors = require("toggleterm.colors")
 
 local fn = vim.fn
 local fmt = string.format
@@ -94,16 +95,10 @@ function M.hl_term(term)
   local hl_names = is_float and { "NormalFloat", "FloatBorder" } or vim.tbl_keys(hls)
 
   local highlights = vim.tbl_map(function(hl_group_name)
-    local hi_def = constants.highlight_group_name_prefix .. id .. hl_group_name
-    local hi_target = fmt("%s:%s", hl_group_name, hi_def)
-    local hi_attrs = hls[hl_group_name]
-
-    if hi_attrs.link then
-      vim.highlight.link(hi_def, hi_attrs.link)
-    else
-      vim.highlight.create(hi_def, hi_attrs)
-    end
-
+    local name = constants.highlight_group_name_prefix .. id .. hl_group_name
+    local hi_target = fmt("%s:%s", hl_group_name, name)
+    local attrs = hls[hl_group_name]
+    colors.set_hl(name, attrs)
     return hi_target
   end, hl_names)
 

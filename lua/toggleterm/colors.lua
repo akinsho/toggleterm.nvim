@@ -119,24 +119,8 @@ local function convert_options(opts)
   return result
 end
 
----Create prefixed highlight groups for toggleterms split buffers
----@param amount number
-function M.set_highlights(amount)
-  local bg_color = M.get_hex("Normal", "bg")
-  local darkened_bg = M.shade_color(bg_color, amount)
-
-  local hl_group_name = constants.highlight_group_name_prefix
-
-  local highlights = {
-    [hl_group_name .. "Normal"] = { guibg = darkened_bg },
-    [hl_group_name .. "StatusLine"] = { guibg = darkened_bg },
-    -- HACK: setting cterm to italic is a hack to prevent the statusline caret issue
-    -- i.e. the StatusLineNC and normal statusline MUST be different otherwise carets are inserted
-    [hl_group_name .. "StatusLineNC"] = { cterm = "italic", gui = "NONE", guibg = darkened_bg },
-  }
-  for hl_group, options in pairs(highlights) do
-    api.nvim_set_hl(0, hl_group, convert_options(options))
-  end
+function M.set_hl(name, opts)
+  api.nvim_set_hl(0, name, convert_options(opts))
 end
 
 return M

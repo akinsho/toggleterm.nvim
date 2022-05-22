@@ -1,5 +1,6 @@
 local colors = require("toggleterm.colors")
 local constants = require("toggleterm.constants")
+local SHADING_AMOUNT = constants.shading_amount
 
 local M = {}
 
@@ -49,8 +50,13 @@ local config = {
 ---@param conf ToggleTermConfig
 ---@return ToggleTermHighlights
 local function get_highlights(conf)
+  local is_bright = colors.is_bright_background()
+  -- if background is light then darken the terminal a lot more to increase contrast
+  local degree = is_bright and 3 or 1
+  local amount = conf.shading_factor * degree
   local normal_bg = colors.get_hex("Normal", "bg")
-  local terminal_bg = conf.shade_terminals and shade(normal_bg, conf.shading_factor) or normal_bg
+  local terminal_bg = conf.shade_terminals and shade(normal_bg, amount) or normal_bg
+
   return vim.tbl_deep_extend("force", {
     Normal = {
       guibg = terminal_bg,
