@@ -1,7 +1,6 @@
 local constants = require("toggleterm.constants")
 
 local fn = vim.fn
-local fmt = string.format
 -----------------------------------------------------------
 -- Export
 -----------------------------------------------------------

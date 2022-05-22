@@ -1,10 +1,21 @@
 local api = vim.api
 local fn = vim.fn
 
-local constants = require("toggleterm.constants")
-local colors = require("toggleterm.colors")
-
-local terms = require("toggleterm.terminal")
+local lazy = require("toggleterm.lazy")
+---@module "toggleterm.constants"
+local constants = lazy.require("toggleterm.constants")
+---@module "toggleterm.colors"
+local colors = lazy.require("toggleterm.colors")
+---@module "toggleterm.terms"
+local terms = lazy.require("toggleterm.terminal")
+---@module "toggleterm.ui"
+local ui = lazy.require("toggleterm.ui")
+---@module "toggleterm.config"
+local config = lazy.require("toggleterm.config")
+---@module "toggleterm.commandline"
+local commandline = lazy.require("toggleterm.commandline")
+---@module "toggleterm.utils"
+local utils = lazy.require("toggleterm.utils")
 
 local term_ft = constants.term_ft
 local SHADING_AMOUNT = constants.shading_amount
@@ -18,16 +29,16 @@ local M = {}
 local function apply_colors()
   local ft = vim.bo.filetype
   ft = (not ft or ft == "") and "none" or ft
-  local allow_list = require("toggleterm.config").get("shade_filetypes") or {}
+  local allow_list = config.get("shade_filetypes") or {}
   local is_enabled_ft = vim.tbl_contains(allow_list, ft)
   if vim.bo.buftype == "terminal" and is_enabled_ft then
     local _, term = terms.identify()
-    require("toggleterm.ui").hl_term(term)
+    ui.hl_term(term)
   end
 end
 
 local function setup_global_mappings()
-  local conf = require("toggleterm.config").get()
+  local conf = config.get()
   local mapping = conf.open_mapping
   -- v:count defaults the count to 0 but if a count is passed in uses that instead
   if mapping then
@@ -50,7 +61,6 @@ end
 ---@param dir string
 ---@param direction string
 local function smart_toggle(_, size, dir, direction)
-  local ui = require("toggleterm.ui")
   local terminals = terms.get_all()
   if not ui.find_open_windows() then
     -- Re-open the first terminal toggled
@@ -66,7 +76,7 @@ local function smart_toggle(_, size, dir, direction)
       end
     end
     if not target then
-      require("toggleterm.utils").notify("Couldn't find a terminal to close", "error")
+      utils.notify("Couldn't find a terminal to close", "error")
       return
     end
     target:close()
@@ -79,7 +89,7 @@ end
 --- @param direction string
 local function toggle_nth_term(num, size, dir, direction)
   local term = terms.get_or_create_term(num, dir, direction)
-  require("toggleterm.ui").update_origin_window(term.window)
+  ui.update_origin_window(term.window)
   term:toggle(size, direction)
 end
 
@@ -116,9 +126,9 @@ local function on_term_open()
         id = id,
         bufnr = api.nvim_get_current_buf(),
         window = api.nvim_get_current_win(),
-        highlights = require("toggleterm.config").get("highlights"),
+        highlights = config.get("highlights"),
         job_id = vim.b.terminal_job_id,
-        direction = require("toggleterm.ui").guess_direction(),
+        direction = ui.guess_direction(),
       })
       :__resurrect()
   end
@@ -127,7 +137,7 @@ end
 function M.exec_command(args, count)
   vim.validate({ args = { args, "string" } })
   if not args:match("cmd") then
-    return require("toggleterm.utils").echomsg(
+    return utils.echomsg(
       "TermExec requires a cmd specified using the syntax cmd='ls -l' e.g. TermExec cmd='ls -l'",
       "ErrorMsg"
     )
@@ -264,7 +274,7 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
 end
 
 function M.toggle_command(args, count)
-  local parsed = require("toggleterm.commandline").parse(args)
+  local parsed = commandline.parse(args)
   vim.validate({
     size = { parsed.size, "number", true },
     dir = { parsed.dir, "string", true },
@@ -302,7 +312,6 @@ end
 -- If no terminal exists it will do nothing
 -- If any terminal exists but is not open it will be open
 function M.toggle_all(force)
-  local ui = require("toggleterm.ui")
   local terminals = terms.get_all()
 
   if force and ui.find_open_windows() then
@@ -412,7 +421,7 @@ local function setup_commands()
 end
 
 function M.setup(user_prefs)
-  local conf = require("toggleterm.config").set(user_prefs)
+  local conf = config.set(user_prefs)
   setup_global_mappings()
   setup_autocommands(conf)
   setup_commands()
