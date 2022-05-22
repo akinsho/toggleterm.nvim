@@ -355,11 +355,11 @@ local function setup_autocommands(_)
   api.nvim_create_autocmd("ColorScheme", {
     group = AUGROUP,
     callback = function()
-      require("toggleterm.config").reset_highlights()
+      config.reset_highlights()
       for _, term in pairs(terms.get_all()) do
         if api.nvim_win_is_valid(term.window) then
           api.nvim_win_call(term.window, function()
-            require("toggleterm.ui").hl_term(term)
+            ui.hl_term(term)
           end)
         end
       end
