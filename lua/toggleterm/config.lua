@@ -112,4 +112,9 @@ function M.set(user_conf)
   return config
 end
 
-return M
+---@return ToggleTermConfig
+return setmetatable(M, {
+  __index = function(_, k)
+    return config[k]
+  end,
+})
