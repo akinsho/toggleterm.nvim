@@ -340,6 +340,7 @@ describe("ToggleTerm tests:", function()
 
     it("should correctly merge a users highlights", function()
       toggleterm.setup({
+        shade_terminals = false,
         highlights = {
           Normal = {
             guibg = "Red",
@@ -348,6 +349,20 @@ describe("ToggleTerm tests:", function()
       })
       local config = require("toggleterm.config").get("highlights")
       assert.equal(config.Normal.guibg, "Red")
+      assert.truthy(config.StatusLine.guibg)
+    end)
+
+    it("should prefer shading over a users highlights if they opt to shade terminals", function()
+      toggleterm.setup({
+        shade_terminals = true,
+        highlights = {
+          Normal = {
+            guibg = "Red",
+          },
+        },
+      })
+      local config = require("toggleterm.config").get("highlights")
+      assert.is_not_equal(config.Normal.guibg, "Red")
       assert.truthy(config.StatusLine.guibg)
     end)
 
