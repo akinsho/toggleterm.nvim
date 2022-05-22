@@ -158,7 +158,7 @@ require("toggleterm").setup{
       guibg = <VALUE-HERE>,
     },
   },
-  shade_terminals = true,
+  shade_terminals = true, -- NOTE: this option takes priority over highlights specified so if you specify Normal highlights you should set this to false
   shading_factor = '<number>', -- the degree by which to darken to terminal colour, default: 1 for dark backgrounds, 3 for light
   start_in_insert = true,
   insert_mappings = true, -- whether or not the open mapping applies in insert mode
