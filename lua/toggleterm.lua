@@ -343,18 +343,19 @@ local function setup_autocommands(_)
     callback = on_term_open,
   })
 
-
-    -- call set highlights once on vim start
-    -- as this plugin might not be initialised till
-    -- after the colorscheme autocommand has fired
-    -- reapply highlights when the colorscheme
-    -- is re-applied
-    api.nvim_create_autocmd("ColorScheme", {
-      group = AUGROUP,
-      callback = function()
-        colors.set_highlights(amount)
-      end,
-    })
+  api.nvim_create_autocmd("ColorScheme", {
+    group = AUGROUP,
+    callback = function()
+      require("toggleterm.config").reset_highlights()
+      for _, term in pairs(terms.get_all()) do
+        if api.nvim_win_is_valid(term.window) then
+          api.nvim_win_call(term.window, function()
+            require("toggleterm.ui").hl_term(term)
+          end)
+        end
+      end
+    end,
+  })
 
   api.nvim_create_autocmd("TermOpen", {
     group = AUGROUP,

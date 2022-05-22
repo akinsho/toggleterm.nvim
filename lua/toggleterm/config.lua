@@ -107,6 +107,10 @@ function M.get(key)
   return config
 end
 
+function M.reset_highlights()
+  config.highlights = get_highlights(config)
+end
+
 ---@param user_conf ToggleTermConfig
 ---@return ToggleTermConfig
 function M.set(user_conf)
