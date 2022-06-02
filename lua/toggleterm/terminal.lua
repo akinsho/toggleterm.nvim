@@ -256,6 +256,7 @@ function Terminal:shutdown()
     self:close()
   end
   ui.delete_buf(self)
+  delete(self.id)
 end
 
 ---Combine arguments into strings separated by new lines
@@ -509,7 +510,6 @@ if _G.IS_TEST then
   function M.__reset()
     for _, term in pairs(terminals) do
       term:shutdown()
-      delete(term.id)
     end
     ids = {}
   end
