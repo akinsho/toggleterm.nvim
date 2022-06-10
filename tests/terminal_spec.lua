@@ -45,13 +45,22 @@ describe("ToggleTerm tests:", function()
     end)
 
     it("should assign the next id filling in any missing gaps", function()
-      t.__set_ids({ 1, 2, 5 })
-      local id = t.__next_id()
-      assert.equal(id, 3)
-      id = t.__next_id()
-      assert.equal(id, 4)
-      id = t.__next_id()
-      assert.equal(id, 6)
+      Terminal:new({ id = 2}):toggle() --2
+      Terminal:new():toggle() --1
+      Terminal:new():toggle() --3
+      Terminal:new():toggle() --4
+      Terminal:new({ id = 6 }):toggle() --6
+      local terms = get_all()
+      terms[3]:shutdown()
+      terms[1]:shutdown()
+      local new1 = Terminal:new():toggle()
+      assert.equal(1, new1.id)
+      local new3 = Terminal:new():toggle()
+      assert.equal(3, new3.id)
+      local new5 = Terminal:new():toggle()
+      assert.equal(5, new5.id)
+      local new7 = Terminal:new():toggle()
+      assert.equal(7, new7.id)
     end)
 
     it("should get terminals as a list", function()
