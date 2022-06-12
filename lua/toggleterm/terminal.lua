@@ -59,33 +59,19 @@ local terminals = {}
 --- @field on_close fun(term:Terminal)
 local Terminal = {}
 
----@type number[]
-local ids = {}
-
 ---@private
 --- Get the next available id based on the next number in the sequence that
 --- hasn't already been allocated e.g. in a list of {1,2,5,6} the next id should
 --- be 3 then 4 then 7
 ---@return integer
 local function next_id()
-  local next_to_use = #ids + 1
-  local next_index = #ids + 1
-  for index, id in ipairs(ids) do
-    if id ~= index then
-      next_to_use = index
-      next_index = index
+  local all = M.get_all(true)
+  for index, term in pairs(all) do
+    if index ~= term.id then
+      return index
     end
   end
-  table.insert(ids, next_index, next_to_use)
-  return next_to_use
-end
-
---- remove the passed id from the list of available ids
----@param num number
-local function decrement_id(num)
-  ids = vim.tbl_filter(function(id)
-    return id ~= num
-  end, ids)
+  return #all+1
 end
 
 ---Get an opened (valid) toggle terminal by id, defaults to the first opened
@@ -123,7 +109,6 @@ end
 --- @param num string
 local function delete(num)
   if terminals[num] then
-    decrement_id(num)
     terminals[num] = nil
   end
 end
@@ -511,13 +496,6 @@ if _G.IS_TEST then
     for _, term in pairs(terminals) do
       term:shutdown()
     end
-    ids = {}
-  end
-
-  ---@private
-  ---@param tbl number[]
-  function M.__set_ids(tbl)
-    ids = tbl
   end
 
   M.__next_id = next_id
