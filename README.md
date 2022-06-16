@@ -148,14 +148,14 @@ require("toggleterm").setup{
     -- highlights which map to a highlight group name and a table of it's values
     -- NOTE: this is only a subset of values, any group placed here will be set for the terminal window split
     Normal = {
-      guibg = <VALUE-HERE>,
+      guibg = "<VALUE-HERE>",
     },
     NormalFloat = {
       link = 'Normal'
     },
     FloatBorder = {
-      guifg = <VALUE-HERE>,
-      guibg = <VALUE-HERE>,
+      guifg = "<VALUE-HERE>",
+      guibg = "<VALUE-HERE>",
     },
   },
   shade_terminals = true, -- NOTE: this option takes priority over highlights specified so if you specify Normal highlights you should set this to false
@@ -164,6 +164,7 @@ require("toggleterm").setup{
   insert_mappings = true, -- whether or not the open mapping applies in insert mode
   terminal_mappings = true, -- whether or not the open mapping applies in the opened terminals
   persist_size = true,
+  persist_mode = true, -- if set to true (default) the previous terminal mode will be remembered
   direction = 'vertical' | 'horizontal' | 'tab' | 'float',
   close_on_exit = true, -- close the terminal window when the process exits
   shell = vim.o.shell, -- change the default shell
@@ -346,7 +347,7 @@ Terminal:new {
 }
 ```
 
-#### Usage
+#### Custom terminal usage
 
 ```lua
 local Terminal  = require('toggleterm.terminal').Terminal
