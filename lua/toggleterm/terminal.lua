@@ -1,10 +1,14 @@
 local M = {}
 
 local lazy = require("toggleterm.lazy")
+---@module "toggleterm.ui"
 local ui = lazy.require("toggleterm.ui")
+---@module "toggleterm.config"
 local config = lazy.require("toggleterm.config")
+---@module "toggleterm.utils"
 local utils = lazy.require("toggleterm.utils")
-local term_ft = lazy.require("toggleterm.constants").term_ft
+---@module "toggleterm.constants"
+local constants = lazy.require("toggleterm.constants")
 local AUGROUP = "ToggleTermBuffer"
 
 local api = vim.api
@@ -334,7 +338,7 @@ function Terminal:__spawn()
     cmd,
     command_sep,
     comment_sep,
-    term_ft,
+    constants.term_ft,
     comment_sep,
     self.id,
   })
