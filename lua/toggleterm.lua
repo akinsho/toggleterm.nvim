@@ -106,6 +106,7 @@ local function handle_term_enter()
   local _, term = terms.identify()
   if term then
     close_last_window(term)
+    term:restore_mode()
   end
 end
 
@@ -113,6 +114,9 @@ local function handle_term_leave()
   local _, term = terms.identify()
   if term and term:is_float() then
     term:close()
+  end
+  if term then
+    term:persist_mode()
   end
 end
 
@@ -373,14 +377,14 @@ local function setup_autocommands(_)
   api.nvim_create_augroup(AUGROUP, { clear = true })
   local toggleterm_pattern = "term://*#toggleterm#*"
 
-  api.nvim_create_autocmd("WinEnter", {
+  api.nvim_create_autocmd("BufWinEnter", {
     pattern = toggleterm_pattern,
     group = AUGROUP,
     nested = true, -- this is necessary in case the buffer is the last
     callback = handle_term_enter,
   })
 
-  api.nvim_create_autocmd("WinLeave", {
+  api.nvim_create_autocmd("BufWinLeave", {
     pattern = toggleterm_pattern,
     group = AUGROUP,
     callback = handle_term_leave,

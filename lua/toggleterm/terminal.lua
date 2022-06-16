@@ -15,6 +15,12 @@ local api = vim.api
 local fmt = string.format
 local fn = vim.fn
 
+local mode = {
+  INSERT = "i",
+  NORMAL = "n",
+  UNSUPPORTED = "?",
+}
+
 local is_windows = fn.has("win32") == 1
 local function is_cmd(shell)
   return string.find(shell, "cmd")
@@ -36,6 +42,9 @@ local function get_newline_chr()
   local shell = config.get("shell")
   return is_windows and (is_pwsh(shell) and "\r" or "\r\n") or "\n"
 end
+
+--- @class TerminalState
+--- @field mode "n" | "i" | "?"
 
 ---@type Terminal[]
 local terminals = {}
@@ -61,6 +70,7 @@ local terminals = {}
 --- @field on_exit fun(t: Terminal, job: number, exit_code: number?, name: string?)
 --- @field on_open fun(term:Terminal)
 --- @field on_close fun(term:Terminal)
+--- @field __state TerminalState
 local Terminal = {}
 
 ---@private
@@ -75,7 +85,7 @@ local function next_id()
       return index
     end
   end
-  return #all+1
+  return #all + 1
 end
 
 ---Get an opened (valid) toggle terminal by id, defaults to the first opened
@@ -144,11 +154,6 @@ local function setup_buffer_autocommands(term)
     if term.window == api.nvim_get_current_win() then
       vim.cmd("startinsert")
     end
-    api.nvim_create_autocmd("BufEnter", {
-      buffer = term.bufnr,
-      group = AUGROUP,
-      command = "startinsert",
-    })
   end
 end
 
@@ -190,6 +195,7 @@ function Terminal:new(term)
   term.on_stdout = term.on_stdout or conf.on_stdout
   term.on_stderr = term.on_stderr or conf.on_stderr
   term.on_exit = term.on_exit or conf.on_exit
+  term.__state = { mode = "?" }
   if term.close_on_exit == nil then
     term.close_on_exit = conf.close_on_exit
   end
@@ -229,6 +235,32 @@ function Terminal:is_open()
   -- empty string window type corresponds to a normal window
   local win_open = win_type == "" or win_type == "popup"
   return win_open and api.nvim_win_get_buf(self.window) == self.bufnr
+end
+
+function Terminal:restore_mode()
+  local state = self.__state
+  local m = state.mode
+  if m == mode.INSERT then
+    vim.cmd("startinsert")
+  elseif m == mode.NORMAL then
+    vim.cmd("stopinsert")
+  elseif m == mode.UNSUPPORTED and config.get("start_in_insert") then
+    vim.cmd("startinsert")
+  end
+end
+
+function Terminal:persist_mode()
+  local raw_mode = api.nvim_get_mode().mode
+  local normal_regex = vim.regex([[\(n\|no\|nov\|\nt\|niI\|niR\)]])
+  local insert_regex = vim.regex([[\(i\|ic\|ix\|t\)]])
+
+  local m = "?"
+  if normal_regex:match_str(raw_mode) then
+    m = mode.NORMAL
+  elseif insert_regex:match_str(raw_mode) then
+    m = mode.INSERT
+  end
+  self.__state.mode = m
 end
 
 function Terminal:close()
