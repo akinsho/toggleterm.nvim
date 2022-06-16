@@ -246,7 +246,6 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
       -- line-visual
       -- return lines encompassed by the selection; already in res object
       return res.selected_lines
-
     elseif vis_mode == "v" then
       -- regular-visual
       -- return the buffer text encompassed by the selection
@@ -256,10 +255,7 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
       if opt.selection._value == "exclusive" then
         end_col = end_col - 1
       end
-      return api.nvim_buf_get_text(
-        0, start_line - 1, start_col - 1, end_line - 1, end_col, {}
-      )
-
+      return api.nvim_buf_get_text(0, start_line - 1, start_col - 1, end_line - 1, end_col, {})
     elseif vis_mode == "\x16" then
       -- block-visual
       -- return the lines encompassed by the selection, each truncated by the
@@ -287,12 +283,10 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
   if selection_type == "single_line" then
     b_line, b_col = unpack(api.nvim_win_get_cursor(0))
     table.insert(lines, fn.getline(b_line))
-
   elseif selection_type == "visual_lines" then
     local res = line_selection("visual")
     b_line, b_col = unpack(res.start_pos)
     lines = res.selected_lines
-
   elseif selection_type == "visual_selection" then
     local res = line_selection("visual")
     b_line, b_col = unpack(res.start_pos)
