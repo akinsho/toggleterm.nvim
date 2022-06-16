@@ -258,13 +258,10 @@ end
 
 function Terminal:persist_mode()
   local raw_mode = api.nvim_get_mode().mode
-  local normal_regex = vim.regex([[\(n\|no\|nov\|\nt\|niI\|niR\)]])
-  local insert_regex = vim.regex([[\(i\|ic\|ix\|t\)]])
-
   local m = "?"
-  if normal_regex:match_str(raw_mode) then
+  if raw_mode:match("nt") then -- nt is normal mode in the terminal
     m = mode.NORMAL
-  elseif insert_regex:match_str(raw_mode) then
+  elseif raw_mode:match("t") then -- t is insert mode in the terminal
     m = mode.INSERT
   end
   self.__state.mode = m
