@@ -535,6 +535,7 @@ if _G.IS_TEST then
   end
 
   M.__next_id = next_id
+  M.mode = mode
 end
 
 M.Terminal = Terminal
