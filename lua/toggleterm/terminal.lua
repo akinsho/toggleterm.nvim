@@ -43,8 +43,10 @@ local function get_newline_chr()
   return is_windows and (is_pwsh(shell) and "\r" or "\r\n") or "\n"
 end
 
+---@alias Mode "n" | "i" | "?"
+
 --- @class TerminalState
---- @field mode "n" | "i" | "?"
+--- @field mode Mode
 
 ---@type Terminal[]
 local terminals = {}
@@ -237,9 +239,14 @@ function Terminal:is_open()
   return win_open and api.nvim_win_get_buf(self.window) == self.bufnr
 end
 
-function Terminal:restore_mode()
-  local state = self.__state
-  local m = state.mode
+---@private
+function Terminal:__restore_mode()
+  self:set_mode(self.__state.mode)
+end
+
+--- Set the terminal's mode
+---@param m Mode
+function Terminal:set_mode(m)
   if m == mode.INSERT then
     vim.cmd("startinsert")
   elseif m == mode.NORMAL then
@@ -535,9 +542,9 @@ if _G.IS_TEST then
   end
 
   M.__next_id = next_id
-  M.mode = mode
 end
 
 M.Terminal = Terminal
+M.mode = mode
 
 return M

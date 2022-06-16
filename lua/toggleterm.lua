@@ -106,7 +106,11 @@ local function handle_term_enter()
   local _, term = terms.identify()
   if term then
     close_last_window(term)
-    term:restore_mode()
+    if config.get("persist_mode") then
+      term:__restore_mode()
+    elseif config.get("start_in_insert") then
+      term:set_mode(terms.mode.INSERT)
+    end
   end
 end
 
@@ -115,7 +119,7 @@ local function handle_term_leave()
   if term and term:is_float() then
     term:close()
   end
-  if term then
+  if term and config.get("persist_mode") then
     term:persist_mode()
   end
 end
