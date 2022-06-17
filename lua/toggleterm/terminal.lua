@@ -531,13 +531,11 @@ function M.get_all(include_hidden)
 end
 
 if _G.IS_TEST then
-  ---@private
   function M.__reset()
     for _, term in pairs(terminals) do
       term:shutdown()
     end
   end
-
   M.__next_id = next_id
 end
 
