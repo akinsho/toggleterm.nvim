@@ -20,6 +20,7 @@ end
 --- @field terminal_mappings boolean
 --- @field start_in_insert boolean
 --- @field persist_size boolean
+--- @field persist_mode boolean
 --- @field close_on_exit boolean
 --- @field direction  '"horizontal"' | '"vertical"' | '"float"'
 --- @field shading_factor number
@@ -36,6 +37,7 @@ local config = {
   terminal_mappings = true,
   start_in_insert = true,
   persist_size = true,
+  persist_mode = true,
   close_on_exit = true,
   direction = "horizontal",
   shading_factor = constants.shading_amount,

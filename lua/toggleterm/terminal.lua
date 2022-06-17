@@ -1,15 +1,25 @@
 local M = {}
 
 local lazy = require("toggleterm.lazy")
+---@module "toggleterm.ui"
 local ui = lazy.require("toggleterm.ui")
+---@module "toggleterm.config"
 local config = lazy.require("toggleterm.config")
+---@module "toggleterm.utils"
 local utils = lazy.require("toggleterm.utils")
-local term_ft = lazy.require("toggleterm.constants").term_ft
+---@module "toggleterm.constants"
+local constants = lazy.require("toggleterm.constants")
 local AUGROUP = "ToggleTermBuffer"
 
 local api = vim.api
 local fmt = string.format
 local fn = vim.fn
+
+local mode = {
+  INSERT = "i",
+  NORMAL = "n",
+  UNSUPPORTED = "?",
+}
 
 local is_windows = fn.has("win32") == 1
 local function is_cmd(shell)
@@ -32,6 +42,11 @@ local function get_newline_chr()
   local shell = config.get("shell")
   return is_windows and (is_pwsh(shell) and "\r" or "\r\n") or "\n"
 end
+
+---@alias Mode "n" | "i" | "?"
+
+--- @class TerminalState
+--- @field mode Mode
 
 ---@type Terminal[]
 local terminals = {}
@@ -57,6 +72,7 @@ local terminals = {}
 --- @field on_exit fun(t: Terminal, job: number, exit_code: number?, name: string?)
 --- @field on_open fun(term:Terminal)
 --- @field on_close fun(term:Terminal)
+--- @field __state TerminalState
 local Terminal = {}
 
 ---@private
@@ -71,7 +87,7 @@ local function next_id()
       return index
     end
   end
-  return #all+1
+  return #all + 1
 end
 
 ---Get an opened (valid) toggle terminal by id, defaults to the first opened
@@ -140,11 +156,6 @@ local function setup_buffer_autocommands(term)
     if term.window == api.nvim_get_current_win() then
       vim.cmd("startinsert")
     end
-    api.nvim_create_autocmd("BufEnter", {
-      buffer = term.bufnr,
-      group = AUGROUP,
-      command = "startinsert",
-    })
   end
 end
 
@@ -186,6 +197,7 @@ function Terminal:new(term)
   term.on_stdout = term.on_stdout or conf.on_stdout
   term.on_stderr = term.on_stderr or conf.on_stderr
   term.on_exit = term.on_exit or conf.on_exit
+  term.__state = { mode = "?" }
   if term.close_on_exit == nil then
     term.close_on_exit = conf.close_on_exit
   end
@@ -225,6 +237,34 @@ function Terminal:is_open()
   -- empty string window type corresponds to a normal window
   local win_open = win_type == "" or win_type == "popup"
   return win_open and api.nvim_win_get_buf(self.window) == self.bufnr
+end
+
+---@private
+function Terminal:__restore_mode()
+  self:set_mode(self.__state.mode)
+end
+
+--- Set the terminal's mode
+---@param m Mode
+function Terminal:set_mode(m)
+  if m == mode.INSERT then
+    vim.cmd("startinsert")
+  elseif m == mode.NORMAL then
+    vim.cmd("stopinsert")
+  elseif m == mode.UNSUPPORTED and config.get("start_in_insert") then
+    vim.cmd("startinsert")
+  end
+end
+
+function Terminal:persist_mode()
+  local raw_mode = api.nvim_get_mode().mode
+  local m = "?"
+  if raw_mode:match("nt") then -- nt is normal mode in the terminal
+    m = mode.NORMAL
+  elseif raw_mode:match("t") then -- t is insert mode in the terminal
+    m = mode.INSERT
+  end
+  self.__state.mode = m
 end
 
 function Terminal:close()
@@ -334,7 +374,7 @@ function Terminal:__spawn()
     cmd,
     command_sep,
     comment_sep,
-    term_ft,
+    constants.term_ft,
     comment_sep,
     self.id,
   })
@@ -491,16 +531,15 @@ function M.get_all(include_hidden)
 end
 
 if _G.IS_TEST then
-  ---@private
   function M.__reset()
     for _, term in pairs(terminals) do
       term:shutdown()
     end
   end
-
   M.__next_id = next_id
 end
 
 M.Terminal = Terminal
+M.mode = mode
 
 return M
