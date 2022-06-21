@@ -114,11 +114,15 @@ local function handle_term_enter()
   end
 end
 
-local function handle_term_leave()
+local function handle_term_win_leave()
   local _, term = terms.identify()
   if term and term:is_float() then
     term:close()
   end
+end
+
+local function handle_term_leave()
+  local _, term = terms.identify()
   if term and config.get("persist_mode") then
     term:persist_mode()
   end
@@ -308,7 +312,7 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
 
   -- Send each line to the terminal after some preprocessing if required
   for _, v in ipairs(lines) do
-    -- Trim whitespaces from the strings
+    -- Trim whitespace from the strings
     v = trim_spaces and v:gsub("^%s+", ""):gsub("%s+$", "") or v
     M.exec(v, terminal_id)
   end
@@ -386,6 +390,12 @@ local function setup_autocommands(_)
     group = AUGROUP,
     nested = true, -- this is necessary in case the buffer is the last
     callback = handle_term_enter,
+  })
+
+  api.nvim_create_autocmd("WinLeave", {
+    pattern = toggleterm_pattern,
+    group = AUGROUP,
+    callback = handle_term_win_leave,
   })
 
   api.nvim_create_autocmd("BufWinLeave", {
