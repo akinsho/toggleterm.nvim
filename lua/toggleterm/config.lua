@@ -3,8 +3,6 @@ local constants = require("toggleterm.constants")
 
 local M = {}
 
-local L = vim.log.levels
-
 local function shade(color, factor)
   return colors.shade_color(color, factor)
 end
@@ -83,18 +81,6 @@ local function get_highlights(conf)
   return vim.tbl_deep_extend("force", defaults, conf.highlights, overrides)
 end
 
-local function handle_deprecations(conf)
-  if conf.direction == "window" then
-    vim.schedule(function()
-      vim.notify(
-        "[Toggleterm] The window layout is deprecated please use the 'tab' layout instead",
-        L.WARN,
-        { title = "Toggleterm" }
-      )
-    end)
-  end
-end
-
 --- get the full user config or just a specified value
 ---@param key string?
 ---@return any
@@ -114,9 +100,6 @@ end
 function M.set(user_conf)
   user_conf = user_conf or {}
   user_conf.highlights = user_conf.highlights or {}
-  if user_conf and type(user_conf) == "table" then
-    handle_deprecations(user_conf)
-  end
   config = vim.tbl_deep_extend("force", config, user_conf)
   config.highlights = get_highlights(config)
   return config
