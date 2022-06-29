@@ -42,7 +42,7 @@ Using packer in lua
 Using vim-plug in vimscript
 
 >
-    Plug 'akinsho/toggleterm.nvim', tag = 'v1.*'
+    Plug 'akinsho/toggleterm.nvim', {'tag' : 'v1.*'}
 <
 
 
