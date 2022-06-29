@@ -69,7 +69,7 @@ end}
 Using vim-plug in vimscript
 
 ```vim
-Plug 'akinsho/toggleterm.nvim', tag = 'v1.*'
+Plug 'akinsho/toggleterm.nvim', {'tag' : 'v1.*'}
 ```
 
 You can/should specify a tag for the current major version of the plugin, to avoid breaking changes as this plugin evolves.
