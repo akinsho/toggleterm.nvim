@@ -13,6 +13,8 @@ local config = lazy.require("toggleterm.config")
 local ui = lazy.require("toggleterm.ui")
 ---@module "toggleterm.commandline"
 local commandline = lazy.require("toggleterm.commandline")
+---@module "toggleterm.command-complete"
+local command_complete = lazy.require("toggleterm.command-complete")
 
 local terms = require("toggleterm.terminal")
 
@@ -438,11 +440,11 @@ local function setup_commands()
   -- Count is 0 by default
   api.nvim_create_user_command("TermExec", function(opts)
     M.exec_command(opts.args, opts.count)
-  end, { count = true, complete = "shellcmd", nargs = "*" })
+  end, { count = true, complete = command_complete.term_exec_complete, nargs = "*" })
 
   api.nvim_create_user_command("ToggleTerm", function(opts)
     M.toggle_command(opts.args, opts.count)
-  end, { count = true, nargs = "*" })
+  end, { count = true, complete = command_complete.toggle_term_complete, nargs = "*" })
 
   api.nvim_create_user_command("ToggleTermToggleAll", function(opts)
     M.toggle_all(opts.bang)

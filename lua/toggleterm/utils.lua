@@ -33,4 +33,31 @@ function M.git_dir()
   return vim.trim(gitdir)
 end
 
+
+---@param str string|nil
+---@return boolean
+function M.str_is_empty(str)
+  return str == nil or str == ""
+end
+
+---@param tbl table
+---@return table
+function M.tbl_filter_empty(tbl)
+  return vim.tbl_filter(
+    ---@param str string|nil
+    function(str)
+      return not M.str_is_empty(str)
+    end,
+    tbl
+  )
+end
+
+--- Concats a table ignoring empty entries
+---@param tbl table
+---@param sep string
+function M.concat_without_empty(tbl, sep)
+  return table.concat(M.tbl_filter_empty(tbl), sep)
+end
+
+
 return M
