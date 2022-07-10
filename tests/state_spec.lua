@@ -15,9 +15,7 @@ describe("Terminal state - ", function()
     toggleterm.setup({ start_in_insert = true })
   end)
 
-  after_each(function()
-    require("toggleterm.terminal").__reset()
-  end)
+  after_each(function() require("toggleterm.terminal").__reset() end)
 
   -- TODO: this test fails because (I think) the shell takes some time to start up and
   -- and so the right autocommands haven't fired yet

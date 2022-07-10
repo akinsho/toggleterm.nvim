@@ -98,9 +98,7 @@ end
 local function close_last_window(term)
   local only_one_window = fn.winnr("$") == 1
   if only_one_window and vim.bo[term.bufnr].filetype == term_ft then
-    if term:is_split() then
-      vim.cmd("keepalt bnext")
-    end
+    if term:is_split() then vim.cmd("keepalt bnext") end
   end
 end
 
@@ -118,16 +116,12 @@ end
 
 local function handle_term_win_leave()
   local _, term = terms.identify()
-  if term and term:is_float() then
-    term:close()
-  end
+  if term and term:is_float() then term:close() end
 end
 
 local function handle_term_leave()
   local _, term = terms.identify()
-  if term and config.get("persist_mode") then
-    term:persist_mode()
-  end
+  if term and config.get("persist_mode") then term:persist_mode() end
 end
 
 local function on_term_open()
@@ -186,19 +180,11 @@ function M.exec(cmd, num, size, dir, direction, go_back, open)
   num = (num and num >= 1) and num or terms.get_toggled_id()
   open = open == nil or open
   local term, created = terms.get_or_create_term(num, dir, direction)
-  if not term:is_open() then
-    term:open(size, direction, created)
-  end
-  if not created and dir then
-    term:change_dir(dir)
-  end
+  if not term:is_open() then term:open(size, direction, created) end
+  if not created and dir then term:change_dir(dir) end
   -- going back from floating window closes it
-  if term:is_float() then
-    go_back = false
-  end
-  if go_back == nil then
-    go_back = true
-  end
+  if term:is_float() then go_back = false end
+  if go_back == nil then go_back = true end
   if not open then
     term:close()
     go_back = false
@@ -266,9 +252,7 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
       local start_line, start_col = unpack(res.start_pos)
       local end_line, end_col = unpack(res.end_pos)
       -- exclude the last char in text if "selection" is set to "exclusive"
-      if opt.selection._value == "exclusive" then
-        end_col = end_col - 1
-      end
+      if opt.selection._value == "exclusive" then end_col = end_col - 1 end
       return api.nvim_buf_get_text(0, start_line - 1, start_col - 1, end_line - 1, end_col, {})
     elseif vis_mode == "\x16" then
       -- block-visual
@@ -277,9 +261,7 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
       local _, start_col = unpack(res.start_pos)
       local _, end_col = unpack(res.end_pos)
       -- exclude the last col of the block if "selection" is set to "exclusive"
-      if opt.selection._value == "exclusive" then
-        end_col = end_col - 1
-      end
+      if opt.selection._value == "exclusive" then end_col = end_col - 1 end
       -- exchange start and end columns for proper substring indexing if needed
       -- e.g. instead of str:sub(10, 5), do str:sub(5, 10)
       if start_col > end_col then
@@ -308,9 +290,7 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
   end
 
   -- If no lines are fetched we don't need to do anything
-  if #lines == 0 or lines == nil then
-    return
-  end
+  if #lines == 0 or lines == nil then return end
 
   -- Send each line to the terminal after some preprocessing if required
   for _, v in ipairs(lines) do
@@ -331,9 +311,7 @@ function M.toggle_command(args, count)
     dir = { parsed.dir, "string", true },
     direction = { parsed.direction, "string", true },
   })
-  if parsed.size then
-    parsed.size = tonumber(parsed.size)
-  end
+  if parsed.size then parsed.size = tonumber(parsed.size) end
   M.toggle(count, parsed.size, parsed.dir, parsed.direction)
 end
 
@@ -418,9 +396,7 @@ local function setup_autocommands(_)
       config.reset_highlights()
       for _, term in pairs(terms.get_all()) do
         if api.nvim_win_is_valid(term.window) then
-          api.nvim_win_call(term.window, function()
-            ui.hl_term(term)
-          end)
+          api.nvim_win_call(term.window, function() ui.hl_term(term) end)
         end
       end
     end,
@@ -438,17 +414,23 @@ end
 ---------------------------------------------------------------------------------
 local function setup_commands()
   -- Count is 0 by default
-  api.nvim_create_user_command("TermExec", function(opts)
-    M.exec_command(opts.args, opts.count)
-  end, { count = true, complete = command_complete.term_exec_complete, nargs = "*" })
+  api.nvim_create_user_command(
+    "TermExec",
+    function(opts) M.exec_command(opts.args, opts.count) end,
+    { count = true, complete = command_complete.term_exec_complete, nargs = "*" }
+  )
 
-  api.nvim_create_user_command("ToggleTerm", function(opts)
-    M.toggle_command(opts.args, opts.count)
-  end, { count = true, complete = command_complete.toggle_term_complete, nargs = "*" })
+  api.nvim_create_user_command(
+    "ToggleTerm",
+    function(opts) M.toggle_command(opts.args, opts.count) end,
+    { count = true, complete = command_complete.toggle_term_complete, nargs = "*" }
+  )
 
-  api.nvim_create_user_command("ToggleTermToggleAll", function(opts)
-    M.toggle_all(opts.bang)
-  end, { bang = true })
+  api.nvim_create_user_command(
+    "ToggleTermToggleAll",
+    function(opts) M.toggle_all(opts.bang) end,
+    { bang = true }
+  )
 
   -- TODO: Convert this functions to use lua functions with the passed in line1,line2 args
   api.nvim_create_user_command(
@@ -462,9 +444,11 @@ local function setup_commands()
     "'<,'> lua require'toggleterm'.send_lines_to_terminal('visual_selection', true, <q-args>)<CR>",
     { range = true, nargs = "?" }
   )
-  api.nvim_create_user_command("ToggleTermSendCurrentLine", function(opts)
-    M.send_lines_to_terminal("single_line", true, opts.args)
-  end, { nargs = "?" })
+  api.nvim_create_user_command(
+    "ToggleTermSendCurrentLine",
+    function(opts) M.send_lines_to_terminal("single_line", true, opts.args) end,
+    { nargs = "?" }
+  )
 end
 
 function M.setup(user_prefs)

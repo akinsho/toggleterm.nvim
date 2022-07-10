@@ -27,27 +27,20 @@ end
 function M.git_dir()
   local gitdir = fn.system(fmt("git -C %s rev-parse --show-toplevel", fn.expand("%:p:h")))
   local isgitdir = fn.matchstr(gitdir, "^fatal:.*") == ""
-  if not isgitdir then
-    return
-  end
+  if not isgitdir then return end
   return vim.trim(gitdir)
 end
 
-
 ---@param str string|nil
 ---@return boolean
-function M.str_is_empty(str)
-  return str == nil or str == ""
-end
+function M.str_is_empty(str) return str == nil or str == "" end
 
 ---@param tbl table
 ---@return table
 function M.tbl_filter_empty(tbl)
   return vim.tbl_filter(
     ---@param str string|nil
-    function(str)
-      return not M.str_is_empty(str)
-    end,
+    function(str) return not M.str_is_empty(str) end,
     tbl
   )
 end
@@ -55,9 +48,6 @@ end
 --- Concats a table ignoring empty entries
 ---@param tbl table
 ---@param sep string
-function M.concat_without_empty(tbl, sep)
-  return table.concat(M.tbl_filter_empty(tbl), sep)
-end
-
+function M.concat_without_empty(tbl, sep) return table.concat(M.tbl_filter_empty(tbl), sep) end
 
 return M

@@ -3,9 +3,7 @@ local constants = require("toggleterm.constants")
 
 local M = {}
 
-local function shade(color, factor)
-  return colors.shade_color(color, factor)
-end
+local function shade(color, factor) return colors.shade_color(color, factor) end
 
 --- @alias ToggleTermHighlights table<string, table<string, string>>
 
@@ -85,15 +83,11 @@ end
 ---@param key string?
 ---@return any
 function M.get(key)
-  if key then
-    return config[key]
-  end
+  if key then return config[key] end
   return config
 end
 
-function M.reset_highlights()
-  config.highlights = get_highlights(config)
-end
+function M.reset_highlights() config.highlights = get_highlights(config) end
 
 ---@param user_conf ToggleTermConfig
 ---@return ToggleTermConfig
@@ -107,7 +101,5 @@ end
 
 ---@return ToggleTermConfig
 return setmetatable(M, {
-  __index = function(_, k)
-    return config[k]
-  end,
+  __index = function(_, k) return config[k] end,
 })

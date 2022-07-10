@@ -21,18 +21,14 @@ local get_all = t.get_all
 ---@param term table
 ---@return any
 local function term_has_windows(term)
-  return ui.find_open_windows(function(buf)
-    return buf == term.bufnr
-  end)
+  return ui.find_open_windows(function(buf) return buf == term.bufnr end)
 end
 
 describe("ToggleTerm tests:", function()
   -- We must set hidden to use the plugin
   vim.o.hidden = true
 
-  after_each(function()
-    require("toggleterm.terminal").__reset()
-  end)
+  after_each(function() require("toggleterm.terminal").__reset() end)
 
   describe("toggling terminals - ", function()
     it("new terminals are assigned incremental ids", function()
@@ -45,7 +41,7 @@ describe("ToggleTerm tests:", function()
     end)
 
     it("should assign the next id filling in any missing gaps", function()
-      Terminal:new({ id = 2}):toggle() --2
+      Terminal:new({ id = 2 }):toggle() --2
       Terminal:new():toggle() --1
       Terminal:new():toggle() --3
       Terminal:new():toggle() --4
@@ -128,17 +124,11 @@ describe("ToggleTerm tests:", function()
 
     it("should spawn in the background", function()
       local stdout = {}
-      local has_spawned = function()
-        return table.concat(stdout, ""):match("SPAWNED") ~= nil
-      end
-      Terminal
-        :new({
-          cmd = [[echo SPAWNED]],
-          on_stdout = function(_, _, lines)
-            vim.list_extend(stdout, lines)
-          end,
-        })
-        :spawn()
+      local has_spawned = function() return table.concat(stdout, ""):match("SPAWNED") ~= nil end
+      Terminal:new({
+        cmd = [[echo SPAWNED]],
+        on_stdout = function(_, _, lines) vim.list_extend(stdout, lines) end,
+      }):spawn()
       -- Wait some time if job is not ready
       vim.wait(500, has_spawned)
       assert.is_true(has_spawned())
@@ -147,18 +137,12 @@ describe("ToggleTerm tests:", function()
     it("should pass environmental variables", function()
       local stdout = {}
       local expected = "TESTVAR = 0123456789"
-      local find_end = function()
-        return table.concat(stdout, ""):match(expected)
-      end
-      Terminal
-        :new({
-          cmd = [[echo "TESTVAR = $TESTVAR END"]],
-          env = { TESTVAR = "0123456789" },
-          on_stdout = function(_, _, lines)
-            vim.list_extend(stdout, lines)
-          end,
-        })
-        :toggle()
+      local find_end = function() return table.concat(stdout, ""):match(expected) end
+      Terminal:new({
+        cmd = [[echo "TESTVAR = $TESTVAR END"]],
+        env = { TESTVAR = "0123456789" },
+        on_stdout = function(_, _, lines) vim.list_extend(stdout, lines) end,
+      }):toggle()
       -- Wait some time if job is not ready
       vim.wait(500, find_end)
       assert.are.equal(expected, table.concat(stdout, " "):match("TESTVAR = %S+"))
@@ -212,17 +196,19 @@ describe("ToggleTerm tests:", function()
   end)
 
   describe("terminal buffers options - ", function()
-    before_each(function()
-      toggleterm.setup({
-        open_mapping = [[<c-\>]],
-        shade_filetypes = { "none" },
-        direction = "horizontal",
-        float_opts = {
-          height = 10,
-          width = 20,
-        },
-      })
-    end)
+    before_each(
+      function()
+        toggleterm.setup({
+          open_mapping = [[<c-\>]],
+          shade_filetypes = { "none" },
+          direction = "horizontal",
+          float_opts = {
+            height = 10,
+            width = 20,
+          },
+        })
+      end
+    )
 
     it("should give each terminal a winhighlight", function()
       local test1 = Terminal:new({ direction = "horizontal" }):toggle()
@@ -309,17 +295,19 @@ describe("ToggleTerm tests:", function()
   end)
 
   describe("layout options - ", function()
-    before_each(function()
-      toggleterm.setup({
-        open_mapping = [[<c-\>]],
-        shade_filetypes = { "none" },
-        direction = "horizontal",
-        float_opts = {
-          height = 10,
-          width = 20,
-        },
-      })
-    end)
+    before_each(
+      function()
+        toggleterm.setup({
+          open_mapping = [[<c-\>]],
+          shade_filetypes = { "none" },
+          direction = "horizontal",
+          float_opts = {
+            height = 10,
+            width = 20,
+          },
+        })
+      end
+    )
 
     it("should open with the correct layout", function()
       local term = Terminal:new({ direction = "float" }):toggle()
@@ -339,9 +327,7 @@ describe("ToggleTerm tests:", function()
       local term = Terminal:new({ direction = "vertical" })
       local size1 = 20
       local size2 = function(_t)
-        if _t.direction == "vertical" then
-          return size1
-        end
+        if _t.direction == "vertical" then return size1 end
         return 0
       end
       assert.equal(ui._resolve_size(size2, term), size1)
@@ -389,22 +375,20 @@ describe("ToggleTerm tests:", function()
       local normal = "#000000"
       local border = "#ffffff"
 
-      local term = Terminal
-        :new({
-          direction = "float",
-          highlights = {
-            NormalFloat = {
-              guibg = normal,
-            },
-            FloatBorder = {
-              guifg = border,
-            },
+      local term = Terminal:new({
+        direction = "float",
+        highlights = {
+          NormalFloat = {
+            guibg = normal,
           },
-          float_opts = {
-            winblend = 12,
+          FloatBorder = {
+            guifg = border,
           },
-        })
-        :toggle()
+        },
+        float_opts = {
+          winblend = 12,
+        },
+      }):toggle()
       local winhighlight = vim.wo[term.window].winhighlight
       local winblend = vim.wo[term.window].winblend
       assert.equal(12, winblend)

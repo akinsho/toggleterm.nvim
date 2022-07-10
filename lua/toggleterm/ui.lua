@@ -25,15 +25,11 @@ end
 --- Explicitly set the persistent size of a direction
 --- @param direction string
 --- @param size number
-function M.save_direction_size(direction, size)
-  persistent[direction] = size
-end
+function M.save_direction_size(direction, size) persistent[direction] = size end
 
 --- @param direction string
 --- @return boolean
-function M.has_saved_size(direction)
-  return persistent[direction] ~= nil
-end
+function M.has_saved_size(direction) return persistent[direction] ~= nil end
 
 --- Get the size of the split. Order of priority is as follows:
 --- 1. The size argument is a valid number > 0
@@ -47,9 +43,7 @@ end
 function M.get_size(size, direction)
   local config = require("toggleterm.config").get()
   local valid_size = size ~= nil and size > 0
-  if not config.persist_size then
-    return valid_size and size or config.size
-  end
+  if not config.persist_size then return valid_size and size or config.size end
   return valid_size and size or persistent[direction] or config.size
 end
 
@@ -85,9 +79,7 @@ function M.hl_term(term)
       and term.highlights
     or config.highlights
 
-  if not hls or vim.tbl_isempty(hls) then
-    return
-  end
+  if not hls or vim.tbl_isempty(hls) then return end
 
   local window = term and term.window or api.nvim_get_current_win()
   local id = term and term.id or "Default"
@@ -129,9 +121,7 @@ local function create_term_buf_if_needed(term)
   term.window, term.bufnr = window, bufnr
 end
 
-function M.create_buf()
-  return api.nvim_create_buf(false, false)
-end
+function M.create_buf() return api.nvim_create_buf(false, false) end
 
 function M.delete_buf(term)
   if term.bufnr and api.nvim_buf_is_valid(term.bufnr) then
@@ -139,36 +129,22 @@ function M.delete_buf(term)
   end
 end
 
-function M.set_origin_window()
-  origin_window = api.nvim_get_current_win()
-end
+function M.set_origin_window() origin_window = api.nvim_get_current_win() end
 
-function M.get_origin_window()
-  return origin_window
-end
+function M.get_origin_window() return origin_window end
 
 function M.update_origin_window(term_window)
   local curr_win = api.nvim_get_current_win()
-  if term_window ~= curr_win then
-    origin_window = curr_win
-  end
+  if term_window ~= curr_win then origin_window = curr_win end
 end
 
-function M.scroll_to_bottom()
-  vim.cmd("normal! G")
-end
+function M.scroll_to_bottom() vim.cmd("normal! G") end
 
-function M.goto_previous()
-  vim.cmd("wincmd p")
-end
+function M.goto_previous() vim.cmd("wincmd p") end
 
-function M.stopinsert()
-  vim.cmd("stopinsert!")
-end
+function M.stopinsert() vim.cmd("stopinsert!") end
 
-local function compare_ft(buf)
-  return vim.bo[buf].filetype == constants.term_ft
-end
+local function compare_ft(buf) return vim.bo[buf].filetype == constants.term_ft end
 
 --- Find the first open terminal window
 --- by iterating all windows and matching the
@@ -195,9 +171,7 @@ end
 function M.switch_buf(buf)
   -- don't change the alternate buffer so that <c-^><c-^> does nothing in the terminal split
   local cur_buf = api.nvim_get_current_buf()
-  if cur_buf ~= buf then
-    vim.cmd(fmt("keepalt buffer %d", buf))
-  end
+  if cur_buf ~= buf then vim.cmd(fmt("keepalt buffer %d", buf)) end
 end
 
 local split_commands = {
@@ -223,9 +197,7 @@ function M.guess_direction()
     return "vertical"
   end
   -- current window is full width horizontal split
-  if api.nvim_win_get_width(0) == vim.o.columns then
-    return "horizontal"
-  end
+  if api.nvim_win_get_width(0) == vim.o.columns then return "horizontal" end
   return nil
 end
 
@@ -279,9 +251,7 @@ function M.open_split(size, term)
     -- we need to be in the terminal window most recently opened
     -- in order to split it
     local split_win = win_ids[#win_ids]
-    if persist_size then
-      M.save_window_size(term.direction, split_win)
-    end
+    if persist_size then M.save_window_size(term.direction, split_win) end
     api.nvim_set_current_win(split_win)
     vim.cmd(commands.existing)
   else
@@ -303,18 +273,14 @@ function M.open_tab(term)
   create_term_buf_if_needed(term)
 end
 
-local function close_tab()
-  vim.cmd("tabclose")
-end
+local function close_tab() vim.cmd("tabclose") end
 
 ---Close terminal window
 ---@param term Terminal
 local function close_split(term)
   if term.window and api.nvim_win_is_valid(term.window) then
     local persist_size = require("toggleterm.config").get("persist_size")
-    if persist_size then
-      M.save_window_size(term.direction, term.window)
-    end
+    if persist_size then M.save_window_size(term.direction, term.window) end
     api.nvim_win_close(term.window, true)
   end
   if origin_window and api.nvim_win_is_valid(origin_window) then
@@ -334,18 +300,14 @@ function M.open_float(term)
 
   term.window, term.bufnr = win, buf
 
-  if opts.winblend then
-    vim.wo[win].winblend = opts.winblend
-  end
+  if opts.winblend then vim.wo[win].winblend = opts.winblend end
   M.set_options(term.window, term.bufnr, term)
 end
 
 ---Updates the floating terminal size
 ---@param term Terminal
 function M.update_float(term)
-  if not vim.api.nvim_win_is_valid(term.window) then
-    return
-  end
+  if not vim.api.nvim_win_is_valid(term.window) then return end
   vim.api.nvim_win_set_config(term.window, M._get_float_config(term, false))
 end
 
@@ -376,22 +338,16 @@ end
 
 ---Determine if a window is a float
 ---@param window number
-function M.is_float(window)
-  return fn.win_gettype(window) == "popup"
-end
+function M.is_float(window) return fn.win_gettype(window) == "popup" end
 
 --- @param bufnr number
-function M.find_windows_by_bufnr(bufnr)
-  return fn.win_findbuf(bufnr)
-end
+function M.find_windows_by_bufnr(bufnr) return fn.win_findbuf(bufnr) end
 
 ---Return whether or not the terminal passed in has an open window
 ---@param term Terminal
 ---@return boolean
 function M.term_has_open_win(term)
-  if not term.window then
-    return false
-  end
+  if not term.window then return false end
   local open_wins = api.nvim_tabpage_list_wins(api.nvim_get_current_tabpage())
   return vim.tbl_contains(open_wins, term.window)
 end

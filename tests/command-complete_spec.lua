@@ -48,16 +48,13 @@ describe("command-complete", function()
     end)
 
     it("should return matching subdirectories", function()
-      local results = command_complete.term_exec_complete(
-        "dir=.github/wor",
-        "ToggleExec dir=.github/wor",
-        27
-      )
+      local results =
+        command_complete.term_exec_complete("dir=.github/wor", "ToggleExec dir=.github/wor", 27)
 
       assert.is_equal("dir=.github/workflows", table.concat(results, ", "))
     end)
 
-    it("should handle empty dir values", function ()
+    it("should handle empty dir values", function()
       local results = command_complete.term_exec_complete("dir", "ToggleExec dir", 15)
 
       assert.is_not_equal(0, #results)
@@ -80,11 +77,8 @@ describe("command-complete", function()
     end)
 
     it("should return partiall typed directions", function()
-      local results = command_complete.term_exec_complete(
-        "direction=ver",
-        "TermExec direction=ver",
-        22
-      )
+      local results =
+        command_complete.term_exec_complete("direction=ver", "TermExec direction=ver", 22)
 
       assert.equal("direction=vertical", table.concat(results, ", "))
     end)

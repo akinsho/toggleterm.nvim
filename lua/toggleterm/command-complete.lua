@@ -17,9 +17,7 @@ function M.get_path_parts(typed_path)
     -- from a root path
     local base_path = vim.fn.fnamemodify(typed_path, ":h")
     local search_term = vim.fn.fnamemodify(typed_path, ":t")
-    if vim.fn.isdirectory(base_path) then
-      return base_path, search_term
-    end
+    if vim.fn.isdirectory(base_path) then return base_path, search_term end
   end
 
   return nil, nil
@@ -37,9 +35,7 @@ local term_exec_options = {
       local dir_cmds = vim.split(vim.fn.glob(glob_str), "\n")
 
       for _, cmd in ipairs(dir_cmds) do
-        if not u.str_is_empty(cmd) then
-          table.insert(commands, vim.fn.fnamemodify(cmd, ":t"))
-        end
+        if not u.str_is_empty(cmd) then table.insert(commands, vim.fn.fnamemodify(cmd, ":t")) end
       end
     end
 
@@ -52,19 +48,22 @@ local term_exec_options = {
     local base_path, search_term = M.get_path_parts(typed_path or "")
     local safe_path = base_path ~= "" and base_path or "."
 
-    local paths = vim.fn.readdir(safe_path, function(entry)
-      return vim.fn.isdirectory(safe_path .. "/" .. entry)
-    end)
+    local paths = vim.fn.readdir(
+      safe_path,
+      function(entry) return vim.fn.isdirectory(safe_path .. "/" .. entry) end
+    )
 
     if not u.str_is_empty(search_term) then
-      paths = vim.tbl_filter(function(path)
-        return path:match("^" .. search_term .. "*") ~= nil
-      end, paths)
+      paths = vim.tbl_filter(
+        function(path) return path:match("^" .. search_term .. "*") ~= nil end,
+        paths
+      )
     end
 
-    return vim.tbl_map(function(path)
-      return u.concat_without_empty({ base_path, path }, "/")
-    end, paths)
+    return vim.tbl_map(
+      function(path) return u.concat_without_empty({ base_path, path }, "/") end,
+      paths
+    )
   end,
   --- Suggests directions for the term
   ---@param typed_direction string
@@ -75,18 +74,15 @@ local term_exec_options = {
       "tab",
       "vertical",
     }
-    if u.str_is_empty(typed_direction) then
-      return directions
-    end
-    return vim.tbl_filter(function(direction)
-      return direction:match("^" .. typed_direction .. "*") ~= nil
-    end, directions)
+    if u.str_is_empty(typed_direction) then return directions end
+    return vim.tbl_filter(
+      function(direction) return direction:match("^" .. typed_direction .. "*") ~= nil end,
+      directions
+    )
   end,
   --- The size param takes in arbitrary numbers, we keep this function only to
   --- match the signature of other options
-  size = function()
-    return {}
-  end,
+  size = function() return {} end,
 }
 
 local toggle_term_options = {
@@ -105,20 +101,17 @@ local function complete(options)
     local key = parts[1]
     local value = parts[2]
     if options[key] then
-      return vim.tbl_map(function(option)
-        return key .. "=" .. option
-      end, options[key](value))
+      return vim.tbl_map(function(option) return key .. "=" .. option end, options[key](value))
     end
 
-    local available_options = vim.tbl_filter(function(option)
-      return command:match(" " .. option .. "=") == nil
-    end, vim.tbl_keys(options))
+    local available_options = vim.tbl_filter(
+      function(option) return command:match(" " .. option .. "=") == nil end,
+      vim.tbl_keys(options)
+    )
 
     table.sort(available_options)
 
-    return vim.tbl_map(function(option)
-      return option .. "="
-    end, available_options)
+    return vim.tbl_map(function(option) return option .. "=" end, available_options)
   end
 end
 
