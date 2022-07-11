@@ -98,7 +98,12 @@ function M.hl_term(term)
     return hi_target
   end, hl_names)
 
-  api.nvim_win_set_option(window, "winhighlight", table.concat(highlights, ","))
+  local str = table.concat(highlights, ",")
+  if utils.is_nightly() then
+    api.nvim_set_option_value("winhighlight", str, { scope = "local", win = window })
+  else
+    api.nvim_win_set_option(window, "winhighlight", str)
+  end
 end
 
 ---Create a terminal buffer with the correct buffer/window options

@@ -13,6 +13,11 @@ function M.echomsg(msg, hl)
   api.nvim_echo({ { msg, hl } }, true, {})
 end
 
+function M.is_nightly()
+  local v = vim.version()
+  return v.minor >= 8
+end
+
 ---Inform a user about something
 ---@param msg string
 ---@param level 'error' | 'info' | 'warn'
