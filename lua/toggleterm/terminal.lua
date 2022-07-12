@@ -9,7 +9,6 @@ local config = lazy.require("toggleterm.config")
 local utils = lazy.require("toggleterm.utils")
 ---@module "toggleterm.constants"
 local constants = lazy.require("toggleterm.constants")
-local AUGROUP = "ToggleTermBuffer"
 
 local api = vim.api
 local fmt = string.format
@@ -20,6 +19,8 @@ local mode = {
   NORMAL = "n",
   UNSUPPORTED = "?",
 }
+
+local AUGROUP = api.nvim_create_augroup("ToggleTermBuffer", { clear = true })
 
 local is_windows = fn.has("win32") == 1
 local function is_cmd(shell) return string.find(shell, "cmd") end
@@ -119,7 +120,6 @@ end
 ---@param term Terminal
 local function setup_buffer_autocommands(term)
   local conf = config.get()
-  api.nvim_create_augroup(AUGROUP, { clear = true })
   api.nvim_create_autocmd("TermClose", {
     buffer = term.bufnr,
     group = AUGROUP,
