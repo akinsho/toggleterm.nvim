@@ -18,11 +18,13 @@ function M.is_nightly()
   return v.minor >= 8
 end
 
+---@alias error_types 'error' | 'info' | 'warn'
 ---Inform a user about something
 ---@param msg string
----@param level 'error' | 'info' | 'warn'
+---@param level error_types
 function M.notify(msg, level)
-  level = level and levels[level:upper()] or levels.INFO
+  local err = level:upper()
+  level = level and levels[err] or levels.INFO
   vim.notify(fmt("[toggleterm]: %s", msg), level)
 end
 
