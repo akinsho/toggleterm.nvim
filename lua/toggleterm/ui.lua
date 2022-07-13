@@ -69,20 +69,23 @@ function M.set_options(win, buf, term)
   api.nvim_buf_set_var(buf, "toggle_number", term.id)
 end
 
-local function hl(name)
-  return "%#" .. name .. "#"
-end
+local function hl(name) return "%#" .. name .. "#" end
 
 local hl_end = "%*"
 
-function M.winbar(id)
-  return hl("Underlined") .. fmt("Toggleterm(%d)", id) .. hl_end
-end
+function M.winbar(id) return fmt(" Toggleterm(%d) ", id) .. hl_end end
 
 ---@param term Terminal
 function M.set_winbar(term)
   if vim.wo[term.window].winbar == "" then
-    vim.wo[term.window].winbar = '%{%v:lua.require("toggleterm.ui").winbar(' .. term.id .. ")%}"
+    api.nvim_set_option_value(
+      "winbar",
+      '%{%v:lua.require("toggleterm.ui").winbar(' .. term.id .. ")%}",
+      {
+        scope = "local",
+        win = term.window,
+      }
+    )
   end
 end
 
