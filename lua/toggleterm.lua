@@ -57,14 +57,16 @@ end
 
 --Create a new terminal or close beginning from the last opened
 ---@param _ number
----@param size number
----@param dir string
----@param direction string
+---@param size number?
+---@param dir string?
+---@param direction string?
 local function smart_toggle(_, size, dir, direction)
   local terminals = terms.get_all()
   if not ui.find_open_windows() then
     -- Re-open the first terminal toggled
-    terms.get_or_create_term(terms.get_toggled_id(), dir, direction):open(size, direction)
+    local id = terms.get_toggled_id()
+    if not id then return end -- TODO: Inform the user of the failure
+    terms.get_or_create_term(id, dir, direction):open(size, direction)
   else
     local target
     -- count backwards from the end of the list
@@ -84,9 +86,9 @@ local function smart_toggle(_, size, dir, direction)
 end
 
 --- @param num number
---- @param size number
---- @param dir string
---- @param direction string
+--- @param size number?
+--- @param dir string?
+--- @param direction string?
 local function toggle_nth_term(num, size, dir, direction)
   local term = terms.get_or_create_term(num, dir, direction)
   ui.update_origin_window(term.window)
@@ -138,9 +140,7 @@ local function on_term_open()
       })
       :__resurrect()
   end
-  if fn.exists("+winbar") == 1 then
-    require("toggleterm.ui").set_winbar(term)
-  end
+  if term and fn.exists("+winbar") == 1 then require("toggleterm.ui").set_winbar(term) end
 end
 
 function M.exec_command(args, count)
@@ -168,8 +168,8 @@ end
 --- @param size number?
 --- @param dir string?
 --- @param direction string?
---- @param go_back? boolean whether or not to return to original window
---- @param open? boolean whether or not to open terminal window
+--- @param go_back boolean? whether or not to return to original window
+--- @param open boolean? whether or not to open terminal window
 function M.exec(cmd, num, size, dir, direction, go_back, open)
   vim.validate({
     cmd = { cmd, "string" },
@@ -182,6 +182,7 @@ function M.exec(cmd, num, size, dir, direction, go_back, open)
   })
   num = (num and num >= 1) and num or terms.get_toggled_id()
   open = open == nil or open
+  if not num then return end -- TODO: Inform the user that no terminal number was found
   local term, created = terms.get_or_create_term(num, dir, direction)
   if not term:is_open() then term:open(size, direction, created) end
   if not created and dir then term:change_dir(dir) end
@@ -204,7 +205,6 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
 
   -- If no terminal id provided fall back to the default
   terminal_id = terminal_id or 1
-  terminal_id = tonumber(terminal_id)
 
   vim.validate({
     selection_type = { selection_type, "string", true },

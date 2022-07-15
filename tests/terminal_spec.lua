@@ -19,7 +19,7 @@ local get_all = t.get_all
 
 ---Return if a terminal has windows
 ---@param term table
----@return any
+---@return boolean, number[]
 local function term_has_windows(term)
   return ui.find_open_windows(function(buf) return buf == term.bufnr end)
 end

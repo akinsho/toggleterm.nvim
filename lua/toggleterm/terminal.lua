@@ -44,6 +44,22 @@ end
 ---@type Terminal[]
 local terminals = {}
 
+--- @class TermCreateArgs
+--- @field cmd string
+--- @field direction? string the layout style for the terminal
+--- @field id number?
+--- @field highlights table<string, table<string, string>>?
+--- @field dir string? the directory for the terminal
+--- @field count number? the count that triggers that specific terminal
+--- @field hidden boolean? whether or not to include this terminal in the terminals list
+--- @field close_on_exit boolean? whether or not to close the terminal window when the process exits
+--- @field float_opts table<string, any>?
+--- @field on_stdout fun(t: Terminal, job: number, data: string[]?, name: string?)?
+--- @field on_stderr fun(t: Terminal, job: number, data: string[], name: string)?
+--- @field on_exit fun(t: Terminal, job: number, exit_code: number?, name: string?)?
+--- @field on_open fun(term:Terminal)?
+--- @field on_close fun(term:Terminal)?
+
 --- @class Terminal
 --- @field cmd string
 --- @field direction string the layout style for the terminal
@@ -56,15 +72,15 @@ local terminals = {}
 --- @field name string the name of the terminal
 --- @field count number the count that triggers that specific terminal
 --- @field hidden boolean whether or not to include this terminal in the terminals list
---- @field close_on_exit boolean whether or not to close the terminal window when the process exits
---- @field float_opts table<string, any>
+--- @field close_on_exit boolean? whether or not to close the terminal window when the process exits
+--- @field float_opts table<string, any>?
 --- @field env table<string, string> environmental variables passed to jobstart()
 --- @field clear_env boolean use clean job environment, passed to jobstart()
---- @field on_stdout fun(t: Terminal, job: number, data: string[]?, name: string?)
---- @field on_stderr fun(t: Terminal, job: number, data: string[], name: string)
---- @field on_exit fun(t: Terminal, job: number, exit_code: number?, name: string?)
---- @field on_open fun(term:Terminal)
---- @field on_close fun(term:Terminal)
+--- @field on_stdout fun(t: Terminal, job: number, data: string[]?, name: string?)?
+--- @field on_stderr fun(t: Terminal, job: number, data: string[], name: string)?
+--- @field on_exit fun(t: Terminal, job: number, exit_code: number?, name: string?)?
+--- @field on_open fun(term:Terminal)?
+--- @field on_close fun(term:Terminal)?
 --- @field __state TerminalState
 local Terminal = {}
 
@@ -83,7 +99,7 @@ end
 
 ---Get an opened (valid) toggle terminal by id, defaults to the first opened
 ---@param position number?
----@return nil
+---@return number?
 function M.get_toggled_id(position)
   position = position or 1
   local t = M.get_all()
@@ -111,7 +127,7 @@ local function on_vim_resized(id)
 end
 
 --- Remove the in memory reference to the no longer open terminal
---- @param num string
+--- @param num number
 local function delete(num)
   if terminals[num] then terminals[num] = nil end
 end
@@ -140,7 +156,7 @@ local function setup_buffer_autocommands(term)
 end
 
 ---get the directory for the terminal parsing special arguments
----@param dir string
+---@param dir string?
 ---@return string
 local function _get_dir(dir)
   if dir == "git_dir" then dir = utils.git_dir() end
@@ -152,7 +168,7 @@ local function _get_dir(dir)
 end
 
 ---Create a new terminal object
----@param term Terminal?
+---@param term TermCreateArgs?
 ---@return Terminal
 function Terminal:new(term)
   term = term or {}
@@ -176,6 +192,7 @@ function Terminal:new(term)
   term.__state = { mode = "?" }
   if term.close_on_exit == nil then term.close_on_exit = conf.close_on_exit end
   -- Add the newly created terminal to the list of all terminals
+  ---@diagnostic disable-next-line: return-type-mismatch
   return setmetatable(term, self)
 end
 
@@ -383,14 +400,14 @@ function Terminal:open(size, direction, is_new)
   if direction then self:change_direction(direction) end
   if not (self.bufnr and api.nvim_buf_is_valid(self.bufnr)) then
     local ok, err = pcall(opener, size, self)
-    if not ok then return utils.notify(err, "error") end
+    if not ok and err then return utils.notify(err, "error") end
     self:__add()
     self:__spawn()
     setup_buffer_autocommands(self)
     setup_buffer_mappings(self.bufnr)
   else
     local ok, err = pcall(opener, size, self)
-    if not ok then return utils.notify(err, "error") end
+    if not ok and err then return utils.notify(err, "error") end
     ui.switch_buf(self.bufnr)
     if not is_new then self:change_dir(self.dir) end
   end
@@ -415,7 +432,8 @@ end
 --- the name e.g. term://~/.dotfiles//3371887:/usr/bin/zsh;#toggleterm#1
 --- the number in this case is 1
 --- @param name string?
---- @return number
+--- @return number?
+--- @return Terminal?
 function M.identify(name)
   name = name or api.nvim_buf_get_name(api.nvim_get_current_buf())
   local comment_sep = get_comment_sep()

@@ -44,8 +44,8 @@ function M.has_saved_size(direction) return persistent[direction] ~= nil end
 ---
 --- If `config.persist_size = false` then option `2` in the
 --- list is skipped.
---- @param size number
---- @param direction string
+--- @param size number?
+--- @param direction string?
 function M.get_size(size, direction)
   local valid_size = size ~= nil and size > 0
   if not config.persist_size then return valid_size and size or config.size end
@@ -111,7 +111,7 @@ end
 
 ---apply highlights to a terminal
 ---if no term is passed in we use default values instead
----@param term Terminal
+---@param term Terminal?
 function M.hl_term(term)
   local hls = (term and term.highlights and not vim.tbl_isempty(term.highlights))
       and term.highlights
@@ -189,6 +189,7 @@ local function compare_ft(buf) return vim.bo[buf].filetype == constants.term_ft 
 --- comparator function or the default which matches
 --- the filetype
 --- @param comparator function?
+--- @return boolean, number[]
 function M.find_open_windows(comparator)
   comparator = comparator or compare_ft
   local wins = api.nvim_list_wins()
@@ -226,6 +227,7 @@ local split_commands = {
 
 ---Guess whether or not the window is a horizontal or vertical split
 ---this only works if either of the two are full size
+---@return string?
 function M.guess_direction()
   -- current window is full height vertical split
   -- NOTE: add one for tabline and one for status
@@ -367,9 +369,7 @@ end
 ---@param size number?
 function M.resize_split(term, size)
   size = M._resolve_size(M.get_size(size, term.direction), term)
-  if require("toggleterm.config").get("persist_size") then
-    M.save_direction_size(term.direction, size)
-  end
+  if config.persist_size and size then M.save_direction_size(term.direction, size) end
   vim.cmd(split_commands[term.direction].resize .. " " .. size)
 end
 
