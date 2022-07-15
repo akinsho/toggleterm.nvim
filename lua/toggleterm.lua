@@ -318,6 +318,12 @@ function M.toggle_command(args, count)
   M.toggle(count, parsed.size, parsed.dir, parsed.direction)
 end
 
+
+function _G.___toggleterm_winbar_click(id)
+  if id then
+    terms.get_or_create_term(id)
+  end
+end
 --- If a count is provided we operate on the specific terminal buffer
 --- i.e. 2ToggleTerm => open or close Term 2
 --- if the count is 1 we use a heuristic which is as follows

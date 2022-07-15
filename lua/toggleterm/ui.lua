@@ -1,8 +1,14 @@
 local M = {}
 
-local constants = require("toggleterm.constants")
-local utils = require("toggleterm.utils")
-local colors = require("toggleterm.colors")
+local lazy = require("toggleterm.lazy")
+---@module "toggleterm.constants"
+local constants = lazy.require("toggleterm.constants")
+---@module "toggleterm.utils"
+local utils = lazy.require("toggleterm.utils")
+---@module "toggleterm.colors"
+local colors = lazy.require("toggleterm.colors")
+---@module "toggleterm.config"
+local config = lazy.require("toggleterm.config")
 
 local fn = vim.fn
 local fmt = string.format
@@ -41,7 +47,6 @@ function M.has_saved_size(direction) return persistent[direction] ~= nil end
 --- @param size number
 --- @param direction string
 function M.get_size(size, direction)
-  local config = require("toggleterm.config").get()
   local valid_size = size ~= nil and size > 0
   if not config.persist_size then return valid_size and size or config.size end
   return valid_size and size or persistent[direction] or config.size
@@ -73,18 +78,33 @@ local function hl(name) return "%#" .. name .. "#" end
 
 local hl_end = "%*"
 
-function M.winbar(id) return fmt(" Toggleterm(%d) ", id) .. hl_end end
+--- Create terminal window bar
+---@param id number
+---@return string
+function M.winbar(id)
+  local terms = require("toggleterm.terminal").get_all()
+  local conf = require("toggleterm.config").get("winbar")
+  local str = " "
+  for _, t in pairs(terms) do
+    local h = id == t.id and "WinBarActive" or "WinBarInactive"
+    str = str
+      .. fmt("%%%d@v:lua.___toggleterm_winbar_click@", t.id)
+      .. hl(h)
+      .. conf.name_formatter(t)
+      .. hl_end
+      .. " "
+  end
+  return str
+end
 
 ---@param term Terminal
 function M.set_winbar(term)
-  if vim.wo[term.window].winbar == "" then
+  local winbar = vim.wo[term.window].winbar
+  if config.winbar.enabled and not term:is_float() and winbar == "" or not winbar then
     api.nvim_set_option_value(
       "winbar",
       '%{%v:lua.require("toggleterm.ui").winbar(' .. term.id .. ")%}",
-      {
-        scope = "local",
-        win = term.window,
-      }
+      { scope = "local", win = term.window }
     )
   end
 end
@@ -93,8 +113,6 @@ end
 ---if no term is passed in we use default values instead
 ---@param term Terminal
 function M.hl_term(term)
-  local config = require("toggleterm.config")
-
   local hls = (term and term.highlights and not vim.tbl_isempty(term.highlights))
       and term.highlights
     or config.highlights
@@ -118,18 +136,12 @@ function M.hl_term(term)
     return hi_target
   end, hl_names)
 
-  local str = table.concat(highlights, ",")
-  if utils.is_nightly() then
-    api.nvim_set_option_value("winhighlight", str, { scope = "local", win = window })
-  else
-    api.nvim_win_set_option(window, "winhighlight", str)
-  end
+  vim.wo[window].winhighlight = table.concat(highlights, ",")
 end
 
 ---Create a terminal buffer with the correct buffer/window options
 ---then set it to current window
 ---@param term Terminal
----@return number, number
 local function create_term_buf_if_needed(term)
   local valid_win = term.window and api.nvim_win_is_valid(term.window)
   local window = valid_win and term.window or api.nvim_get_current_win()
