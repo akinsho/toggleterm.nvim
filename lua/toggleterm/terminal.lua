@@ -426,7 +426,7 @@ end
 
 ---get existing terminal or create an empty term table
 ---@param num number
----@param dir string
+---@param dir string?
 ---@param direction string?
 ---@return Terminal
 ---@return boolean
@@ -438,7 +438,7 @@ end
 
 ---Get a single terminal by id, unless it is hidden
 ---@param id number
----@return Terminal
+---@return Terminal?
 function M.get(id)
   local term = terminals[id]
   return (term and not term.hidden) and term or nil
