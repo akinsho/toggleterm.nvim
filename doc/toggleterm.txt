@@ -24,6 +24,8 @@ MULTIPLE ORIENTATIONS ~
 
 SEND COMMANDS TO DIFFERENT TERMINALS ~
 
+WINBAR (EXPERIMENTAL/NIGHTLY ONLY) ~
+
 REQUIREMENTS                                         *toggleterm-requirements*
 
 This plugin only works in _Neovim 0.7_ or newer.
@@ -167,7 +169,13 @@ show what options are available. It is not written be used as is.
         width = <value>,
         height = <value>,
         winblend = 3,
-      }
+      },
+      winbar = {
+        enabled = false,
+        name_formatter(term) --  term: Terminal
+          return term.name
+        end
+      },
     }
 <
 
