@@ -318,10 +318,11 @@ function M.toggle_command(args, count)
   M.toggle(count, parsed.size, parsed.dir, parsed.direction)
 end
 
-
 function _G.___toggleterm_winbar_click(id)
   if id then
-    terms.get_or_create_term(id)
+    local term = terms.get_or_create_term(id)
+    if not term then return end
+    term:toggle()
   end
 end
 --- If a count is provided we operate on the specific terminal buffer
