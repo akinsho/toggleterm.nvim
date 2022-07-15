@@ -14,11 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Get neovim v0.7.0
+      - name: Get neovim nightly
         uses: actions/cache@v2
         with:
-          path: build/neovim/v0.7.0
-          key: ${{ runner.os }}-appimage-0.7.0
+          path: build/neovim/nightly
+          key: ${{ runner.os }}-appimage
 
       - name: Fetch dependencies
         run: |
@@ -27,9 +27,9 @@ jobs:
 
       - name: Run tests
         run: |
-          test -d build/neovim/v0.7.0 || {
-            mkdir -p build/neovim/v0.7.0
-            curl -Lo build/neovim/v0.7.0/nvim https://github.com/neovim/neovim/releases/download/v0.7.0/nvim.appimage
-            chmod +x build/neovim/v0.7.0/nvim
+          test -d build/neovim/nightly || {
+            mkdir -p build/neovim/nightly
+            curl -Lo build/neovim/nightly/nvim https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage
+            chmod +x build/neovim/nightly/nvim
           }
-          build/neovim/v0.7.0/nvim --headless --noplugin -u tests/minimal.vim -c "PlenaryBustedDirectory tests/ {minimal_init = 'tests/minimal.vim'}"
+          build/neovim/nightly/nvim --headless --noplugin -u tests/minimal.vim -c "PlenaryBustedDirectory tests/ {minimal_init = 'tests/minimal.vim'}"
