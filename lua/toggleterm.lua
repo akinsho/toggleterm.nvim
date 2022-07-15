@@ -65,7 +65,6 @@ local function smart_toggle(_, size, dir, direction)
   if not ui.find_open_windows() then
     -- Re-open the first terminal toggled
     local id = terms.get_toggled_id()
-    if not id then return end -- TODO: Inform the user of the failure
     terms.get_or_create_term(id, dir, direction):open(size, direction)
   else
     local target

@@ -443,7 +443,7 @@ function M.identify(name)
 end
 
 ---get existing terminal or create an empty term table
----@param num number
+---@param num number?
 ---@param dir string?
 ---@param direction string?
 ---@return Terminal
@@ -455,7 +455,7 @@ function M.get_or_create_term(num, dir, direction)
 end
 
 ---Get a single terminal by id, unless it is hidden
----@param id number
+---@param id number?
 ---@return Terminal?
 function M.get(id)
   local term = terminals[id]

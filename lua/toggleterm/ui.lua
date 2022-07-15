@@ -99,8 +99,10 @@ end
 
 ---@param term Terminal
 function M.set_winbar(term)
-  local winbar = vim.wo[term.window].winbar
-  if config.winbar.enabled and not term:is_float() and winbar == "" or not winbar then
+  if config.winbar.enabled and not term:is_float() then
+    if not api.nvim_win_is_valid(term.window) then return end
+    local winbar = vim.wo[term.window].winbar
+    if winbar and winbar ~= "" then return end
     api.nvim_set_option_value(
       "winbar",
       '%{%v:lua.require("toggleterm.ui").winbar(' .. term.id .. ")%}",
