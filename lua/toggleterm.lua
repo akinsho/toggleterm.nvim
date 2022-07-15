@@ -64,8 +64,7 @@ local function smart_toggle(_, size, dir, direction)
   local terminals = terms.get_all()
   if not ui.find_open_windows() then
     -- Re-open the first terminal toggled
-    local id = terms.get_toggled_id()
-    terms.get_or_create_term(id, dir, direction):open(size, direction)
+    terms.get_or_create_term(terms.get_toggled_id(), dir, direction):open(size, direction)
   else
     local target
     -- count backwards from the end of the list
@@ -181,7 +180,6 @@ function M.exec(cmd, num, size, dir, direction, go_back, open)
   })
   num = (num and num >= 1) and num or terms.get_toggled_id()
   open = open == nil or open
-  if not num then return end -- TODO: Inform the user that no terminal number was found
   local term, created = terms.get_or_create_term(num, dir, direction)
   if not term:is_open() then term:open(size, direction, created) end
   if not created and dir then term:change_dir(dir) end
