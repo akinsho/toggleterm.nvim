@@ -1,8 +1,14 @@
 local M = {}
 
-local constants = require("toggleterm.constants")
-local utils = require("toggleterm.utils")
-local colors = require("toggleterm.colors")
+local lazy = require("toggleterm.lazy")
+---@module "toggleterm.constants"
+local constants = lazy.require("toggleterm.constants")
+---@module "toggleterm.utils"
+local utils = lazy.require("toggleterm.utils")
+---@module "toggleterm.colors"
+local colors = lazy.require("toggleterm.colors")
+---@module "toggleterm.config"
+local config = lazy.require("toggleterm.config")
 
 local fn = vim.fn
 local fmt = string.format
@@ -38,10 +44,9 @@ function M.has_saved_size(direction) return persistent[direction] ~= nil end
 ---
 --- If `config.persist_size = false` then option `2` in the
 --- list is skipped.
---- @param size number
---- @param direction string
+--- @param size number?
+--- @param direction string?
 function M.get_size(size, direction)
-  local config = require("toggleterm.config").get()
   local valid_size = size ~= nil and size > 0
   if not config.persist_size then return valid_size and size or config.size end
   return valid_size and size or persistent[direction] or config.size
@@ -69,12 +74,47 @@ function M.set_options(win, buf, term)
   api.nvim_buf_set_var(buf, "toggle_number", term.id)
 end
 
+local function hl(name) return "%#" .. name .. "#" end
+
+local hl_end = "%*"
+
+--- Create terminal window bar
+---@param id number
+---@return string
+function M.winbar(id)
+  local terms = require("toggleterm.terminal").get_all()
+  local conf = require("toggleterm.config").get("winbar")
+  local str = " "
+  for _, t in pairs(terms) do
+    local h = id == t.id and "WinBarActive" or "WinBarInactive"
+    str = str
+      .. fmt("%%%d@v:lua.___toggleterm_winbar_click@", t.id)
+      .. hl(h)
+      .. conf.name_formatter(t)
+      .. hl_end
+      .. " "
+  end
+  return str
+end
+
+---@param term Terminal
+function M.set_winbar(term)
+  if config.winbar.enabled and not term:is_float() then
+    if not api.nvim_win_is_valid(term.window) then return end
+    local winbar = vim.wo[term.window].winbar
+    if winbar and winbar ~= "" then return end
+    api.nvim_set_option_value(
+      "winbar",
+      '%{%v:lua.require("toggleterm.ui").winbar(' .. term.id .. ")%}",
+      { scope = "local", win = term.window }
+    )
+  end
+end
+
 ---apply highlights to a terminal
 ---if no term is passed in we use default values instead
----@param term Terminal
+---@param term Terminal?
 function M.hl_term(term)
-  local config = require("toggleterm.config")
-
   local hls = (term and term.highlights and not vim.tbl_isempty(term.highlights))
       and term.highlights
     or config.highlights
@@ -98,18 +138,12 @@ function M.hl_term(term)
     return hi_target
   end, hl_names)
 
-  local str = table.concat(highlights, ",")
-  if utils.is_nightly() then
-    api.nvim_set_option_value("winhighlight", str, { scope = "local", win = window })
-  else
-    api.nvim_win_set_option(window, "winhighlight", str)
-  end
+  vim.wo[window].winhighlight = table.concat(highlights, ",")
 end
 
 ---Create a terminal buffer with the correct buffer/window options
 ---then set it to current window
 ---@param term Terminal
----@return number, number
 local function create_term_buf_if_needed(term)
   local valid_win = term.window and api.nvim_win_is_valid(term.window)
   local window = valid_win and term.window or api.nvim_get_current_win()
@@ -157,6 +191,7 @@ local function compare_ft(buf) return vim.bo[buf].filetype == constants.term_ft 
 --- comparator function or the default which matches
 --- the filetype
 --- @param comparator function?
+--- @return boolean, number[]
 function M.find_open_windows(comparator)
   comparator = comparator or compare_ft
   local wins = api.nvim_list_wins()
@@ -194,6 +229,7 @@ local split_commands = {
 
 ---Guess whether or not the window is a horizontal or vertical split
 ---this only works if either of the two are full size
+---@return string?
 function M.guess_direction()
   -- current window is full height vertical split
   -- NOTE: add one for tabline and one for status
@@ -335,9 +371,7 @@ end
 ---@param size number?
 function M.resize_split(term, size)
   size = M._resolve_size(M.get_size(size, term.direction), term)
-  if require("toggleterm.config").get("persist_size") then
-    M.save_direction_size(term.direction, size)
-  end
+  if config.persist_size and size then M.save_direction_size(term.direction, size) end
   vim.cmd(split_commands[term.direction].resize .. " " .. size)
 end
 

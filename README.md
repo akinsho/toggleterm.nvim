@@ -52,6 +52,13 @@
 
 <!-- panvimdoc-ignore-end -->
 
+### Winbar (Experimental/Nightly ONLY)
+<!-- panvimdoc-ignore-start -->
+
+<img width="1728" alt="image" src="https://user-images.githubusercontent.com/22454918/179199998-75ec16cb-8271-490e-925f-6c82c50ffc5d.png">
+
+<!-- panvimdoc-ignore-end -->
+
 ## Requirements
 
 This plugin only works in _Neovim 0.7_ or newer.
@@ -178,7 +185,13 @@ require("toggleterm").setup{
     width = <value>,
     height = <value>,
     winblend = 3,
-  }
+  },
+  winbar = {
+    enabled = false,
+    name_formatter(term) --  term: Terminal
+      return term.name
+    end
+  },
 }
 ```
 

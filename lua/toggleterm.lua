@@ -57,9 +57,9 @@ end
 
 --Create a new terminal or close beginning from the last opened
 ---@param _ number
----@param size number
----@param dir string
----@param direction string
+---@param size number?
+---@param dir string?
+---@param direction string?
 local function smart_toggle(_, size, dir, direction)
   local terminals = terms.get_all()
   if not ui.find_open_windows() then
@@ -84,9 +84,9 @@ local function smart_toggle(_, size, dir, direction)
 end
 
 --- @param num number
---- @param size number
---- @param dir string
---- @param direction string
+--- @param size number?
+--- @param dir string?
+--- @param direction string?
 local function toggle_nth_term(num, size, dir, direction)
   local term = terms.get_or_create_term(num, dir, direction)
   ui.update_origin_window(term.window)
@@ -138,6 +138,7 @@ local function on_term_open()
       })
       :__resurrect()
   end
+  if term and fn.exists("+winbar") == 1 then require("toggleterm.ui").set_winbar(term) end
 end
 
 function M.exec_command(args, count)
@@ -165,8 +166,8 @@ end
 --- @param size number?
 --- @param dir string?
 --- @param direction string?
---- @param go_back? boolean whether or not to return to original window
---- @param open? boolean whether or not to open terminal window
+--- @param go_back boolean? whether or not to return to original window
+--- @param open boolean? whether or not to open terminal window
 function M.exec(cmd, num, size, dir, direction, go_back, open)
   vim.validate({
     cmd = { cmd, "string" },
@@ -201,7 +202,6 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
 
   -- If no terminal id provided fall back to the default
   terminal_id = terminal_id or 1
-  terminal_id = tonumber(terminal_id)
 
   vim.validate({
     selection_type = { selection_type, "string", true },
@@ -315,6 +315,13 @@ function M.toggle_command(args, count)
   M.toggle(count, parsed.size, parsed.dir, parsed.direction)
 end
 
+function _G.___toggleterm_winbar_click(id)
+  if id then
+    local term = terms.get_or_create_term(id)
+    if not term then return end
+    term:toggle()
+  end
+end
 --- If a count is provided we operate on the specific terminal buffer
 --- i.e. 2ToggleTerm => open or close Term 2
 --- if the count is 1 we use a heuristic which is as follows

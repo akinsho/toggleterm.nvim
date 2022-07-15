@@ -3,9 +3,15 @@ local constants = require("toggleterm.constants")
 
 local M = {}
 
+local fmt = string.format
+
 local function shade(color, factor) return colors.shade_color(color, factor) end
 
 --- @alias ToggleTermHighlights table<string, table<string, string>>
+
+---@class WinbarOpts
+---@field name_formatter fun(t: Terminal):string
+---@field enabled boolean
 
 --- @class ToggleTermConfig
 --- @field size number
@@ -23,6 +29,7 @@ local function shade(color, factor) return colors.shade_color(color, factor) end
 --- @field shell string
 --- @field float_opts table<string, any>
 --- @field highlights ToggleTermHighlights
+--- @field winbar WinbarOpts
 
 local config = {
   size = 12,
@@ -38,6 +45,10 @@ local config = {
   direction = "horizontal",
   shading_factor = constants.shading_amount,
   shell = vim.o.shell,
+  winbar = {
+    enabled = false,
+    name_formatter = function(term) return fmt("%d:%s", term.id, vim.split(term.name, ";")[1]) end,
+  },
   float_opts = {
     winblend = 0,
   },
@@ -62,13 +73,25 @@ local function get_highlights(conf)
   }
   local overrides = {}
 
+  local comment_fg = colors.get_hex("Comment", "fg")
+  local dir_fg = colors.get_hex("Directory", "fg")
+
+  local winbar_inactive_opts = { guifg = comment_fg }
+  local winbar_active_opts = { guifg = dir_fg, gui = "underline" }
+
   if conf.shade_terminals then
     local is_bright = colors.is_bright_background()
     local degree = is_bright and -3 or 1
     local amount = conf.shading_factor * degree
     local normal_bg = colors.get_hex("Normal", "bg")
     local terminal_bg = conf.shade_terminals and shade(normal_bg, amount) or normal_bg
+
+    winbar_inactive_opts.guibg = terminal_bg
+    winbar_active_opts.guibg = terminal_bg
+
     overrides = {
+      WinBarNC = { guibg = terminal_bg },
+      WinBar = { guibg = terminal_bg },
       Normal = { guibg = terminal_bg },
       SignColumn = { guibg = terminal_bg },
       EndOfBuffer = { guibg = terminal_bg },
@@ -76,6 +99,12 @@ local function get_highlights(conf)
       StatusLineNC = { guibg = terminal_bg },
     }
   end
+
+  if conf.winbar.enabled then
+    colors.set_hl("WinBarActive", winbar_active_opts)
+    colors.set_hl("WinBarInactive", winbar_inactive_opts)
+  end
+
   return vim.tbl_deep_extend("force", defaults, conf.highlights, overrides)
 end
 

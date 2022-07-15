@@ -9,12 +9,20 @@ local p = {
 
 local is_windows = vim.loop.os_uname().version:match("Windows")
 
+---@class ParsedArgs
+---@field direction string?
+---@field cmd string?
+---@field dir string?
+---@field size number?
+---@field go_back boolean?
+---@field open boolean?
+
 ---Take a users command arguments in the format "cmd='git commit' dir=~/dotfiles"
 ---and parse this into a table of arguments
 ---{cmd = "git commit", dir = "~/dotfiles"}
 ---@see https://stackoverflow.com/a/27007701
 ---@param args string
----@return table<string, string|number>
+---@return ParsedArgs
 function M.parse(args)
   local result = {}
   if args then
