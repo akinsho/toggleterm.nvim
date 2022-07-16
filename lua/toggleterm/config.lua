@@ -1,5 +1,6 @@
 local colors = require("toggleterm.colors")
 local constants = require("toggleterm.constants")
+local utils = require("toggleterm.utils")
 
 local M = {}
 
@@ -72,6 +73,7 @@ local function get_highlights(conf)
     StatusLineNC = { cterm = "italic", gui = "NONE" },
   }
   local overrides = {}
+  local nightly = utils.is_nightly()
 
   local comment_fg = colors.get_hex("Comment", "fg")
   local dir_fg = colors.get_hex("Directory", "fg")
@@ -86,21 +88,22 @@ local function get_highlights(conf)
     local normal_bg = colors.get_hex("Normal", "bg")
     local terminal_bg = conf.shade_terminals and shade(normal_bg, amount) or normal_bg
 
-    winbar_inactive_opts.guibg = terminal_bg
-    winbar_active_opts.guibg = terminal_bg
-
     overrides = {
-      WinBarNC = { guibg = terminal_bg },
-      WinBar = { guibg = terminal_bg },
       Normal = { guibg = terminal_bg },
       SignColumn = { guibg = terminal_bg },
       EndOfBuffer = { guibg = terminal_bg },
       StatusLine = { guibg = terminal_bg },
       StatusLineNC = { guibg = terminal_bg },
     }
+    if nightly then
+      winbar_inactive_opts.guibg = terminal_bg
+      winbar_active_opts.guibg = terminal_bg
+      overrides.WinBarNC = { guibg = terminal_bg }
+      overrides.WinBar = { guibg = terminal_bg }
+    end
   end
 
-  if conf.winbar.enabled then
+  if nightly and conf.winbar.enabled then
     colors.set_hl("WinBarActive", winbar_active_opts)
     colors.set_hl("WinBarInactive", winbar_inactive_opts)
   end
