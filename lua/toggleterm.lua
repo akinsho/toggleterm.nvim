@@ -195,8 +195,9 @@ end
 
 --- @param selection_type string
 --- @param trim_spaces boolean
---- @param terminal_id number
-function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
+--- @param cmd_data table<string, any>
+function M.send_lines_to_terminal(selection_type, trim_spaces, cmd_data)
+  local terminal_id = cmd_data.args
   -- trim_spaces defines if we should trim the spaces from lines which are sent to the terminal
   trim_spaces = trim_spaces == nil or trim_spaces
 
@@ -442,18 +443,18 @@ local function setup_commands()
   -- TODO: Convert this functions to use lua functions with the passed in line1,line2 args
   api.nvim_create_user_command(
     "ToggleTermSendVisualLines",
-    "'<,'> lua require'toggleterm'.send_lines_to_terminal('visual_lines', true, <q-args>)<CR>",
+    function(args) M.send_lines_to_terminal("visual_lines", true, args) end,
     { range = true, nargs = "?" }
   )
   -- TODO: Convert this functions to use lua functions with the passed in line1,line2 args
   api.nvim_create_user_command(
     "ToggleTermSendVisualSelection",
-    "'<,'> lua require'toggleterm'.send_lines_to_terminal('visual_selection', true, <q-args>)<CR>",
+    function(args) M.send_lines_to_terminal("visual_selection", true, args) end,
     { range = true, nargs = "?" }
   )
   api.nvim_create_user_command(
     "ToggleTermSendCurrentLine",
-    function(opts) M.send_lines_to_terminal("single_line", true, opts.args) end,
+    function(args) M.send_lines_to_terminal("single_line", true, args) end,
     { nargs = "?" }
   )
 end

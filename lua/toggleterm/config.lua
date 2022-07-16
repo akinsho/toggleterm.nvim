@@ -95,6 +95,7 @@ local function get_highlights(conf)
       StatusLine = { guibg = terminal_bg },
       StatusLineNC = { guibg = terminal_bg },
     }
+    -- TODO: Move this to the main overrides block once nvim 0.8 is stable
     if nightly then
       winbar_inactive_opts.guibg = terminal_bg
       winbar_active_opts.guibg = terminal_bg
