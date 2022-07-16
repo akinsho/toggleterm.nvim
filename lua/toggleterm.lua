@@ -201,7 +201,7 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, terminal_id)
   trim_spaces = trim_spaces == nil or trim_spaces
 
   -- If no terminal id provided fall back to the default
-  terminal_id = terminal_id or 1
+  terminal_id = tonumber(terminal_id) or 1
 
   vim.validate({
     selection_type = { selection_type, "string", true },
