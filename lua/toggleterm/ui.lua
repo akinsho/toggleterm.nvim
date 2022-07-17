@@ -83,32 +83,31 @@ local hl_end = "%*"
 ---@return string
 function M.winbar(id)
   local terms = require("toggleterm.terminal").get_all()
-  local conf = require("toggleterm.config").get("winbar")
   local str = " "
   for _, t in pairs(terms) do
     local h = id == t.id and "WinBarActive" or "WinBarInactive"
     str = str
       .. fmt("%%%d@v:lua.___toggleterm_winbar_click@", t.id)
       .. hl(h)
-      .. conf.name_formatter(t)
+      .. config.winbar.name_formatter(t)
       .. hl_end
       .. " "
   end
   return str
 end
 
----@param term Terminal
+---@param term Terminal?
 function M.set_winbar(term)
-  if config.winbar.enabled and not term:is_float() then
-    if not api.nvim_win_is_valid(term.window) then return end
-    local winbar = vim.wo[term.window].winbar
-    if winbar and winbar ~= "" then return end
-    api.nvim_set_option_value(
-      "winbar",
-      '%{%v:lua.require("toggleterm.ui").winbar(' .. term.id .. ")%}",
-      { scope = "local", win = term.window }
-    )
+  if
+    not config.winbar.enabled
+    or not term
+    or term:is_float()
+    or fn.exists("+winbar") ~= 1
+    or not api.nvim_win_is_valid(term.window)
+  then
+    return
   end
+  vim.wo[term.window].winbar = fmt('%%{%%v:lua.require("toggleterm.ui").winbar(%d)%%}', term.id)
 end
 
 ---apply highlights to a terminal
