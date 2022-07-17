@@ -420,6 +420,31 @@ end
 ---------------------------------------------------------------------------------
 -- Commands
 ---------------------------------------------------------------------------------
+
+---@param callback fun(t: Terminal?)
+local function get_subject_terminal(callback)
+  local items = terms.get_all(true)
+  if #items == 0 then return vim.notify("No toggleterms are open yet", "info") end
+
+  vim.ui.select(items, {
+    prompt = "Please select a terminal to name",
+    format_item = function(term) return term.id .. ": " .. term.name end,
+  }, function(term)
+    if not term then return end
+    callback(term)
+  end)
+end
+
+---@param name string
+---@param term Terminal
+local function set_term_name(name, term) term.name = name end
+
+local function request_term_name(term)
+  vim.ui.input({ prompt = "Please set a name for the terminal" }, function(name)
+    if name and #name > 0 then set_term_name(name, term) end
+  end)
+end
+
 local function setup_commands()
   -- Count is 0 by default
   api.nvim_create_user_command(
@@ -457,6 +482,18 @@ local function setup_commands()
     function(args) M.send_lines_to_terminal("single_line", true, args) end,
     { nargs = "?" }
   )
+
+  api.nvim_create_user_command("ToggleTermSetName", function(opts)
+    if not opts.count or opts.count < 1 then
+      get_subject_terminal(request_term_name)
+    elseif opts.args == "" then
+      request_term_name()
+    else
+      local term = terms.get(opts.count)
+      if not term then return end
+      set_term_name(opts.args, term)
+    end
+  end, { nargs = "?" })
 end
 
 function M.setup(user_prefs)
