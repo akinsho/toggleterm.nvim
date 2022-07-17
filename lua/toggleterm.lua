@@ -481,10 +481,14 @@ local function setup_commands()
   )
 
   cmd("ToggleTermSetName", function(opts)
-    if not opts.count or opts.count < 1 then
+    local no_count = not opts.count or opts.count < 1
+    local no_name = opts.args == ""
+    if no_count and no_name then
       get_subject_terminal(request_term_name)
-    elseif opts.args == "" then
+    elseif no_name then
       request_term_name()
+    elseif no_count then
+      get_subject_terminal(function(t) set_term_name(opts.args, t) end)
     else
       local term = terms.get(opts.count)
       if not term then return end
