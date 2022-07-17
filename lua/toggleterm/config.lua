@@ -49,7 +49,7 @@ local config = {
   shell = vim.o.shell,
   winbar = {
     enabled = false,
-    name_formatter = function(term) return fmt("%d:%s", term.id, vim.split(term.name, ";")[1]) end,
+    name_formatter = function(term) return fmt("%d:%s", term.id, term:_display_name()) end,
   },
   float_opts = {
     winblend = 0,

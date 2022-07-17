@@ -428,7 +428,7 @@ local function get_subject_terminal(callback)
 
   vim.ui.select(items, {
     prompt = "Please select a terminal to name",
-    format_item = function(term) return term.id .. ": " .. term.name end,
+    format_item = function(term) return term.id .. ": " .. term:_display_name() end,
   }, function(term)
     if not term then return end
     callback(term)
@@ -437,7 +437,7 @@ end
 
 ---@param name string
 ---@param term Terminal
-local function set_term_name(name, term) term.name = name end
+local function set_term_name(name, term) term.display_name = name end
 
 local function request_term_name(term)
   vim.ui.input({ prompt = "Please set a name for the terminal" }, function(name)
