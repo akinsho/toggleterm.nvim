@@ -446,44 +446,41 @@ local function request_term_name(term)
 end
 
 local function setup_commands()
+  local cmd = api.nvim_create_user_command
   -- Count is 0 by default
-  api.nvim_create_user_command(
+  cmd(
     "TermExec",
     function(opts) M.exec_command(opts.args, opts.count) end,
     { count = true, complete = command_complete.term_exec_complete, nargs = "*" }
   )
 
-  api.nvim_create_user_command(
+  cmd(
     "ToggleTerm",
     function(opts) M.toggle_command(opts.args, opts.count) end,
     { count = true, complete = command_complete.toggle_term_complete, nargs = "*" }
   )
 
-  api.nvim_create_user_command(
-    "ToggleTermToggleAll",
-    function(opts) M.toggle_all(opts.bang) end,
-    { bang = true }
-  )
+  cmd("ToggleTermToggleAll", function(opts) M.toggle_all(opts.bang) end, { bang = true })
 
-  -- TODO: Convert this functions to use lua functions with the passed in line1,line2 args
-  api.nvim_create_user_command(
+  cmd(
     "ToggleTermSendVisualLines",
     function(args) M.send_lines_to_terminal("visual_lines", true, args) end,
     { range = true, nargs = "?" }
   )
-  -- TODO: Convert this functions to use lua functions with the passed in line1,line2 args
-  api.nvim_create_user_command(
+
+  cmd(
     "ToggleTermSendVisualSelection",
     function(args) M.send_lines_to_terminal("visual_selection", true, args) end,
     { range = true, nargs = "?" }
   )
-  api.nvim_create_user_command(
+
+  cmd(
     "ToggleTermSendCurrentLine",
     function(args) M.send_lines_to_terminal("single_line", true, args) end,
     { nargs = "?" }
   )
 
-  api.nvim_create_user_command("ToggleTermSetName", function(opts)
+  cmd("ToggleTermSetName", function(opts)
     if not opts.count or opts.count < 1 then
       get_subject_terminal(request_term_name)
     elseif opts.args == "" then
