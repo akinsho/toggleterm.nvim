@@ -230,7 +230,7 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, cmd_data)
     -- Get the start and the end of the selection
     local start_line, start_col = unpack(fn.getpos(start_char), 2, 3)
     local end_line, end_col = unpack(fn.getpos(end_char), 2, 3)
-    local selected_lines = api.nvim_buf_get_lines(0, start_line - 1, end_line, 0)
+    local selected_lines = api.nvim_buf_get_lines(0, start_line - 1, end_line, false)
     return {
       start_pos = { start_line, start_col },
       end_pos = { end_line, end_col },
