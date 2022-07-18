@@ -3,6 +3,7 @@
     "Lua.diagnostics.disable": [
         "redundant-parameter",
         "return-type-mismatch",
-        "assign-type-mismatch"
+        "assign-type-mismatch",
+        "cast-local-type"
     ]
 }
