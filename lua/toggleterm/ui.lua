@@ -127,7 +127,9 @@ function M.hl_term(term)
 
   -- If the terminal is a floating window we only want to set the background and border
   -- not the statusline etc. which are not applicable to floating windows
-  local hl_names = is_float and { "NormalFloat", "FloatBorder" } or vim.tbl_keys(hls)
+  local hl_names = vim.tbl_filter(function (name)
+    return not is_float or (is_float and vim.tbl_contains({"FloatBorder", "NormalFloat"}, name))
+  end, vim.tbl_keys(hls))
 
   local highlights = vim.tbl_map(function(hl_group_name)
     local name = constants.highlight_group_name_prefix .. id .. hl_group_name
