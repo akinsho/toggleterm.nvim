@@ -315,9 +315,12 @@ function M.open_tab(term)
 end
 
 local function close_tab()
-  local tab = vim.api.nvim_list_tabpages()
-  if #tab > 1 then
-    vim.cmd([[tabclose]])
+  if #vim.api.nvim_list_tabpages() == 1 then
+    vim.notify("You cannot close the last tab! This will exit neovim", "error", {
+      title = "Toggleterm",
+    })
+  else
+    vim.cmd("tabclose")
   end
 end
 
