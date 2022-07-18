@@ -314,7 +314,12 @@ function M.open_tab(term)
   create_term_buf_if_needed(term)
 end
 
-local function close_tab() vim.cmd("tabclose") end
+local function close_tab()
+  local tab = vim.api.nvim_list_tabpages()
+  if #tab > 1 then
+    vim.cmd([[tabclose]])
+  end
+end
 
 ---Close terminal window
 ---@param term Terminal
