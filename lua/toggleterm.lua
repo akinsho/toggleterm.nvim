@@ -138,7 +138,7 @@ local function on_term_open()
       })
       :__resurrect()
   end
-  if term and fn.exists("+winbar") == 1 then require("toggleterm.ui").set_winbar(term) end
+  ui.set_winbar(term)
 end
 
 function M.exec_command(args, count)
@@ -420,43 +420,81 @@ end
 ---------------------------------------------------------------------------------
 -- Commands
 ---------------------------------------------------------------------------------
+
+---@param callback fun(t: Terminal?)
+local function get_subject_terminal(callback)
+  local items = terms.get_all(true)
+  if #items == 0 then return vim.notify("No toggleterms are open yet", "info") end
+
+  vim.ui.select(items, {
+    prompt = "Please select a terminal to name",
+    format_item = function(term) return term.id .. ": " .. term:_display_name() end,
+  }, function(term)
+    if not term then return end
+    callback(term)
+  end)
+end
+
+---@param name string
+---@param term Terminal
+local function set_term_name(name, term) term.display_name = name end
+
+local function request_term_name(term)
+  vim.ui.input({ prompt = "Please set a name for the terminal" }, function(name)
+    if name and #name > 0 then set_term_name(name, term) end
+  end)
+end
+
 local function setup_commands()
+  local cmd = api.nvim_create_user_command
   -- Count is 0 by default
-  api.nvim_create_user_command(
+  cmd(
     "TermExec",
     function(opts) M.exec_command(opts.args, opts.count) end,
     { count = true, complete = command_complete.term_exec_complete, nargs = "*" }
   )
 
-  api.nvim_create_user_command(
+  cmd(
     "ToggleTerm",
     function(opts) M.toggle_command(opts.args, opts.count) end,
     { count = true, complete = command_complete.toggle_term_complete, nargs = "*" }
   )
 
-  api.nvim_create_user_command(
-    "ToggleTermToggleAll",
-    function(opts) M.toggle_all(opts.bang) end,
-    { bang = true }
-  )
+  cmd("ToggleTermToggleAll", function(opts) M.toggle_all(opts.bang) end, { bang = true })
 
-  -- TODO: Convert this functions to use lua functions with the passed in line1,line2 args
-  api.nvim_create_user_command(
+  cmd(
     "ToggleTermSendVisualLines",
     function(args) M.send_lines_to_terminal("visual_lines", true, args) end,
     { range = true, nargs = "?" }
   )
-  -- TODO: Convert this functions to use lua functions with the passed in line1,line2 args
-  api.nvim_create_user_command(
+
+  cmd(
     "ToggleTermSendVisualSelection",
     function(args) M.send_lines_to_terminal("visual_selection", true, args) end,
     { range = true, nargs = "?" }
   )
-  api.nvim_create_user_command(
+
+  cmd(
     "ToggleTermSendCurrentLine",
     function(args) M.send_lines_to_terminal("single_line", true, args) end,
     { nargs = "?" }
   )
+
+  cmd("ToggleTermSetName", function(opts)
+    local no_count = not opts.count or opts.count < 1
+    local no_name = opts.args == ""
+    if no_count and no_name then
+      get_subject_terminal(request_term_name)
+    elseif no_name then
+      request_term_name()
+    elseif no_count then
+      get_subject_terminal(function(t) set_term_name(opts.args, t) end)
+    else
+      local term = terms.get(opts.count)
+      if not term then return end
+      set_term_name(opts.args, term)
+    end
+  end, { nargs = "?" })
 end
 
 function M.setup(user_prefs)

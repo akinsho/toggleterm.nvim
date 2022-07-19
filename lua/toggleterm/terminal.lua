@@ -51,6 +51,7 @@ local terminals = {}
 --- @field highlights table<string, table<string, string>>?
 --- @field dir string? the directory for the terminal
 --- @field count number? the count that triggers that specific terminal
+--- @field display_name string?
 --- @field hidden boolean? whether or not to include this terminal in the terminals list
 --- @field close_on_exit boolean? whether or not to close the terminal window when the process exits
 --- @field float_opts table<string, any>?
@@ -74,6 +75,7 @@ local terminals = {}
 --- @field hidden boolean whether or not to include this terminal in the terminals list
 --- @field close_on_exit boolean? whether or not to close the terminal window when the process exits
 --- @field float_opts table<string, any>?
+--- @field display_name string?
 --- @field env table<string, string> environmental variables passed to jobstart()
 --- @field clear_env boolean use clean job environment, passed to jobstart()
 --- @field on_stdout fun(t: Terminal, job: number, data: string[]?, name: string?)?
@@ -81,6 +83,7 @@ local terminals = {}
 --- @field on_exit fun(t: Terminal, job: number, exit_code: number?, name: string?)?
 --- @field on_open fun(term:Terminal)?
 --- @field on_close fun(term:Terminal)?
+--- @field _display_name fun(term: Terminal): string
 --- @field __state TerminalState
 local Terminal = {}
 
@@ -247,6 +250,9 @@ function Terminal:persist_mode()
   end
   self.__state.mode = m
 end
+
+---@private
+function Terminal:_display_name() return self.display_name or vim.split(self.name, ";")[1] end
 
 function Terminal:close()
   if self.on_close then self:on_close() end

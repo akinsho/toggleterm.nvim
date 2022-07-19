@@ -276,6 +276,16 @@ Example:
 
 <!-- panvimdoc-ignore-end -->
 
+### ToggleTermSetName
+
+This function allows setting a display name for a terminal. This name is primarily used inside of the winbar, and can be a more descriptive way
+to remember which terminal is for what.
+
+You can map this to a key and call it with a count which will then prompt you a name for the terminal with the matching ID.
+Alternatively you can call it with just the name e.g. `:ToggleTermSetName work<CR>` this will the prompt you for which terminal it should apply to.
+Lastly you can call it without any arguments and it will prompt you for which terminal it should apply to then prompt you for the name to use.
+
+
 ### Set terminal shading
 
 This plugin automatically shades terminal filetypes to be darker than other window

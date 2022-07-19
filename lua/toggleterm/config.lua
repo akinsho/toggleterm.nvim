@@ -11,7 +11,7 @@ local function shade(color, factor) return colors.shade_color(color, factor) end
 --- @alias ToggleTermHighlights table<string, table<string, string>>
 
 ---@class WinbarOpts
----@field name_formatter fun(t: Terminal):string
+---@field name_formatter fun(term: Terminal):string
 ---@field enabled boolean
 
 --- @class ToggleTermConfig
@@ -32,6 +32,7 @@ local function shade(color, factor) return colors.shade_color(color, factor) end
 --- @field highlights ToggleTermHighlights
 --- @field winbar WinbarOpts
 
+---@type ToggleTermConfig
 local config = {
   size = 12,
   shade_filetypes = {},
@@ -48,7 +49,7 @@ local config = {
   shell = vim.o.shell,
   winbar = {
     enabled = false,
-    name_formatter = function(term) return fmt("%d:%s", term.id, vim.split(term.name, ";")[1]) end,
+    name_formatter = function(term) return fmt("%d:%s", term.id, term:_display_name()) end,
   },
   float_opts = {
     winblend = 0,
