@@ -1,5 +1,5 @@
-local fn = vim.fn
 local api = vim.api
+local bit = require("bit")
 -----------------------------------------------------------
 -- Export
 -----------------------------------------------------------
@@ -50,13 +50,16 @@ function M.color_is_bright(hex)
 end
 
 --- Get hex color
----@param hlgroup_name string highlight group name
+---@param name string highlight group name
 ---@param attr string attr name 'bg', 'fg'
 ---@return string
-function M.get_hex(hlgroup_name, attr)
-  local hlgroup_ID = fn.synIDtrans(fn.hlID(hlgroup_name))
-  local hex = fn.synIDattr(hlgroup_ID, attr)
-  return hex ~= "" and hex or "NONE"
+function M.get_hex(name, attr)
+  local ok, hl = pcall(api.nvim_get_hl_by_name, name, true)
+  if not ok then return "NONE" end
+  hl.foreground = hl.foreground and "#" .. bit.tohex(hl.foreground, 6)
+  hl.background = hl.background and "#" .. bit.tohex(hl.background, 6)
+  attr = ({ bg = "background", fg = "foreground" })[attr] or attr
+  return hl[attr] or "NONE"
 end
 
 --- Check if background is bright
