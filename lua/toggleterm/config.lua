@@ -58,7 +58,7 @@ local config = {
 
 ---Derive the highlights for a toggleterm and merge these with the user's preferences
 ---A few caveats must be noted. Since I link the normal and float border to the Normal
----highlight this has to be done carefully as if the user has speficied any Float highlights
+---highlight this has to be done carefully as if the user has specified any Float highlights
 ---themselves merging will result in a mix of user highlights and the link key which is invalid
 ---so I check that they have not attempted to highlight these themselves. Also
 ---if they have chosen to shade the terminal then this takes priority over their own highlights
