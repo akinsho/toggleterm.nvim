@@ -29,7 +29,7 @@ local M = {}
 local function apply_colors()
   local ft = vim.bo.filetype
   ft = (not ft or ft == "") and "none" or ft
-  local allow_list = config.get("shade_filetypes") or {}
+  local allow_list = config.shade_filetypes or {}
   local is_enabled_ft = vim.tbl_contains(allow_list, ft)
   if vim.bo.buftype == "terminal" and is_enabled_ft then
     local _, term = terms.identify()
@@ -38,15 +38,14 @@ local function apply_colors()
 end
 
 local function setup_global_mappings()
-  local conf = config.get()
-  local mapping = conf.open_mapping
+  local mapping = config.open_mapping
   -- v:count defaults the count to 0 but if a count is passed in uses that instead
   if mapping then
     api.nvim_set_keymap("n", mapping, '<Cmd>execute v:count . "ToggleTerm"<CR>', {
       silent = true,
       noremap = true,
     })
-    if conf.insert_mappings then
+    if config.insert_mappings then
       api.nvim_set_keymap("i", mapping, "<Esc><Cmd>ToggleTerm<CR>", {
         silent = true,
         noremap = true,
@@ -133,7 +132,7 @@ local function on_term_open()
         id = id,
         bufnr = api.nvim_get_current_buf(),
         window = api.nvim_get_current_win(),
-        highlights = config.get("highlights"),
+        highlights = config.highlights,
         job_id = vim.b.terminal_job_id,
         direction = ui.guess_direction(),
       })
