@@ -95,20 +95,24 @@ end
 
 ---Close the last window if only a terminal *split* is open
 ---@param term Terminal
+---@return boolean
 local function close_last_window(term)
   local only_one_window = fn.winnr("$") == 1
   if only_one_window and vim.bo[term.bufnr].filetype == term_ft then
     if term:is_split() then vim.cmd("keepalt bnext") end
+    return true
   end
+  return false
 end
 
 local function handle_term_enter()
   local _, term = terms.identify()
   if term then
-    close_last_window(term)
-    if config.get("persist_mode") then
+    local closed = close_last_window(term)
+    if closed then return end
+    if config.persist_mode then
       term:__restore_mode()
-    elseif config.get("start_in_insert") then
+    elseif config.start_in_insert then
       term:set_mode(terms.mode.INSERT)
     end
   end
@@ -119,9 +123,9 @@ local function handle_term_win_leave()
   if term and term:is_float() then term:close() end
 end
 
-local function handle_term_leave()
+local function handle_term_buf_leave()
   local _, term = terms.identify()
-  if term and config.get("persist_mode") then term:persist_mode() end
+  if term and config.persist_mode then term:persist_mode() end
 end
 
 local function on_term_open()
@@ -373,7 +377,7 @@ local function setup_autocommands(_)
   api.nvim_create_augroup(AUGROUP, { clear = true })
   local toggleterm_pattern = "term://*#toggleterm#*"
 
-  api.nvim_create_autocmd("BufWinEnter", {
+  api.nvim_create_autocmd("BufEnter", {
     pattern = toggleterm_pattern,
     group = AUGROUP,
     nested = true, -- this is necessary in case the buffer is the last
@@ -389,7 +393,7 @@ local function setup_autocommands(_)
   api.nvim_create_autocmd("BufWinLeave", {
     pattern = toggleterm_pattern,
     group = AUGROUP,
-    callback = handle_term_leave,
+    callback = handle_term_buf_leave,
   })
 
   api.nvim_create_autocmd("TermOpen", {
