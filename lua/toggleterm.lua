@@ -118,14 +118,11 @@ local function handle_term_enter()
   end
 end
 
-local function handle_term_win_leave()
+local function handle_term_leave()
   local _, term = terms.identify()
-  if term and term:is_float() then term:close() end
-end
-
-local function handle_term_buf_leave()
-  local _, term = terms.identify()
-  if term and config.persist_mode then term:persist_mode() end
+  if not term then return end
+  if config.persist_mode then term:persist_mode() end
+  if term:is_float() then term:close() end
 end
 
 local function on_term_open()
@@ -387,13 +384,7 @@ local function setup_autocommands(_)
   api.nvim_create_autocmd("WinLeave", {
     pattern = toggleterm_pattern,
     group = AUGROUP,
-    callback = handle_term_win_leave,
-  })
-
-  api.nvim_create_autocmd("BufWinLeave", {
-    pattern = toggleterm_pattern,
-    group = AUGROUP,
-    callback = handle_term_buf_leave,
+    callback = handle_term_leave,
   })
 
   api.nvim_create_autocmd("TermOpen", {
