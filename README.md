@@ -53,6 +53,7 @@
 <!-- panvimdoc-ignore-end -->
 
 ### Winbar (Experimental/Nightly ONLY)
+
 <!-- panvimdoc-ignore-start -->
 
 <img width="1728" alt="image" src="https://user-images.githubusercontent.com/22454918/179199998-75ec16cb-8271-490e-925f-6c82c50ffc5d.png">
@@ -81,6 +82,10 @@ Plug 'akinsho/toggleterm.nvim', {'tag' : 'v2.*'}
 
 You can/should specify a tag for the current major version of the plugin, to avoid breaking changes as this plugin evolves.
 To use a version of this plugin compatible with nvim versions less than 0.7 please use the tag `v1.*`.
+
+## Notices
+
+- **28/07/1990** - If using `persist_mode` terminal mappings should be changed to use `wincmd` instead otherwise persist mode will not work correctly. See [here](#terminal-window-mappings) for details.
 
 ## Why?
 
@@ -285,7 +290,6 @@ to remember which terminal is for what.
 You can map this to a key and call it with a count which will then prompt you a name for the terminal with the matching ID.
 Alternatively you can call it with just the name e.g. `:ToggleTermSetName work<CR>` this will the prompt you for which terminal it should apply to.
 Lastly you can call it without any arguments and it will prompt you for which terminal it should apply to then prompt you for the name to use.
-
 
 ### Set terminal shading
 
