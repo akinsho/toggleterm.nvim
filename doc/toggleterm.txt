@@ -5,6 +5,7 @@ Table of Contents                               *toggleterm-table-of-contents*
 
   - Requirements                                     |toggleterm-requirements|
   - Installation                                     |toggleterm-installation|
+  - Notices                                               |toggleterm-notices|
   - Why?                                                     |toggleterm-why?|
   - Roadmap                                               |toggleterm-roadmap|
 
@@ -51,6 +52,12 @@ Using vim-plug in vimscript
 You can/should specify a tag for the current major version of the plugin, to
 avoid breaking changes as this plugin evolves. To use a version of this plugin
 compatible with nvim versions less than 0.7 please use the tag `v1.*`.
+
+NOTICES                                                   *toggleterm-notices*
+
+
+- **28/07/1990** - If using `persist_mode` terminal mappings should be changed to use `wincmd` instead otherwise persist mode will not work correctly. See |toggleterm-here| for details.
+
 
 WHY?                                                         *toggleterm-why?*
 
