@@ -13,8 +13,6 @@ local config = lazy.require("toggleterm.config")
 local ui = lazy.require("toggleterm.ui")
 ---@module "toggleterm.commandline"
 local commandline = lazy.require("toggleterm.commandline")
----@module "toggleterm.command-complete"
-local command_complete = lazy.require("toggleterm.command-complete")
 
 local terms = require("toggleterm.terminal")
 
@@ -445,13 +443,13 @@ local function setup_commands()
   cmd(
     "TermExec",
     function(opts) M.exec_command(opts.args, opts.count) end,
-    { count = true, complete = command_complete.term_exec_complete, nargs = "*" }
+    { count = true, complete = commandline.term_exec_complete, nargs = "*" }
   )
 
   cmd(
     "ToggleTerm",
     function(opts) M.toggle_command(opts.args, opts.count) end,
-    { count = true, complete = command_complete.toggle_term_complete, nargs = "*" }
+    { count = true, complete = commandline.toggle_term_complete, nargs = "*" }
   )
 
   cmd("ToggleTermToggleAll", function(opts) M.toggle_all(opts.bang) end, { bang = true })

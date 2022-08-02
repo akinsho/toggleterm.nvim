@@ -1,5 +1,5 @@
 describe("command-complete", function()
-  local command_complete = require("toggleterm.command-complete")
+  local command_complete = require("toggleterm.commandline")
   it("should return the default options", function()
     local results = command_complete.term_exec_complete("", "TermExec ", 9)
 
