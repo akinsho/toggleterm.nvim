@@ -153,6 +153,7 @@ local toggle_term_options = {
 }
 
 ---@param options table a dictionary of key to function
+---@return fun(lead: string, command: string, _: number)
 local function complete(options)
   ---@param lead string the leading portion of the argument currently being completed on
   ---@param command string the entire command line
@@ -177,15 +178,9 @@ local function complete(options)
 end
 
 --- See :h :command-completion-custom
----@param lead string the leading portion of the argument currently being completed on
----@param command string the entire command line
----@param _ number the cursor position in it (byte index)
 M.term_exec_complete = complete(term_exec_options)
 
 --- See :h :command-completion-custom
----@param lead string the leading portion of the argument currently being completed on
----@param command string the entire command line
----@param _ number the cursor position in it (byte index)
 M.toggle_term_complete = complete(toggle_term_options)
 
 return M
