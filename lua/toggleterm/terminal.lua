@@ -330,7 +330,7 @@ function Terminal:__stdout()
   if self.auto_scroll or self.on_stdout then
     return function(...)
       if self.auto_scroll then
-        vim.api.nvim_buf_call(self.bufnr, function() vim.cmd('norm G') end)
+        vim.api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom)
       end
       if self.on_stdout then
         self.on_stdout(self, ...)
@@ -345,7 +345,7 @@ function Terminal:__stderr()
   if self.auto_scroll or self.on_stderr then
     return function(...)
       if self.auto_scroll then
-        vim.api.nvim_buf_call(self.bufnr, function() vim.cmd('norm G') end)
+        vim.api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom)
       end
       if self.on_stderr then
         self.on_stderr(self, ...)
