@@ -345,7 +345,7 @@ end
 ---If `auto_scroll` is active, will create a handler that scrolls on terminal output
 ---If `handler` is present, will call it passing `self` as the first parameter
 ---If none of the above is applicable, will not return a handler
----@param func function? a custom handler function for output handling
+---@param handler function? a custom callback function for output handling
 function Terminal:__make_output_handler(handler)
   if self.auto_scroll or handler then
     return function(...)
