@@ -213,7 +213,7 @@ function Terminal:is_float() return self.direction == "float" and ui.is_float(se
 
 function Terminal:is_split()
   return (self.direction == "vertical" or self.direction == "horizontal")
-      and not ui.is_float(self.window)
+    and not ui.is_float(self.window)
 end
 
 function Terminal:resize(size)
@@ -333,9 +333,7 @@ function Terminal:__stdout()
       if self.auto_scroll and api.nvim_buf_is_valid(self.bufnr) then
         vim.api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom)
       end
-      if self.on_stdout then
-        self.on_stdout(self, ...)
-      end
+      if self.on_stdout then self.on_stdout(self, ...) end
     end
   end
 end
@@ -352,9 +350,7 @@ function Terminal:__make_output_handler(handler)
       if self.auto_scroll and api.nvim_buf_is_valid(self.bufnr) then
         vim.api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom)
       end
-      if handler then
-        handler(self, ...)
-      end
+      if handler then handler(self, ...) end
     end
   end
 end
