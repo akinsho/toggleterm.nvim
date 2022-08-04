@@ -54,6 +54,7 @@ local terminals = {}
 --- @field display_name string?
 --- @field hidden boolean? whether or not to include this terminal in the terminals list
 --- @field close_on_exit boolean? whether or not to close the terminal window when the process exits
+--- @field auto_scroll boolean? whether or not to scroll down on terminal output
 --- @field float_opts table<string, any>?
 --- @field on_stdout fun(t: Terminal, job: number, data: string[]?, name: string?)?
 --- @field on_stderr fun(t: Terminal, job: number, data: string[], name: string)?
@@ -74,6 +75,7 @@ local terminals = {}
 --- @field count number the count that triggers that specific terminal
 --- @field hidden boolean whether or not to include this terminal in the terminals list
 --- @field close_on_exit boolean? whether or not to close the terminal window when the process exits
+--- @field auto_scroll boolean? whether or not to scroll down on terminal output
 --- @field float_opts table<string, any>?
 --- @field display_name string?
 --- @field env table<string, string> environmental variables passed to jobstart()
@@ -187,6 +189,7 @@ function Terminal:new(term)
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
   term.env = term.env or conf.env
   term.clear_env = term.clear_env
+  term.auto_scroll = term.auto_scroll or conf.auto_scroll
   term.on_open = term.on_open or conf.on_open
   term.on_close = term.on_close or conf.on_close
   term.on_stdout = term.on_stdout or conf.on_stdout
@@ -210,7 +213,7 @@ function Terminal:is_float() return self.direction == "float" and ui.is_float(se
 
 function Terminal:is_split()
   return (self.direction == "vertical" or self.direction == "horizontal")
-    and not ui.is_float(self.window)
+      and not ui.is_float(self.window)
 end
 
 function Terminal:resize(size)
@@ -325,13 +328,35 @@ end
 ---@private
 ---Pass self as first parameter to callback
 function Terminal:__stdout()
-  if self.on_stdout then return function(...) self.on_stdout(self, ...) end end
+  if self.auto_scroll or self.on_stdout then
+    return function(...)
+      if self.auto_scroll and api.nvim_buf_is_valid(self.bufnr) then
+        vim.api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom)
+      end
+      if self.on_stdout then
+        self.on_stdout(self, ...)
+      end
+    end
+  end
 end
 
 ---@private
----Pass self as first parameter to callback
-function Terminal:__stderr()
-  if self.on_stderr then return function(...) self.on_stderr(self, ...) end end
+---Prepare callback for terminal output handling
+---If `auto_scroll` is active, will create a handler that scrolls on terminal output
+---If `handler` is present, will call it passing `self` as the first parameter
+---If none of the above is applicable, will not return a handler
+---@param handler function? a custom callback function for output handling
+function Terminal:__make_output_handler(handler)
+  if self.auto_scroll or handler then
+    return function(...)
+      if self.auto_scroll and api.nvim_buf_is_valid(self.bufnr) then
+        vim.api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom)
+      end
+      if handler then
+        handler(self, ...)
+      end
+    end
+  end
 end
 
 ---@private
@@ -351,8 +376,8 @@ function Terminal:__spawn()
     detach = 1,
     cwd = _get_dir(self.dir),
     on_exit = __handle_exit(self),
-    on_stdout = self:__stdout(),
-    on_stderr = self:__stderr(),
+    on_stdout = self:__make_output_handler(self.on_stdout),
+    on_stderr = self:__make_output_handler(self.on_stderr),
     env = self.env,
     clear_env = self.clear_env,
   })
@@ -486,6 +511,7 @@ if _G.IS_TEST then
       term:shutdown()
     end
   end
+
   M.__next_id = next_id
 end
 

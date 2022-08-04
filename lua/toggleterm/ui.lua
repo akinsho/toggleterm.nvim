@@ -178,7 +178,12 @@ function M.update_origin_window(term_window)
   if term_window ~= curr_win then origin_window = curr_win end
 end
 
-function M.scroll_to_bottom() vim.cmd("normal! G") end
+function M.scroll_to_bottom()
+  local info = vim.api.nvim_get_mode()
+  if info and (info.mode == "n" or info.mode == "nt") then
+    vim.cmd("normal! G")
+  end
+end
 
 function M.goto_previous() vim.cmd("wincmd p") end
 
