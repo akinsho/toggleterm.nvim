@@ -329,7 +329,7 @@ end
 function Terminal:__stdout()
   if self.auto_scroll or self.on_stdout then
     return function(...)
-      if self.auto_scroll then
+      if self.auto_scroll and vim.fn.bufexists(self.bufnr) == 1 then
         vim.api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom)
       end
       if self.on_stdout then
@@ -344,7 +344,7 @@ end
 function Terminal:__stderr()
   if self.auto_scroll or self.on_stderr then
     return function(...)
-      if self.auto_scroll then
+      if self.auto_scroll and vim.fn.bufexists(self.bufnr) == 1 then
         vim.api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom)
       end
       if self.on_stderr then

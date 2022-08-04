@@ -179,8 +179,8 @@ function M.update_origin_window(term_window)
 end
 
 function M.scroll_to_bottom()
-  local mode = vim.api.nvim_get_mode()
-  if mode and (mode.mode == 'n' or mode.mode == 'nt') then
+  local info = vim.api.nvim_get_mode()
+  if info and (info.mode == 'n' or info.mode == 'nt') then
     vim.cmd("normal! G")
   end
 end
