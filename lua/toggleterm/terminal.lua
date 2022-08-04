@@ -54,7 +54,7 @@ local terminals = {}
 --- @field display_name string?
 --- @field hidden boolean? whether or not to include this terminal in the terminals list
 --- @field close_on_exit boolean? whether or not to close the terminal window when the process exits
---- @field auto_close boolean? whether or not to scroll down on terminal output
+--- @field auto_scroll boolean? whether or not to scroll down on terminal output
 --- @field float_opts table<string, any>?
 --- @field on_stdout fun(t: Terminal, job: number, data: string[]?, name: string?)?
 --- @field on_stderr fun(t: Terminal, job: number, data: string[], name: string)?
