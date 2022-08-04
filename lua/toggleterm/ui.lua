@@ -180,7 +180,7 @@ end
 
 function M.scroll_to_bottom()
   local info = vim.api.nvim_get_mode()
-  if info and (info.mode == 'n' or info.mode == 'nt') then
+  if info and (info.mode == "n" or info.mode == "nt") then
     vim.cmd("normal! G")
   end
 end
