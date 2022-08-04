@@ -54,6 +54,7 @@ local terminals = {}
 --- @field display_name string?
 --- @field hidden boolean? whether or not to include this terminal in the terminals list
 --- @field close_on_exit boolean? whether or not to close the terminal window when the process exits
+--- @field auto_close boolean? whether or not to scroll down on terminal output
 --- @field float_opts table<string, any>?
 --- @field on_stdout fun(t: Terminal, job: number, data: string[]?, name: string?)?
 --- @field on_stderr fun(t: Terminal, job: number, data: string[], name: string)?
@@ -187,6 +188,7 @@ function Terminal:new(term)
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
   term.env = term.env or conf.env
   term.clear_env = term.clear_env
+  term.auto_scroll = term.auto_scroll or conf.auto_scroll
   term.on_open = term.on_open or conf.on_open
   term.on_close = term.on_close or conf.on_close
   term.on_stdout = term.on_stdout or conf.on_stdout
@@ -210,7 +212,7 @@ function Terminal:is_float() return self.direction == "float" and ui.is_float(se
 
 function Terminal:is_split()
   return (self.direction == "vertical" or self.direction == "horizontal")
-    and not ui.is_float(self.window)
+      and not ui.is_float(self.window)
 end
 
 function Terminal:resize(size)
@@ -325,13 +327,31 @@ end
 ---@private
 ---Pass self as first parameter to callback
 function Terminal:__stdout()
-  if self.on_stdout then return function(...) self.on_stdout(self, ...) end end
+  if self.auto_scroll or self.on_stdout then
+    return function(...)
+      if self.auto_scroll then
+        vim.api.nvim_buf_call(self.bufnr, function() vim.cmd('norm G') end)
+      end
+      if self.on_stdout then
+        self.on_stdout(self, ...)
+      end
+    end
+  end
 end
 
 ---@private
 ---Pass self as first parameter to callback
 function Terminal:__stderr()
-  if self.on_stderr then return function(...) self.on_stderr(self, ...) end end
+  if self.auto_scroll or self.on_stderr then
+    return function(...)
+      if self.auto_scroll then
+        vim.api.nvim_buf_call(self.bufnr, function() vim.cmd('norm G') end)
+      end
+      if self.on_stderr then
+        self.on_stderr(self, ...)
+      end
+    end
+  end
 end
 
 ---@private
@@ -486,6 +506,7 @@ if _G.IS_TEST then
       term:shutdown()
     end
   end
+
   M.__next_id = next_id
 end
 

@@ -29,6 +29,7 @@ local function shade(color, factor) return colors.shade_color(color, factor) end
 --- @field direction  '"horizontal"' | '"vertical"' | '"float"'
 --- @field shading_factor number
 --- @field shell string
+--- @field auto_scroll boolean
 --- @field float_opts table<string, any>
 --- @field highlights ToggleTermHighlights
 --- @field winbar WinbarOpts
@@ -48,6 +49,7 @@ local config = {
   direction = "horizontal",
   shading_factor = constants.shading_amount,
   shell = vim.o.shell,
+  auto_scroll = true,
   winbar = {
     enabled = false,
     name_formatter = function(term) return fmt("%d:%s", term.id, term:_display_name()) end,
