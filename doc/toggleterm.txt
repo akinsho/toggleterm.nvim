@@ -166,6 +166,7 @@ show what options are available. It is not written be used as is.
       direction = 'vertical' | 'horizontal' | 'tab' | 'float',
       close_on_exit = true, -- close the terminal window when the process exits
       shell = vim.o.shell, -- change the default shell
+      auto_scroll = true, -- automatically scroll to the bottom on terminal output
       -- This field is only relevant if direction is set to 'float'
       float_opts = {
         -- The border key is *almost* the same as 'nvim_open_win'
@@ -367,6 +368,7 @@ Each terminal can take the following arguments:
       clear_env = bool -- use only environmental variables from `env`, passed to jobstart()
       on_open = fun(t: Terminal) -- function to run when the terminal opens
       on_close = fun(t: Terminal) -- function to run when the terminal closes
+      auto_scroll = boolean -- automatically scroll to the bottom on terminal output
       -- callbacks for processing the output
       on_stdout = fun(t: Terminal, job: number, data: string[], name: string) -- callback for processing output on stdout
       on_stderr = fun(t: Terminal, job: number, data: string[], name: string) -- callback for processing output on stderr
