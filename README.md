@@ -195,7 +195,7 @@ require("toggleterm").setup{
   },
   winbar = {
     enabled = false,
-    name_formatter(term) --  term: Terminal
+    name_formatter = function(term) --  term: Terminal
       return term.name
     end
   },
