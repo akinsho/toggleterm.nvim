@@ -52,34 +52,6 @@ local function setup_global_mappings()
   end
 end
 
---Create a new terminal or close beginning from the last opened
----@param _ number
----@param size number?
----@param dir string?
----@param direction string?
-local function smart_toggle(_, size, dir, direction)
-  local terminals = terms.get_all()
-  if not ui.find_open_windows() then
-    -- Re-open the first terminal toggled
-    terms.get_or_create_term(terms.get_toggled_id(), dir, direction):open(size, direction)
-  else
-    local target
-    -- count backwards from the end of the list
-    for i = #terminals, 1, -1 do
-      local term = terminals[i]
-      if term and ui.term_has_open_win(term) then
-        target = term
-        break
-      end
-    end
-    if not target then
-      utils.notify("Couldn't find a terminal to close", "error")
-      return
-    end
-    target:close()
-  end
-end
-
 --- @param num number
 --- @param size number?
 --- @param dir string?
@@ -321,9 +293,58 @@ function _G.___toggleterm_winbar_click(id)
     term:toggle()
   end
 end
+
+M.toggle_strategies = {
+  utils = {
+    get_last_open = function()
+      local terminals = terms.get_all()
+      ---@type Terminal
+      local target
+      -- count backwards from the end of the list
+      for i = #terminals, 1, -1 do
+        local term = terminals[i]
+        if term and ui.term_has_open_win(term) then
+          target = term
+          break
+        end
+      end
+      if not target then
+        utils.notify("Couldn't find a terminal to close", "error")
+        return
+      end
+      return target.id
+    end
+  },
+
+  -- use the first terminal in the terminal list
+  first = function()
+    if not ui.find_open_windows() then
+      -- Re-open the first terminal toggled
+      return terms.get_toggled_id()
+    end
+    return M.toggle_strategies.utils.get_last_open()
+  end,
+
+  -- use a terminal corresponding to the current tabpage handle
+  by_tabpage = function()
+    if not ui.find_open_windows() then
+      return vim.api.nvim_get_current_tabpage()
+    end
+    return M.toggle_strategies.utils.get_last_open()
+  end,
+
+  -- use a terminal corresponding to the current window handle
+  by_window = function()
+    if not ui.find_open_windows() then
+      return vim.api.nvim_get_current_win()
+    end
+    return M.toggle_strategies.utils.get_last_open()
+  end
+}
+
 --- If a count is provided we operate on the specific terminal buffer
 --- i.e. 2ToggleTerm => open or close Term 2
---- if the count is 1 we use a heuristic which is as follows
+--- if the count is 0 we use a heuristic which is as follows
 --- if there is no open terminal window we toggle the first one i.e. assumed
 --- to be the primary. However if several are open we close them.
 --- this can be used with the count commands to allow specific operations
@@ -338,7 +359,17 @@ function M.toggle(count, size, dir, direction)
   if count >= 1 then
     toggle_nth_term(count, size, dir, direction)
   else
-    smart_toggle(count, size, dir, direction)
+    local toggle_strategy
+    if type(config.toggle_strategy) == "function" then
+      toggle_strategy = config.toggle_strategy
+    else
+      toggle_strategy = M.toggle_strategies[config.toggle_strategy]
+      if not (type(toggle_strategy) == "function") then
+        utils.echomsg(string.format('Invalid toggle strategy \'%s\'. Defaulting to strategy \'first\'.', config.toggle_strategy), "Error")
+        toggle_strategy = M.toggle_strategies.first
+      end
+    end
+    toggle_nth_term(toggle_strategy(), size, dir, direction)
   end
 end
 

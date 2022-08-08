@@ -181,6 +181,7 @@ require("toggleterm").setup{
   close_on_exit = true, -- close the terminal window when the process exits
   shell = vim.o.shell, -- change the default shell
   auto_scroll = true, -- automatically scroll to the bottom on terminal output
+  toggle_strategy = "first", -- specify the smart toggle strategy (for `:ToggleTerm` with no count; see below)
   -- This field is only relevant if direction is set to 'float'
   float_opts = {
     -- The border key is *almost* the same as 'nvim_open_win'
@@ -213,6 +214,16 @@ arguments `size`, `dir` and `direction`. e.g.
 ```vim
 :ToggleTerm size=40 dir=~/Desktop direction=horizontal
 ```
+
+If a `count` is not given this command defaults to "smart toggling", which can have different
+effects according to the config value `toggle_strategy`:
+
+- `toggle_strategy = "first"`: When no terminals are open, use the first (non-hidden) terminal by ID.
+  If terminals are open, close them in order.
+- `toggle_strategy = "by_tabpage"`: When no terminals are open, use a terminal with an ID
+  corresponding the the current tab number. If terminals are open, close them in order.
+- `toggle_strategy = "by_window"`: When no terminals are open, use a terminal with an ID
+  corresponding the the current window number. If terminals are open, close them in order.
 
 If `dir` is specified on creation toggle term will open at the specified directory.
 If the terminal has already been opened at a particular directory it will remain in that directory.
@@ -450,10 +461,21 @@ let statusline .= '%{&ft == "toggleterm" ? "terminal (".b:toggle_number.")" : ""
 
 You can create your on commands by using the lua functions this plugin provides directly
 
-```vim
-command! -count=1 TermGitPush  lua require'toggleterm'.exec("git push",    <count>, 12)
-command! -count=1 TermGitPushF lua require'toggleterm'.exec("git push -f", <count>, 12)
+```lua
+local toggleterm = require'toggleterm'
+local strategies = toggleterm.toggle_strategies
+local cmd = vim.api.nvim_create_user_command
+
+cmd("TermGitPush", function(opts) toggleterm.exec("git push", opts.count, 12) end, {count = 1})
+cmd("TermGitPushF", function(opts) toggleterm.exec("git push -f", opts.count, 12) end, {count = 1})
+cmd("ToggleTermTab", function(opts) toggleterm.toggle_command(opts.args, strategies["by_tabpage"]()) end, {})
 ```
+
+The table `require'toggleterm'.toggle_strategies` provides a set of utility
+functions that can be used to extract terminal IDs based on the current
+context, and is useful for implementing custom smart-toggle commands as above.
+See their implementation for inspiration on how to write your own smart-toggle
+functions.
 
 ### Open multiple terminals side-by-side
 
