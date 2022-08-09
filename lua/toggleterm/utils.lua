@@ -16,7 +16,7 @@ end
 function M.notify(msg, level)
   local err = level:upper()
   level = level and levels[err] or levels.INFO
-  vim.notify(fmt("[toggleterm]: %s", msg), level)
+  vim.schedule(function() vim.notify(msg, level, { title = "Toggleterm" }) end)
 end
 
 ---@private
