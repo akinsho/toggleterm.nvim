@@ -1,17 +1,8 @@
 local M = {}
 
-local api = vim.api
 local fn = vim.fn
 local fmt = string.format
 local levels = vim.log.levels
-
----Print a message to vim's commandline
----@param msg string
----@param hl string
-function M.echomsg(msg, hl)
-  hl = hl or "Title"
-  api.nvim_echo({ { msg, hl } }, true, {})
-end
 
 function M.is_nightly()
   local v = vim.version()

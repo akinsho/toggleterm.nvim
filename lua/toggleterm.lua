@@ -142,9 +142,9 @@ end
 function M.exec_command(args, count)
   vim.validate({ args = { args, "string" } })
   if not args:match("cmd") then
-    return utils.echomsg(
+    return utils.notify(
       "TermExec requires a cmd specified using the syntax cmd='ls -l' e.g. TermExec cmd='ls -l'",
-      "ErrorMsg"
+      "error"
     )
   end
   local parsed = require("toggleterm.commandline").parse(args)

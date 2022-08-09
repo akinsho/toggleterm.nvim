@@ -261,7 +261,7 @@ function M._resolve_size(size, term)
   elseif term and type(size) == "function" then
     return size(term)
   end
-  utils.echomsg(string.format('The input %s is not of type "number" or "function".', size), "Error")
+  utils.notify(fmt('The input %s is not of type "number" or "function".', size), "error")
 end
 
 local curved = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
