@@ -222,8 +222,6 @@ effects according to the config value `toggle_strategy`:
   If terminals are open, close them in order.
 - `toggle_strategy = "by_tabpage"`: When no terminals are open, use a terminal with an ID
   corresponding the the current tab number. If terminals are open, close them in order.
-- `toggle_strategy = "by_window"`: When no terminals are open, use a terminal with an ID
-  corresponding the the current window number. If terminals are open, close them in order.
 
 If `dir` is specified on creation toggle term will open at the specified directory.
 If the terminal has already been opened at a particular directory it will remain in that directory.

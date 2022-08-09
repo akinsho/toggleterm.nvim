@@ -313,32 +313,24 @@ function M.get_last_open_term()
   return target.id
 end
 
-M.toggle_strategies = {
-  -- use the first terminal in the terminal list
-  first = function()
-    if not ui.find_open_windows() then
-      -- Re-open the first terminal toggled
-      return terms.get_toggled_id()
-    end
-    return M.get_last_open_term()
-  end,
+M.strategies = {}
 
-  -- use a terminal corresponding to the current tabpage handle
-  by_tabpage = function()
-    if not ui.find_open_windows() then
-      return vim.api.nvim_get_current_tabpage()
-    end
-    return M.get_last_open_term()
-  end,
-
-  -- use a terminal corresponding to the current window handle
-  by_window = function()
-    if not ui.find_open_windows() then
-      return vim.api.nvim_get_current_win()
-    end
-    return M.get_last_open_term()
+-- use the first terminal in the terminal list
+M.strategies.first = function()
+  if not ui.find_open_windows() then
+    -- Re-open the first terminal toggled
+    return terms.get_toggled_id()
   end
-}
+  return M.get_last_open_term()
+end
+
+-- use a terminal corresponding to the current tabpage handle
+M.strategies.by_tabpage = function()
+  if not ui.find_open_windows() then
+    return vim.api.nvim_get_current_tabpage()
+  end
+  return M.get_last_open_term()
+end
 
 --- If a count is provided we operate on the specific terminal buffer
 --- i.e. 2ToggleTerm => open or close Term 2
@@ -357,15 +349,10 @@ function M.toggle(count, size, dir, direction)
   if count >= 1 then
     toggle_nth_term(count, size, dir, direction)
   else
-    local toggle_strategy
-    if type(config.toggle_strategy) == "function" then
-      toggle_strategy = config.toggle_strategy
-    else
-      toggle_strategy = M.toggle_strategies[config.toggle_strategy]
-      if not (type(toggle_strategy) == "function") then
-        utils.echomsg(string.format('Invalid toggle strategy \'%s\'. Defaulting to strategy \'first\'.', config.toggle_strategy), "Error")
-        toggle_strategy = M.toggle_strategies.first
-      end
+    local toggle_strategy = M.toggle_strategies[config.toggle_strategy]
+    if not (type(toggle_strategy) == "function") then
+      utils.echomsg(string.format('Invalid toggle strategy \'%s\'. Defaulting to strategy \'first\'.', config.toggle_strategy), "Error")
+      toggle_strategy = M.toggle_strategies.first
     end
     toggle_nth_term(toggle_strategy(), size, dir, direction)
   end
