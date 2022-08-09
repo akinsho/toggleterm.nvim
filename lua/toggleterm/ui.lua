@@ -323,12 +323,9 @@ end
 
 local function close_tab()
   if #vim.api.nvim_list_tabpages() == 1 then
-    vim.notify("You cannot close the last tab! This will exit neovim", "error", {
-      title = "Toggleterm",
-    })
-  else
-    vim.cmd("tabclose")
+    return utils.notify("You cannot close the last tab! This will exit neovim", "error")
   end
+  vim.cmd("tabclose")
 end
 
 ---Close terminal window

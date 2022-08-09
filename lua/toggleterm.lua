@@ -72,10 +72,7 @@ local function smart_toggle(_, size, dir, direction)
         break
       end
     end
-    if not target then
-      utils.notify("Couldn't find a terminal to close", "error")
-      return
-    end
+    if not target then return utils.notify("Couldn't find a terminal to close", "error") end
     target:close()
   end
 end
@@ -416,7 +413,7 @@ end
 ---@param callback fun(t: Terminal?)
 local function get_subject_terminal(callback)
   local items = terms.get_all(true)
-  if #items == 0 then return vim.notify("No toggleterms are open yet", "info") end
+  if #items == 0 then return utils.notify("No toggleterms are open yet") end
 
   vim.ui.select(items, {
     prompt = "Please select a terminal to name",
