@@ -113,9 +113,8 @@ end
 
 --- @param bufnr number
 local function setup_buffer_mappings(bufnr)
-  local conf = config.get()
-  local mapping = conf.open_mapping
-  if mapping and conf.terminal_mappings then
+  local mapping = config.open_mapping
+  if mapping and config.terminal_mappings then
     vim.keymap.set("t", mapping, "<Cmd>ToggleTerm<CR>", { buffer = bufnr, silent = true })
   end
 end
