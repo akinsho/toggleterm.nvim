@@ -334,7 +334,7 @@ function M.toggle(count, size, dir, direction)
   -- Check if dir can be opened
   -- If it can't, change dir to nil
   local expanded = vim.fn.expand(dir)
-  if (vim.fn.filereadable(expanded) + vim.fn.isdirectory(expanded)) == 0 then dir = nil end
+  if vim.fn.isdirectory(expanded) == 0 then dir = nil end
   -- TODO this should toggle the specified term if any count is passed in
   if count >= 1 then
     toggle_nth_term(count, size, dir, direction)
