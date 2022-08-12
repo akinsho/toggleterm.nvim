@@ -153,8 +153,8 @@ function M.exec_command(args, count)
     go_back = { parsed.go_back, "boolean", true },
     open = { parsed.open, "boolean", true },
   })
-  -- Check if dir can be opened
-  -- If it can't, change dir to nil
+  -- Check if dir exists
+  -- If it doesn't, change dir to nil
   if vim.fn.isdirectory(vim.fn.expand(parsed.dir)) == 0 then parsed.dir = nil end
   M.exec(parsed.cmd, count, parsed.size, parsed.dir, parsed.direction, parsed.go_back, parsed.open)
 end
@@ -311,8 +311,8 @@ function M.toggle_command(args, count)
     direction = { parsed.direction, "string", true },
   })
   if parsed.size then parsed.size = tonumber(parsed.size) end
-  -- Check if dir can be opened
-  -- If it can't, change dir to nil
+  -- Check if dir exists
+  -- If it doesn't, change dir to nil
   if vim.fn.isdirectory(vim.fn.expand(parsed.dir)) == 0 then parsed.dir = nil end
   M.toggle(count, parsed.size, parsed.dir, parsed.direction)
 end
