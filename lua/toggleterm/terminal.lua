@@ -474,6 +474,9 @@ end
 function M.get_or_create_term(num, dir, direction)
   local term = M.get(num)
   if term then return term, false end
+  -- Check if dir exists
+  -- If it doesn't, change dir to nil
+  if vim.fn.isdirectory(vim.fn.expand(dir)) == 0 then dir = nil end
   return Terminal:new({ id = num, dir = dir, direction = direction }), true
 end
 
