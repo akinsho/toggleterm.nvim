@@ -206,7 +206,7 @@ require("toggleterm").setup{
 
 ### `ToggleTerm`
 
-This is the command the mappings call under the hood. You can use it directly (see [Smart-Toggling](#Smart-Toggling))
+This is the command the mappings call under the hood. You can use it directly (see [Smart-Toggling](#smart-toggling))
 or prefix it with a count to target a specific terminal. This function also takes
 arguments `size`, `dir` and `direction`. e.g.
 

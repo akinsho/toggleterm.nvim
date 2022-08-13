@@ -218,7 +218,7 @@ function Terminal:__add()
 end
 
 ---@private
----Set this terminal as the last opened terminal
+---Associate the current tab with this terminal
 function Terminal:__set_tab_to_term()
   if self.hidden then return end
   local tab = vim.api.nvim_get_current_tabpage()
