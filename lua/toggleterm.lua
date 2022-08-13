@@ -114,9 +114,9 @@ end
 function M.exec_command(args, count)
   vim.validate({ args = { args, "string" } })
   if not args:match("cmd") then
-    return utils.echomsg(
+    return utils.notify(
       "TermExec requires a cmd specified using the syntax cmd='ls -l' e.g. TermExec cmd='ls -l'",
-      "ErrorMsg"
+      "error"
     )
   end
   local parsed = require("toggleterm.commandline").parse(args)
@@ -458,7 +458,7 @@ end
 ---@param callback fun(t: Terminal?)
 local function get_subject_terminal(callback)
   local items = terms.get_all(true)
-  if #items == 0 then return vim.notify("No toggleterms are open yet", "info") end
+  if #items == 0 then return utils.notify("No toggleterms are open yet") end
 
   vim.ui.select(items, {
     prompt = "Please select a terminal to name",
