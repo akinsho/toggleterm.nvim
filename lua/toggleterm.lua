@@ -313,21 +313,16 @@ function M.get_last_open_term()
   return target.id
 end
 
-M.strategies = {}
-
 -- use the first terminal in the terminal list
-M.strategies.first = function()
+local function smart_toggle()
   if not ui.find_open_windows() then
-    -- Re-open the first terminal toggled
-    return terms.get_toggled_id()
-  end
-  return M.get_last_open_term()
-end
-
--- use a terminal corresponding to the current tabpage handle
-M.strategies.by_tabpage = function()
-  if not ui.find_open_windows() then
-    return vim.api.nvim_get_current_tabpage()
+    local tab_term = terms.get_tab_term()
+    local id = tab_term and tab_term.id
+    if not id then
+      local last_term = terms.get_last_term()
+      return last_term and last_term.id
+    end
+    return id
   end
   return M.get_last_open_term()
 end
@@ -349,13 +344,24 @@ function M.toggle(count, size, dir, direction)
   if count >= 1 then
     toggle_nth_term(count, size, dir, direction)
   else
-    local toggle_strategy = M.toggle_strategies[config.toggle_strategy]
-    if not (type(toggle_strategy) == "function") then
-      utils.echomsg(string.format('Invalid toggle strategy \'%s\'. Defaulting to strategy \'first\'.', config.toggle_strategy), "Error")
-      toggle_strategy = M.toggle_strategies.first
-    end
-    toggle_nth_term(toggle_strategy(), size, dir, direction)
+    toggle_nth_term(smart_toggle(), size, dir, direction)
   end
+end
+
+function M.toggle_smart_clear()
+  terms.clear_tab_term()
+end
+
+function M.toggle_smart_new(args)
+  local parsed = commandline.parse(args)
+  vim.validate({
+    size = { parsed.size, "number", true },
+    dir = { parsed.dir, "string", true },
+    direction = { parsed.direction, "string", true },
+  })
+  if parsed.size then parsed.size = tonumber(parsed.size) end
+
+  toggle_nth_term(nil, args.size, args.dir, args.direction)
 end
 
 -- Toggle all terminals
@@ -466,6 +472,18 @@ local function setup_commands()
     "ToggleTerm",
     function(opts) M.toggle_command(opts.args, opts.count) end,
     { count = true, complete = commandline.toggle_term_complete, nargs = "*" }
+  )
+
+  cmd(
+    "ToggleTermSmartClear",
+    M.toggle_smart_clear,
+    {}
+  )
+
+  cmd(
+    "ToggleTermSmartNew",
+    function(opts) M.toggle_smart_new(opts.args) end,
+    { complete = commandline.toggle_term_complete, nargs = "*" }
   )
 
   cmd("ToggleTermToggleAll", function(opts) M.toggle_all(opts.bang) end, { bang = true })

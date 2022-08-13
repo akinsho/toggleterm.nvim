@@ -44,6 +44,14 @@ end
 ---@type Terminal[]
 local terminals = {}
 
+-- Table mapping from tabs to terminals, used with smart-toggling.
+---@type table<number, Terminal>
+local tabs_to_terms = {}
+
+-- The last terminal opened; used for smart-toggling.
+---@type Terminal
+local last_term
+
 --- @class TermCreateArgs
 --- @field cmd string
 --- @field direction? string the layout style for the terminal
@@ -207,6 +215,22 @@ end
 function Terminal:__add()
   if not terminals[self.id] then terminals[self.id] = self end
   return self
+end
+
+---@private
+---Set this terminal as the last opened terminal
+function Terminal:__set_tab_to_term()
+  if self.hidden then return end
+  local tab = vim.api.nvim_get_current_tabpage()
+  if not tabs_to_terms[tab] then tabs_to_terms[tab] = self end
+  return self
+end
+
+---@private
+---Set this terminal as the last opened terminal
+function Terminal:__set_last_term()
+  if self.hidden then return end
+  last_term = self
 end
 
 function Terminal:is_float() return self.direction == "float" and ui.is_float(self.window) end
@@ -438,6 +462,8 @@ function Terminal:open(size, direction, is_new)
     ui.switch_buf(self.bufnr)
     if not is_new then self:change_dir(self.dir) end
   end
+  self:__set_last_term()
+  self:__set_tab_to_term()
   ui.hl_term(self)
   -- NOTE: it is important that this function is called at this point. i.e. the buffer has been correctly assigned
   if self.on_open then self:on_open() end
@@ -499,6 +525,18 @@ function M.get_all(include_hidden)
   end
   table.sort(result, function(a, b) return a.id < b.id end)
   return result
+end
+
+function M.clear_tab_term()
+  tabs_to_terms[vim.api.nvim_get_current_tabpage()] = nil
+end
+
+function M.get_tab_term()
+  return tabs_to_terms[vim.api.nvim_get_current_tabpage()]
+end
+
+function M.get_last_term()
+  return last_term
 end
 
 if _G.IS_TEST then

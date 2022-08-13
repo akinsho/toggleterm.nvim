@@ -461,7 +461,7 @@ You can create your on commands by using the lua functions this plugin provides 
 
 ```lua
 local toggleterm = require'toggleterm'
-local strategies = toggleterm.toggle_strategies
+local strategies = toggleterm.strategies
 local cmd = vim.api.nvim_create_user_command
 
 cmd("TermGitPush", function(opts) toggleterm.exec("git push", opts.count, 12) end, {count = 1})
@@ -469,7 +469,7 @@ cmd("TermGitPushF", function(opts) toggleterm.exec("git push -f", opts.count, 12
 cmd("ToggleTermTab", function(opts) toggleterm.toggle_command(opts.args, strategies["by_tabpage"]()) end, {})
 ```
 
-The table `require'toggleterm'.toggle_strategies` provides a set of utility
+The table `require'toggleterm'.strategies` provides a set of utility
 functions that can be used to extract terminal IDs based on the current
 context, and is useful for implementing custom smart-toggle commands as above.
 See their implementation for inspiration on how to write your own smart-toggle
