@@ -181,7 +181,6 @@ require("toggleterm").setup{
   close_on_exit = true, -- close the terminal window when the process exits
   shell = vim.o.shell, -- change the default shell
   auto_scroll = true, -- automatically scroll to the bottom on terminal output
-  toggle_strategy = "first", -- specify the smart toggle strategy (for `:ToggleTerm` with no count; see below)
   -- This field is only relevant if direction is set to 'float'
   float_opts = {
     -- The border key is *almost* the same as 'nvim_open_win'
@@ -196,7 +195,7 @@ require("toggleterm").setup{
   },
   winbar = {
     enabled = false,
-    name_formatter(term) --  term: Terminal
+    name_formatter = function(term) --  term: Terminal
       return term.name
     end
   },
@@ -207,21 +206,13 @@ require("toggleterm").setup{
 
 ### `ToggleTerm`
 
-This is the command the mappings call under the hood. You can use it directly
-and prefix it with a count to target a specific terminal. This function also takes
+This is the command the mappings call under the hood. You can use it directly (see [Smart-Toggling](#Smart-Toggling))
+or prefix it with a count to target a specific terminal. This function also takes
 arguments `size`, `dir` and `direction`. e.g.
 
 ```vim
 :ToggleTerm size=40 dir=~/Desktop direction=horizontal
 ```
-
-If a `count` is not given this command defaults to "smart toggling", which can have different
-effects according to the config value `toggle_strategy`:
-
-- `toggle_strategy = "first"`: When no terminals are open, use the first (non-hidden) terminal by ID.
-  If terminals are open, close them in order.
-- `toggle_strategy = "by_tabpage"`: When no terminals are open, use a terminal with an ID
-  corresponding the the current tab number. If terminals are open, close them in order.
 
 If `dir` is specified on creation toggle term will open at the specified directory.
 If the terminal has already been opened at a particular directory it will remain in that directory.
@@ -268,6 +259,22 @@ By default focus is returned to the original window after executing the command
 You can send commands to a terminal without opening its window by using the `open=0` argument.
 
 see `:h expand()` for more details
+
+### Smart-Toggling
+
+When `:ToggleTerm` is used without a prefixed count, it defaults to "smart-toggling".
+This feature is designed to use your current neovim context to determine which terminal
+to open, thus helping to minimize the number of times you have to explicitly provide a count.
+
+Currently, terminal contexts exist on a per-tab basis. Each tab is "pinned" to
+the first terminal that is opened in it. If you call `:ToggleTerm` from a new tab,
+it defaults to opening, (and thus pinning) the last-opened terminal
+(which can be done explicitly with `:ToggleTermSmartLast`).
+Alternatively, you can call `:ToggleTermSmartNew` within a new tab to associate
+a brand-new terminal with that tab.
+If you want to re-associate a tab with a different terminal,
+you can call `:ToggleTermSmartClear` to clear the entry in the internal mapping
+and then open the new terminal.
 
 ### Sending lines to the terminal
 
@@ -459,21 +466,10 @@ let statusline .= '%{&ft == "toggleterm" ? "terminal (".b:toggle_number.")" : ""
 
 You can create your on commands by using the lua functions this plugin provides directly
 
-```lua
-local toggleterm = require'toggleterm'
-local strategies = toggleterm.strategies
-local cmd = vim.api.nvim_create_user_command
-
-cmd("TermGitPush", function(opts) toggleterm.exec("git push", opts.count, 12) end, {count = 1})
-cmd("TermGitPushF", function(opts) toggleterm.exec("git push -f", opts.count, 12) end, {count = 1})
-cmd("ToggleTermTab", function(opts) toggleterm.toggle_command(opts.args, strategies["by_tabpage"]()) end, {})
+```vim
+command! -count=1 TermGitPush  lua require'toggleterm'.exec("git push",    <count>, 12)
+command! -count=1 TermGitPushF lua require'toggleterm'.exec("git push -f", <count>, 12)
 ```
-
-The table `require'toggleterm'.strategies` provides a set of utility
-functions that can be used to extract terminal IDs based on the current
-context, and is useful for implementing custom smart-toggle commands as above.
-See their implementation for inspiration on how to write your own smart-toggle
-functions.
 
 ### Open multiple terminals side-by-side
 

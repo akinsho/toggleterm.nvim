@@ -313,6 +313,14 @@ function M.get_last_open_term()
   return target.id
 end
 
+local function last_smart_toggle()
+  if not ui.find_open_windows() then
+    local last_term = terms.get_last_term()
+    return last_term and last_term.id
+  end
+  return M.get_last_open_term()
+end
+
 -- use the first terminal in the terminal list
 local function smart_toggle()
   if not ui.find_open_windows() then
@@ -350,6 +358,18 @@ end
 
 function M.toggle_smart_clear()
   terms.clear_tab_term()
+end
+
+function M.toggle_smart_last(args)
+  local parsed = commandline.parse(args)
+  vim.validate({
+    size = { parsed.size, "number", true },
+    dir = { parsed.dir, "string", true },
+    direction = { parsed.direction, "string", true },
+  })
+  if parsed.size then parsed.size = tonumber(parsed.size) end
+
+  toggle_nth_term(last_smart_toggle(), args.size, args.dir, args.direction)
 end
 
 function M.toggle_smart_new(args)
@@ -483,6 +503,12 @@ local function setup_commands()
   cmd(
     "ToggleTermSmartNew",
     function(opts) M.toggle_smart_new(opts.args) end,
+    { complete = commandline.toggle_term_complete, nargs = "*" }
+  )
+
+  cmd(
+    "ToggleTermSmartLast",
+    function(opts) M.toggle_smart_last(opts.args) end,
     { complete = commandline.toggle_term_complete, nargs = "*" }
   )
 
