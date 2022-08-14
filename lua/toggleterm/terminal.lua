@@ -221,9 +221,8 @@ end
 ---Associate the current tab with this terminal
 function Terminal:__set_tab_to_term()
   if self.hidden then return end
-  local tab = vim.api.nvim_get_current_tabpage()
+  local tab = api.nvim_get_current_tabpage()
   if not tabs_to_terms[tab] then tabs_to_terms[tab] = self end
-  return self
 end
 
 ---@private
@@ -355,7 +354,7 @@ function Terminal:__stdout()
   if self.auto_scroll or self.on_stdout then
     return function(...)
       if self.auto_scroll and api.nvim_buf_is_valid(self.bufnr) then
-        vim.api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom)
+        api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom)
       end
       if self.on_stdout then self.on_stdout(self, ...) end
     end
@@ -372,7 +371,7 @@ function Terminal:__make_output_handler(handler)
   if self.auto_scroll or handler then
     return function(...)
       if self.auto_scroll and api.nvim_buf_is_valid(self.bufnr) then
-        vim.api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom)
+        api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom)
       end
       if handler then handler(self, ...) end
     end
@@ -528,11 +527,11 @@ function M.get_all(include_hidden)
 end
 
 function M.clear_tab_term()
-  tabs_to_terms[vim.api.nvim_get_current_tabpage()] = nil
+  tabs_to_terms[api.nvim_get_current_tabpage()] = nil
 end
 
 function M.get_tab_term()
-  return tabs_to_terms[vim.api.nvim_get_current_tabpage()]
+  return tabs_to_terms[api.nvim_get_current_tabpage()]
 end
 
 function M.get_last_term()
