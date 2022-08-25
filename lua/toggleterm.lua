@@ -255,7 +255,7 @@ end
 --- @param direction string?
 function M.toggle(count, size, dir, direction)
   vim.validate({ count = { count, "number", true }, size = { size, "number", true } })
-  -- TODO this should toggle the specified term if any count is passed in
+  -- TODO: this should toggle the specified term if any count is passed in
   if count >= 1 then
     toggle_nth_term(count, size, dir, direction)
   else

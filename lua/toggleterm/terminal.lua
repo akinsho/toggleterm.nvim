@@ -278,6 +278,11 @@ local function with_cr(...)
   return table.concat(result, "")
 end
 
+function Terminal:scroll_bottom()
+  if api.nvim_buf_is_loaded(self.bufnr) and api.nvim_buf_is_valid(self.bufnr) then return end
+  if ui.term_has_open_win(self) then api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom) end
+end
+
 ---Send a command to a running terminal
 ---@param cmd string|string[]
 ---@param go_back boolean? whether or not to return to original window
@@ -285,7 +290,7 @@ function Terminal:send(cmd, go_back)
   cmd = type(cmd) == "table" and with_cr(unpack(cmd)) or with_cr(cmd)
   fn.chansend(self.job_id, cmd)
   if go_back then
-    ui.scroll_to_bottom()
+    self:scroll_bottom()
     ui.goto_previous()
     ui.stopinsert()
   end
@@ -322,19 +327,6 @@ local function __handle_exit(term)
 end
 
 ---@private
----Pass self as first parameter to callback
-function Terminal:__stdout()
-  if self.auto_scroll or self.on_stdout then
-    return function(...)
-      if self.auto_scroll and api.nvim_buf_is_valid(self.bufnr) then
-        vim.api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom)
-      end
-      if self.on_stdout then self.on_stdout(self, ...) end
-    end
-  end
-end
-
----@private
 ---Prepare callback for terminal output handling
 ---If `auto_scroll` is active, will create a handler that scrolls on terminal output
 ---If `handler` is present, will call it passing `self` as the first parameter
@@ -343,9 +335,7 @@ end
 function Terminal:__make_output_handler(handler)
   if self.auto_scroll or handler then
     return function(...)
-      if self.auto_scroll and api.nvim_buf_is_valid(self.bufnr) then
-        vim.api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom)
-      end
+      if self.auto_scroll then self:scroll_bottom() end
       if handler then handler(self, ...) end
     end
   end
