@@ -181,16 +181,16 @@ function Terminal:new(term)
   self.__index = self
   term.direction = term.direction or conf.direction
   term.id = id or next_id()
-  term.hidden = term.hidden or false
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
-  term.env = term.env or conf.env
   term.clear_env = term.clear_env
-  term.auto_scroll = term.auto_scroll or conf.auto_scroll
-  term.on_open = term.on_open or conf.on_open
-  term.on_close = term.on_close or conf.on_close
-  term.on_stdout = term.on_stdout or conf.on_stdout
-  term.on_stderr = term.on_stderr or conf.on_stderr
-  term.on_exit = term.on_exit or conf.on_exit
+  term.auto_scroll = vim.F.if_nil(term.auto_scroll, conf.auto_scroll)
+  term.env = vim.F.if_nil(term.env, conf.env)
+  term.hidden = vim.F.if_nil(term.hidden, false)
+  term.on_open = vim.F.if_nil(term.on_open, conf.on_open)
+  term.on_close = vim.F.if_nil(term.on_close, conf.on_close)
+  term.on_stdout = vim.F.if_nil(term.on_stdout, conf.on_stdout)
+  term.on_stderr = vim.F.if_nil(term.on_stderr, conf.on_stderr)
+  term.on_exit = vim.F.if_nil(term.on_exit, conf.on_exit)
   term.__state = { mode = "?" }
   if term.close_on_exit == nil then term.close_on_exit = conf.close_on_exit end
   -- Add the newly created terminal to the list of all terminals
