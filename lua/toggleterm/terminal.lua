@@ -290,7 +290,7 @@ function Terminal:send(cmd, go_back)
   cmd = type(cmd) == "table" and with_cr(unpack(cmd)) or with_cr(cmd)
   fn.chansend(self.job_id, cmd)
   self:scroll_bottom()
-  if not go_back then
+  if go_back then
     ui.goto_previous()
     ui.stopinsert()
   end
