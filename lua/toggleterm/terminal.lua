@@ -283,6 +283,12 @@ function Terminal:scroll_bottom()
   if ui.term_has_open_win(self) then api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom) end
 end
 
+function Terminal:is_focused() return self.window == api.nvim_get_current_win() end
+
+function Terminal:focus()
+  if ui.term_has_open_win then api.nvim_set_current_win(self.window) end
+end
+
 ---Send a command to a running terminal
 ---@param cmd string|string[]
 ---@param go_back boolean? whether or not to return to original window
@@ -290,9 +296,11 @@ function Terminal:send(cmd, go_back)
   cmd = type(cmd) == "table" and with_cr(unpack(cmd)) or with_cr(cmd)
   fn.chansend(self.job_id, cmd)
   self:scroll_bottom()
-  if not go_back then
+  if go_back and self:is_focused() then
     ui.goto_previous()
     ui.stopinsert()
+  elseif not go_back and not self:is_focused() then
+    self:focus()
   end
 end
 
