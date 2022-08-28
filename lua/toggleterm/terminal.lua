@@ -23,9 +23,9 @@ local mode = {
 local AUGROUP = api.nvim_create_augroup("ToggleTermBuffer", { clear = true })
 
 local is_windows = fn.has("win32") == 1
-local function is_cmd(shell) return string.find(shell, "cmd") end
+local function is_cmd(shell) return shell:find("cmd") end
 
-local function is_pwsh(shell) return string.find(shell, "pwsh") or string.find(shell, "powershell") end
+local function is_pwsh(shell) return shell:find("pwsh") or shell:find("powershell") end
 
 local function get_command_sep() return is_windows and is_cmd(vim.o.shell) and "&" or ";" end
 
