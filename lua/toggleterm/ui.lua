@@ -53,25 +53,26 @@ function M.get_size(size, direction)
 end
 
 --- Add terminal buffer specific options
---- @param win number
---- @param buf number
+--- @param window number
+--- @param buffer number
 --- @param term Terminal
-function M.set_options(win, buf, term)
+function M.set_options(window, buffer, term)
+  local win, buf = vim.wo[window], vim.bo[buffer]
+
   if term:is_split() then
     if term.direction == "horizontal" then
-      vim.wo[win].winfixheight = true
+      win.winfixheight = true
     else
-      vim.wo[win].winfixwidth = true
+      win.winfixwidth = true
     end
   end
-  vim.bo[buf].buflisted = false
-  vim.bo[buf].filetype = constants.term_ft
 
-  if require("toggleterm.config").get("hide_numbers") then
-    vim.wo[win].number = false
-    vim.wo[win].relativenumber = false
+  buf.filetype, buf.buflisted = constants.term_ft, false
+
+  if config.hide_numbers then
+    win.number, win.relativenumber = false, false
   end
-  api.nvim_buf_set_var(buf, "toggle_number", term.id)
+  vim.b[buffer].toggle_number = term.id
 end
 
 local function hl(name) return "%#" .. name .. "#" end
@@ -201,10 +202,8 @@ local function compare_ft(buf) return vim.bo[buf].filetype == constants.term_ft 
 --- @return boolean, number[]
 function M.find_open_windows(comparator)
   comparator = comparator or compare_ft
-  local wins = api.nvim_list_wins()
-  local is_open = false
-  local term_wins = {}
-  for _, win in pairs(wins) do
+  local term_wins, is_open = {}, false
+  for _, win in pairs(api.nvim_list_wins()) do
     if comparator(api.nvim_win_get_buf(win)) then
       is_open = true
       table.insert(term_wins, win)
@@ -293,13 +292,12 @@ end
 function M.open_split(size, term)
   local has_open, win_ids = M.find_open_windows()
   local commands = split_commands[term.direction]
-  local persist_size = require("toggleterm.config").get("persist_size")
 
   if has_open then
     -- we need to be in the terminal window most recently opened
     -- in order to split it
     local split_win = win_ids[#win_ids]
-    if persist_size then M.save_window_size(term.direction, split_win) end
+    if config.persist_size then M.save_window_size(term.direction, split_win) end
     api.nvim_set_current_win(split_win)
     vim.cmd(commands.existing)
   else
