@@ -286,7 +286,7 @@ end
 function Terminal:is_focused() return self.window == api.nvim_get_current_win() end
 
 function Terminal:focus()
-  if ui.term_has_open_win then api.nvim_set_current_win(self.window) end
+  if ui.term_has_open_win(self) then api.nvim_set_current_win(self.window) end
 end
 
 ---Send a command to a running terminal
