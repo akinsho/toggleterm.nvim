@@ -358,7 +358,7 @@ function Terminal:__spawn()
     cmd,
     command_sep,
     comment_sep,
-    constants.term_ft,
+    constants.FILETYPE,
     comment_sep,
     self.id,
   })
@@ -380,8 +380,36 @@ function Terminal:__resurrect()
   self:__add()
   if self:is_split() then ui.resize_split(self) end
   -- set the window options including fixing height or width once the window is resized
-  ui.set_options(self.window, self.bufnr, self)
+  self:__set_options()
   ui.hl_term(self)
+end
+
+---@private
+function Terminal:__set_ft_options()
+  local buf = vim.bo[self.bufnr]
+  buf.filetype = constants.FILETYPE
+  buf.buflisted = false
+end
+
+---@private
+function Terminal:__set_win_options()
+  local win = vim.wo[self.window]
+  if self:is_split() then
+    local field = self.direction == "vertical" and "winfixwidth" or "winfixheight"
+    win[field] = true
+  end
+
+  if config.hide_numbers then
+    win.number = false
+    win.relativenumber = false
+  end
+end
+
+---@private
+function Terminal:__set_options()
+  self:__set_ft_options()
+  self:__set_win_options()
+  vim.b[self.bufnr].toggle_number = self.id
 end
 
 ---Open a terminal in a type of window i.e. a split,full window or tab

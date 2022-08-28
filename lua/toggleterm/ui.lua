@@ -52,29 +52,6 @@ function M.get_size(size, direction)
   return valid_size and size or persistent[direction] or config.size
 end
 
---- Add terminal buffer specific options
---- @param window number
---- @param buffer number
---- @param term Terminal
-function M.set_options(window, buffer, term)
-  local win, buf = vim.wo[window], vim.bo[buffer]
-
-  if term:is_split() then
-    if term.direction == "horizontal" then
-      win.winfixheight = true
-    else
-      win.winfixwidth = true
-    end
-  end
-
-  buf.filetype, buf.buflisted = constants.term_ft, false
-
-  if config.hide_numbers then
-    win.number, win.relativenumber = false, false
-  end
-  vim.b[buffer].toggle_number = term.id
-end
-
 local function hl(name) return "%#" .. name .. "#" end
 
 local hl_end = "%*"
@@ -156,13 +133,12 @@ local function create_term_buf_if_needed(term)
   local valid_buf = term.bufnr and api.nvim_buf_is_valid(term.bufnr)
   local bufnr = valid_buf and term.bufnr or api.nvim_create_buf(false, false)
 
-  M.set_options(window, bufnr, term)
-  -- If the buffer didn't previously exist then assign it the window
-  if not valid_buf then
-    api.nvim_set_current_buf(bufnr)
-    api.nvim_win_set_buf(window, bufnr)
-  end
   term.window, term.bufnr = window, bufnr
+  term:__set_options()
+  if valid_buf then return end
+  -- If the buffer didn't previously exist then assign it the window
+  api.nvim_set_current_buf(bufnr)
+  api.nvim_win_set_buf(window, bufnr)
 end
 
 function M.create_buf() return api.nvim_create_buf(false, false) end
@@ -191,7 +167,11 @@ function M.goto_previous() vim.cmd("wincmd p") end
 
 function M.stopinsert() vim.cmd("stopinsert!") end
 
-local function compare_ft(buf) return vim.bo[buf].filetype == constants.term_ft end
+---@param buf integer
+---@return boolean
+local function default_compare(buf)
+  return vim.bo[buf].filetype == constants.FILETYPE or vim.b[buf].toggle_number ~= nil
+end
 
 --- Find the first open terminal window
 --- by iterating all windows and matching the
@@ -201,7 +181,7 @@ local function compare_ft(buf) return vim.bo[buf].filetype == constants.term_ft 
 --- @param comparator function?
 --- @return boolean, number[]
 function M.find_open_windows(comparator)
-  comparator = comparator or compare_ft
+  comparator = comparator or default_compare
   local term_wins, is_open = {}, false
   for _, win in pairs(api.nvim_list_wins()) do
     if comparator(api.nvim_win_get_buf(win)) then
@@ -352,7 +332,7 @@ function M.open_float(term)
   term.window, term.bufnr = win, buf
 
   if opts.winblend then vim.wo[win].winblend = opts.winblend end
-  M.set_options(term.window, term.bufnr, term)
+  term:__set_options()
 end
 
 ---Updates the floating terminal size

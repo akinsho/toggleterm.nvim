@@ -15,7 +15,6 @@ local commandline = lazy.require("toggleterm.commandline")
 
 local terms = require("toggleterm.terminal")
 
-local term_ft = constants.term_ft
 local AUGROUP = "ToggleTermCommands"
 -----------------------------------------------------------
 -- Export
@@ -85,7 +84,7 @@ end
 ---@return boolean
 local function close_last_window(term)
   local only_one_window = fn.winnr("$") == 1
-  if only_one_window and vim.bo[term.bufnr].filetype == term_ft then
+  if only_one_window and vim.bo[term.bufnr].filetype == constants.FILETYPE then
     if term:is_split() then vim.cmd("keepalt bnext") end
     return true
   end
@@ -95,6 +94,10 @@ end
 local function handle_term_enter()
   local _, term = terms.identify()
   if term then
+    --- FIXME: we have to reset the filetype here because it is reset by other plugins
+    --- i.e. telescope.nvim
+    if vim.bo[term.bufnr] ~= constants.FILETYPE then term:__set_ft_options() end
+
     local closed = close_last_window(term)
     if closed then return end
     if config.persist_mode then
