@@ -343,7 +343,7 @@ local function get_subject_terminal(callback)
   if #items == 0 then return utils.notify("No toggleterms are open yet") end
 
   vim.ui.select(items, {
-    prompt = "Please select a terminal to name",
+    prompt = "Please select a terminal to name: ",
     format_item = function(term) return term.id .. ": " .. term:_display_name() end,
   }, function(term)
     if not term then return end
