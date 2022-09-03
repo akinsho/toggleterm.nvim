@@ -85,8 +85,10 @@ end
 local function close_last_window(term)
   local only_one_window = fn.winnr("$") == 1
   if only_one_window and vim.bo[term.bufnr].filetype == constants.FILETYPE then
-    if term:is_split() then vim.cmd("keepalt bnext") end
-    return true
+    if term:is_split() then
+      vim.cmd("keepalt bnext")
+      return true
+    end
   end
   return false
 end
