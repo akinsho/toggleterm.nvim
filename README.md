@@ -69,7 +69,7 @@ This plugin only works in _Neovim 0.7_ or newer.
 Using packer in lua
 
 ```lua
-use {"akinsho/toggleterm.nvim", tag = 'v2.*', config = function()
+use {"akinsho/toggleterm.nvim", tag = '*', config = function()
   require("toggleterm").setup()
 end}
 ```
@@ -77,7 +77,7 @@ end}
 Using vim-plug in vimscript
 
 ```vim
-Plug 'akinsho/toggleterm.nvim', {'tag' : 'v2.*'}
+Plug 'akinsho/toggleterm.nvim', {'tag' : '*'}
 ```
 
 You can/should specify a tag for the current major version of the plugin, to avoid breaking changes as this plugin evolves.
@@ -85,7 +85,7 @@ To use a version of this plugin compatible with nvim versions less than 0.7 plea
 
 ## Notices
 
-- **28/07/1990** - If using `persist_mode` terminal mappings should be changed to use `wincmd` instead otherwise persist mode will not work correctly. See [here](#terminal-window-mappings) for details.
+- **28/07/1990** — If using `persist_mode` terminal mappings should be changed to use `wincmd` instead otherwise persist mode will not work correctly. See [here](#terminal-window-mappings) for details.
 
 ## Why?
 
@@ -94,7 +94,7 @@ set a process going and leave it to continue to run in the background. I don't n
 I just need to be able to refer back to it at intervals. I also sometimes want to create a new terminal and run a few commands.
 
 Sometimes I want these side by side, and I _really_ want these terminals to be easy to access.
-I also want my terminal to look different from non-terminal buffers so I use `winhighlight` to darken them based on the `Normal`
+I also want my terminal to look different from non-terminal buffers, so I use `winhighlight` to darken them based on the `Normal`
 background colour.
 
 This is the exact use case this was designed for. If that's your use case this might work for you.
@@ -113,7 +113,7 @@ I'm also going to be pretty conservative about what I add.
 
 This plugin must be explicitly enabled by using `require("toggleterm").setup{}`
 
-Setting the `open_mapping` key to use for toggling the terminal(s) will setup mappings for _normal_ mode
+Setting the `open_mapping` key to use for toggling the terminal(s) will set up mappings for _normal_ mode
 If you prefix the mapping with a number that particular terminal will be opened.
 
 If you set the `insert_mappings` key to true, the mapping will also take effect in insert mode; similarly setting `terminal_mappings` to will have the mappings take effect in the opened terminal.
@@ -136,7 +136,7 @@ inoremap <silent><c-t> <Esc><Cmd>exe v:count1 . "ToggleTerm"<CR>
 
 **NOTE**: Please ensure you have set `hidden` in your neovim config, otherwise the terminals will be discarded when closed.
 
-**WARNING**: Please do not copy and paste this configuration! It is here to show what options are available. It is not written be used as is.
+**WARNING**: Please do not copy and paste this configuration! It is here to show what options are available. It is not written to be used as is.
 
 ```lua
 require("toggleterm").setup{
@@ -180,6 +180,7 @@ require("toggleterm").setup{
   direction = 'vertical' | 'horizontal' | 'tab' | 'float',
   close_on_exit = true, -- close the terminal window when the process exits
   shell = vim.o.shell, -- change the default shell
+  auto_scroll = true, -- automatically scroll to the bottom on terminal output
   -- This field is only relevant if direction is set to 'float'
   float_opts = {
     -- The border key is *almost* the same as 'nvim_open_win'
@@ -194,7 +195,7 @@ require("toggleterm").setup{
   },
   winbar = {
     enabled = false,
-    name_formatter(term) --  term: Terminal
+    name_formatter = function(term) --  term: Terminal
       return term.name
     end
   },
@@ -218,24 +219,24 @@ If the terminal has already been opened at a particular directory it will remain
 
 The directory can also be specified as `git_dir` which toggleterm will then
 use to try and derive the git repo directory.
-_NOTE_: This currently will not work for `git-worktrees` or other more complex setups.
+_NOTE_: This will not work for `git-worktrees` or other more complex setups.
 
-If `size` is specified and the command opens a split (horizontal/vertical) terminal,
+If `size` is specified, and the command opens a split (horizontal/vertical) terminal,
 the height/width of all terminals in the same direction will be changed to `size`.
 
-If `direction` is specified and the command opens a terminal,
+If `direction` is specified, and the command opens a terminal,
 the terminal will be changed to the specified direction.
 
 `size` and `direction` are ignored if the command closes a terminal.
 
 #### Caveats
 
-- Having multiple terminals with different directions open at the same time is currently unsupported.
+- Having multiple terminals with different directions open at the same time is unsupported.
 
 ### `ToggleTermToggleAll`
 
 This command allows you to open all the previously toggled terminal in one go
-or close all the currently open terminals at once.
+or close all the open terminals at once.
 
 ### `TermExec`
 
@@ -252,7 +253,7 @@ These special keywords can be escaped using the `\` character, if you want to pr
 
 The `size` and `direction` arguments are like the `size` and `direction` arguments of `ToggleTerm`.
 
-By default focus is returned to the original window after executing the command
+By default, focus is returned to the original window after executing the command
 (except for floating terminals). Use argument `go_back=0` to disable this behaviour.
 
 You can send commands to a terminal without opening its window by using the `open=0` argument.
@@ -263,11 +264,11 @@ see `:h expand()` for more details
 
 You can "send lines" to the toggled terminals with the following commands:
 
-- `:ToggleTermSendCurrentLine <T_ID>`: sends the whole line where you are currently standing with your cursor
-- `:ToggleTermSendVisualLines <T_ID>`: sends all of the (whole) lines in your visual selection
+- `:ToggleTermSendCurrentLine <T_ID>`: sends the whole line where you are standing with your cursor
+- `:ToggleTermSendVisualLines <T_ID>`: sends all the (whole) lines in your visual selection
 - `:ToggleTermSendVisualSelection <T_ID>`: sends only the visually selected text (this can be a block of text or a selection in a single line)
 
-(`<T_ID` is an optional terminal ID parameter which defines where should we send the lines.
+(`<T_ID` is an optional terminal ID parameter, which defines where should we send the lines.
 If the parameter is not provided, then the default is the `first terminal`)
 
 <!-- panvimdoc-ignore-start -->
@@ -284,12 +285,12 @@ Example:
 
 ### ToggleTermSetName
 
-This function allows setting a display name for a terminal. This name is primarily used inside of the winbar, and can be a more descriptive way
-to remember which terminal is for what.
+This function allows setting a display name for a terminal. This name is primarily used inside the winbar, and can be a more descriptive way
+to remember, which terminal is for what.
 
-You can map this to a key and call it with a count which will then prompt you a name for the terminal with the matching ID.
+You can map this to a key and call it with a count, which will then prompt you a name for the terminal with the matching ID.
 Alternatively you can call it with just the name e.g. `:ToggleTermSetName work<CR>` this will the prompt you for which terminal it should apply to.
-Lastly you can call it without any arguments and it will prompt you for which terminal it should apply to then prompt you for the name to use.
+Lastly you can call it without any arguments, and it will prompt you for which terminal it should apply to then prompt you for the name to use.
 
 ### Set terminal shading
 
@@ -302,7 +303,7 @@ require'toggleterm'.setup {
 }
 ```
 
-alternatively you can set _which_ filetypes should be shaded by setting
+alternatively you can set, _which_ filetypes should be shaded by setting
 
 ```lua
 -- fzf is just an example
@@ -368,6 +369,7 @@ Terminal:new {
   clear_env = bool -- use only environmental variables from `env`, passed to jobstart()
   on_open = fun(t: Terminal) -- function to run when the terminal opens
   on_close = fun(t: Terminal) -- function to run when the terminal closes
+  auto_scroll = boolean -- automatically scroll to the bottom on terminal output
   -- callbacks for processing the output
   on_stdout = fun(t: Terminal, job: number, data: string[], name: string) -- callback for processing output on stdout
   on_stderr = fun(t: Terminal, job: number, data: string[], name: string) -- callback for processing output on stderr
@@ -388,14 +390,14 @@ end
 vim.api.nvim_set_keymap("n", "<leader>g", "<cmd>lua _lazygit_toggle()<CR>", {noremap = true, silent = true})
 ```
 
-This will create a new terminal but the specified command is not being run immediately.
+This will create a new terminal, but the specified command is not being run immediately.
 The command will run once the terminal is opened. Alternatively `term:spawn()` can be used
 to start the command in a background buffer without opening a terminal window yet. If the
 `hidden` key is set to true, this terminal will not be toggled by normal toggleterm commands
 such as `:ToggleTerm` or the open mapping. It will only open and close by using the returned
 terminal object. A mapping for toggling the terminal can be set as in the example above.
 
-Alternatively the terminal can be specified with a count which is the number that can be used
+Alternatively the terminal can be specified with a count, which is the number that can be used
 to trigger this specific terminal. This can then be triggered using the current count e.g.
 `:5ToggleTerm<CR>`
 
@@ -436,7 +438,7 @@ can change in the future.
 
 ### Statusline
 
-In order to tell each terminal apart you can use the terminal buffer variable `b:toggle_number`
+To tell each terminal apart you can use the terminal buffer variable `b:toggle_number`
 in your statusline
 
 ```vim

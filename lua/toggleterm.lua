@@ -1,6 +1,5 @@
 local api = vim.api
 local fn = vim.fn
-local opt = vim.opt
 
 local lazy = require("toggleterm.lazy")
 ---@module "toggleterm.utils"
@@ -16,7 +15,6 @@ local commandline = lazy.require("toggleterm.commandline")
 
 local terms = require("toggleterm.terminal")
 
-local term_ft = constants.term_ft
 local AUGROUP = "ToggleTermCommands"
 -----------------------------------------------------------
 -- Export
@@ -39,15 +37,9 @@ local function setup_global_mappings()
   local mapping = config.open_mapping
   -- v:count defaults the count to 0 but if a count is passed in uses that instead
   if mapping then
-    api.nvim_set_keymap("n", mapping, '<Cmd>execute v:count . "ToggleTerm"<CR>', {
-      silent = true,
-      noremap = true,
-    })
+    vim.keymap.set("n", mapping, '<Cmd>execute v:count . "ToggleTerm"<CR>', { silent = true })
     if config.insert_mappings then
-      api.nvim_set_keymap("i", mapping, "<Esc><Cmd>ToggleTerm<CR>", {
-        silent = true,
-        noremap = true,
-      })
+      vim.keymap.set("i", mapping, "<Esc><Cmd>ToggleTerm<CR>", { silent = true })
     end
   end
 end
@@ -72,10 +64,7 @@ local function smart_toggle(_, size, dir, direction)
         break
       end
     end
-    if not target then
-      utils.notify("Couldn't find a terminal to close", "error")
-      return
-    end
+    if not target then return utils.notify("Couldn't find a terminal to close", "error") end
     target:close()
   end
 end
@@ -95,9 +84,11 @@ end
 ---@return boolean
 local function close_last_window(term)
   local only_one_window = fn.winnr("$") == 1
-  if only_one_window and vim.bo[term.bufnr].filetype == term_ft then
-    if term:is_split() then vim.cmd("keepalt bnext") end
-    return true
+  if only_one_window and vim.bo[term.bufnr].filetype == constants.FILETYPE then
+    if term:is_split() then
+      vim.cmd("keepalt bnext")
+      return true
+    end
   end
   return false
 end
@@ -105,6 +96,10 @@ end
 local function handle_term_enter()
   local _, term = terms.identify()
   if term then
+    --- FIXME: we have to reset the filetype here because it is reset by other plugins
+    --- i.e. telescope.nvim
+    if vim.bo[term.bufnr] ~= constants.FILETYPE then term:__set_ft_options() end
+
     local closed = close_last_window(term)
     if closed then return end
     if config.persist_mode then
@@ -142,9 +137,9 @@ end
 function M.exec_command(args, count)
   vim.validate({ args = { args, "string" } })
   if not args:match("cmd") then
-    return utils.echomsg(
+    return utils.notify(
       "TermExec requires a cmd specified using the syntax cmd='ls -l' e.g. TermExec cmd='ls -l'",
-      "ErrorMsg"
+      "error"
     )
   end
   local parsed = require("toggleterm.commandline").parse(args)
@@ -195,112 +190,43 @@ end
 --- @param trim_spaces boolean
 --- @param cmd_data table<string, any>
 function M.send_lines_to_terminal(selection_type, trim_spaces, cmd_data)
-  local terminal_id = cmd_data.args
-  -- trim_spaces defines if we should trim the spaces from lines which are sent to the terminal
+  local id = tonumber(cmd_data.args) or 1
   trim_spaces = trim_spaces == nil or trim_spaces
-
-  -- If no terminal id provided fall back to the default
-  terminal_id = tonumber(terminal_id) or 1
 
   vim.validate({
     selection_type = { selection_type, "string", true },
     trim_spaces = { trim_spaces, "boolean", true },
-    terminal_id = { terminal_id, "number", true },
+    terminal_id = { id, "number", true },
   })
 
-  -- Window number from where we are calling the function (needed so we can get back to it automatically)
-  local current_window = api.nvim_get_current_win()
-  -- Line texts - these will be sent over to the terminal one by one
+  local current_window = api.nvim_get_current_win() -- save current window
+
   local lines = {}
   -- Beginning of the selection: line number, column number
-  local b_line, b_col
-
-  local function line_selection(mode)
-    local start_char, end_char
-    if mode == "visual" then
-      start_char = "'<"
-      end_char = "'>"
-    elseif mode == "motion" then
-      start_char = "'["
-      end_char = "']"
-    end
-
-    -- Get the start and the end of the selection
-    local start_line, start_col = unpack(fn.getpos(start_char), 2, 3)
-    local end_line, end_col = unpack(fn.getpos(end_char), 2, 3)
-    local selected_lines = api.nvim_buf_get_lines(0, start_line - 1, end_line, false)
-    return {
-      start_pos = { start_line, start_col },
-      end_pos = { end_line, end_col },
-      selected_lines = selected_lines,
-    }
-  end
-
-  local function get_visual_selection(res)
-    -- Return the text of the precise visual selection
-
-    local vis_mode = fn.visualmode()
-
-    if vis_mode == "V" then
-      -- line-visual
-      -- return lines encompassed by the selection; already in res object
-      return res.selected_lines
-    elseif vis_mode == "v" then
-      -- regular-visual
-      -- return the buffer text encompassed by the selection
-      local start_line, start_col = unpack(res.start_pos)
-      local end_line, end_col = unpack(res.end_pos)
-      -- exclude the last char in text if "selection" is set to "exclusive"
-      if opt.selection._value == "exclusive" then end_col = end_col - 1 end
-      return api.nvim_buf_get_text(0, start_line - 1, start_col - 1, end_line - 1, end_col, {})
-    elseif vis_mode == "\x16" then
-      -- block-visual
-      -- return the lines encompassed by the selection, each truncated by the
-      -- start and end columns
-      local _, start_col = unpack(res.start_pos)
-      local _, end_col = unpack(res.end_pos)
-      -- exclude the last col of the block if "selection" is set to "exclusive"
-      if opt.selection._value == "exclusive" then end_col = end_col - 1 end
-      -- exchange start and end columns for proper substring indexing if needed
-      -- e.g. instead of str:sub(10, 5), do str:sub(5, 10)
-      if start_col > end_col then
-        start_col, end_col = end_col, start_col
-      end
-      -- iterate over lines, truncating each one
-      local block_lines = {}
-      for i, v in ipairs(res.selected_lines) do
-        block_lines[i] = v:sub(start_col, end_col)
-      end
-      return block_lines
-    end
-  end
-
+  local start_line, start_col
   if selection_type == "single_line" then
-    b_line, b_col = unpack(api.nvim_win_get_cursor(0))
-    table.insert(lines, fn.getline(b_line))
+    start_line, start_col = unpack(api.nvim_win_get_cursor(0))
+    table.insert(lines, fn.getline(start_line))
   elseif selection_type == "visual_lines" then
-    local res = line_selection("visual")
-    b_line, b_col = unpack(res.start_pos)
+    local res = utils.get_line_selection("visual")
+    start_line, start_col = unpack(res.start_pos)
     lines = res.selected_lines
   elseif selection_type == "visual_selection" then
-    local res = line_selection("visual")
-    b_line, b_col = unpack(res.start_pos)
-    lines = get_visual_selection(res)
+    local res = utils.get_line_selection("visual")
+    start_line, start_col = unpack(res.start_pos)
+    lines = utils.get_visual_selection(res)
   end
 
-  -- If no lines are fetched we don't need to do anything
-  if #lines == 0 or lines == nil then return end
+  if not lines or not next(lines) then return end
 
-  -- Send each line to the terminal after some preprocessing if required
-  for _, v in ipairs(lines) do
-    -- Trim whitespace from the strings
-    v = trim_spaces and v:gsub("^%s+", ""):gsub("%s+$", "") or v
-    M.exec(v, terminal_id)
+  for _, line in ipairs(lines) do
+    local l = trim_spaces and line:gsub("^%s+", ""):gsub("%s+$", "") or line
+    M.exec(l, id)
   end
 
-  -- Jump back with the cursor where we were at the begiining of the selection
+  -- Jump back with the cursor where we were at the beginning of the selection
   api.nvim_set_current_win(current_window)
-  api.nvim_win_set_cursor(current_window, { b_line, b_col })
+  api.nvim_win_set_cursor(current_window, { start_line, start_col })
 end
 
 function M.toggle_command(args, count)
@@ -334,7 +260,7 @@ end
 --- @param direction string?
 function M.toggle(count, size, dir, direction)
   vim.validate({ count = { count, "number", true }, size = { size, "number", true } })
-  -- TODO this should toggle the specified term if any count is passed in
+  -- TODO: this should toggle the specified term if any count is passed in
   if count >= 1 then
     toggle_nth_term(count, size, dir, direction)
   else
@@ -416,10 +342,10 @@ end
 ---@param callback fun(t: Terminal?)
 local function get_subject_terminal(callback)
   local items = terms.get_all(true)
-  if #items == 0 then return vim.notify("No toggleterms are open yet", "info") end
+  if #items == 0 then return utils.notify("No toggleterms are open yet") end
 
   vim.ui.select(items, {
-    prompt = "Please select a terminal to name",
+    prompt = "Please select a terminal to name: ",
     format_item = function(term) return term.id .. ": " .. term:_display_name() end,
   }, function(term)
     if not term then return end
