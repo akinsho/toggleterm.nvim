@@ -474,3 +474,9 @@ Explain:
 
 - `2`: this is the terminal's number (or ID), your first terminal is `1` (e.g. your 3rd terminal will be `3<C-\>`, so on).
 - <kbd>C-\\</kbd>: this is the combined key mapping to the command `:ToggleTerm`.
+
+### FAQ
+
+#### How do I get this plugin to work with Powershell?
+
+Please check out the [Wiki section on this topic](https://github.com/akinsho/toggleterm.nvim/wiki/Tips-and-Tricks#using-toggleterm-with-powershell).
