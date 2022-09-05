@@ -173,9 +173,8 @@ function M.exec(cmd, num, size, dir, direction, go_back, open)
   })
   num = (num and num >= 1) and num or terms.get_toggled_id()
   open = open == nil or open
-  local term, created = terms.get_or_create_term(num, dir, direction)
-  if not term:is_open() then term:open(size, direction, created) end
-  if not created and dir then term:change_dir(dir) end
+  local term = terms.get_or_create_term(num, dir, direction)
+  if not term:is_open() then term:open(size, direction) end
   -- going back from floating window closes it
   if term:is_float() then go_back = false end
   if go_back == nil then go_back = true end

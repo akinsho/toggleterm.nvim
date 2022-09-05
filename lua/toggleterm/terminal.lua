@@ -310,7 +310,9 @@ function Terminal:clear() self:send("clear") end
 ---@param dir string
 function Terminal:change_dir(dir)
   dir = _get_dir(dir)
-  if self.dir ~= dir then self:send({ fmt("cd %s", dir), "clear" }) end
+  if self.dir == dir then return end
+  self:send({ fmt("cd %s", dir), "clear" })
+  self.dir = dir
 end
 
 ---Update the direction of an already opened terminal
@@ -362,9 +364,10 @@ function Terminal:__spawn()
     comment_sep,
     self.id,
   })
+  local dir = _get_dir(self.dir)
   self.job_id = fn.termopen(cmd, {
     detach = 1,
-    cwd = _get_dir(self.dir),
+    cwd = dir,
     on_exit = __handle_exit(self),
     on_stdout = self:__make_output_handler(self.on_stdout),
     on_stderr = self:__make_output_handler(self.on_stderr),
@@ -372,6 +375,7 @@ function Terminal:__spawn()
     clear_env = self.clear_env,
   })
   self.name = cmd
+  self.dir = dir
 end
 
 ---@private
@@ -442,12 +446,11 @@ end
 ---Open a terminal window
 ---@param size number?
 ---@param direction string?
----@param is_new boolean?
-function Terminal:open(size, direction, is_new)
+function Terminal:open(size, direction)
   self.dir = _get_dir(self.dir)
   ui.set_origin_window()
   if direction then self:change_direction(direction) end
-  if not (self.bufnr and api.nvim_buf_is_valid(self.bufnr)) then
+  if not self.bufnr or not api.nvim_buf_is_valid(self.bufnr) then
     local ok, err = pcall(opener, size, self)
     if not ok and err then return utils.notify(err, "error") end
     self:__add()
@@ -458,7 +461,10 @@ function Terminal:open(size, direction, is_new)
     local ok, err = pcall(opener, size, self)
     if not ok and err then return utils.notify(err, "error") end
     ui.switch_buf(self.bufnr)
-    if not is_new then self:change_dir(self.dir) end
+    if config.autochdir then
+      local cwd = fn.getcwd()
+      if self.dir ~= cwd then self:change_dir(cwd) end
+    end
   end
   ui.hl_term(self)
   -- NOTE: it is important that this function is called at this point. i.e. the buffer has been correctly assigned
