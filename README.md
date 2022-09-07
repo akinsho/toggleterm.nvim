@@ -156,6 +156,7 @@ require("toggleterm").setup{
   on_exit = fun(t: Terminal, job: number, exit_code: number, name: string) -- function to run when terminal process exits
   hide_numbers = true, -- hide the number column in toggleterm buffers
   shade_filetypes = {},
+  autochdir = false, -- when neovim changes it current directory the terminal will change it's own when next it's opened
   highlights = {
     -- highlights which map to a highlight group name and a table of it's values
     -- NOTE: this is only a subset of values, any group placed here will be set for the terminal window split
@@ -474,3 +475,9 @@ Explain:
 
 - `2`: this is the terminal's number (or ID), your first terminal is `1` (e.g. your 3rd terminal will be `3<C-\>`, so on).
 - <kbd>C-\\</kbd>: this is the combined key mapping to the command `:ToggleTerm`.
+
+### FAQ
+
+#### How do I get this plugin to work with Powershell?
+
+Please check out the [Wiki section on this topic](https://github.com/akinsho/toggleterm.nvim/wiki/Tips-and-Tricks#using-toggleterm-with-powershell).
