@@ -183,7 +183,8 @@ end
 function M.find_open_windows(comparator)
   comparator = comparator or default_compare
   local term_wins, is_open = {}, false
-  for _, win in pairs(api.nvim_list_wins()) do
+  -- only check the current tab page for open terminals
+  for _, win in pairs(api.nvim_tabpage_list_wins(api.nvim_get_current_tabpage())) do
     if comparator(api.nvim_win_get_buf(win)) then
       is_open = true
       table.insert(term_wins, win)
@@ -377,8 +378,11 @@ function M.find_windows_by_bufnr(bufnr) return fn.win_findbuf(bufnr) end
 ---@return boolean
 function M.term_has_open_win(term)
   if not term.window then return false end
-  local open_wins = api.nvim_tabpage_list_wins(api.nvim_get_current_tabpage())
-  return vim.tbl_contains(open_wins, term.window)
+  local wins = {}
+  for _, tab in ipairs(api.nvim_list_tabpages()) do
+    vim.list_extend(wins, api.nvim_tabpage_list_wins(tab))
+  end
+  return vim.tbl_contains(wins, term.window)
 end
 
 return M
