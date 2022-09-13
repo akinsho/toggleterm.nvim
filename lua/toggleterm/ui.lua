@@ -183,11 +183,12 @@ end
 function M.find_open_windows(comparator)
   comparator = comparator or default_compare
   local term_wins, is_open = {}, false
-  -- only check the current tab page for open terminals
-  for _, win in pairs(api.nvim_tabpage_list_wins(api.nvim_get_current_tabpage())) do
-    if comparator(api.nvim_win_get_buf(win)) then
-      is_open = true
-      table.insert(term_wins, win)
+  for _, tab in ipairs(api.nvim_list_tabpages()) do
+    for _, win in pairs(api.nvim_tabpage_list_wins(tab)) do
+      if comparator(api.nvim_win_get_buf(win)) then
+        is_open = true
+        table.insert(term_wins, win)
+      end
     end
   end
   return is_open, term_wins
@@ -300,11 +301,12 @@ function M.open_tab(term)
   create_term_buf_if_needed(term)
 end
 
-local function close_tab()
+---@param term Terminal
+local function close_tab(term)
   if #vim.api.nvim_list_tabpages() == 1 then
     return utils.notify("You cannot close the last tab! This will exit neovim", "error")
   end
-  vim.cmd("tabclose")
+  api.nvim_win_close(term.window, true)
 end
 
 ---Close terminal window
@@ -348,12 +350,10 @@ end
 function M.close(term)
   if term:is_split() then
     close_split(term)
-  elseif term.direction == "tab" then
-    close_tab()
-  else
-    if term.window and api.nvim_win_is_valid(term.window) then
-      api.nvim_win_close(term.window, true)
-    end
+  elseif term:is_tab() then
+    close_tab(term)
+  elseif term.window and api.nvim_win_is_valid(term.window) then
+    api.nvim_win_close(term.window, true)
   end
 end
 
