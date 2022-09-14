@@ -55,17 +55,12 @@ local function smart_toggle(_, size, dir, direction)
     -- Re-open the first terminal toggled
     terms.get_or_create_term(terms.get_toggled_id(), dir, direction):open(size, direction)
   else
-    local target
     -- count backwards from the end of the list
     for i = #terminals, 1, -1 do
       local term = terminals[i]
-      if term and ui.term_has_open_win(term) then
-        target = term
-        break
-      end
+      if term and ui.term_has_open_win(term) then return term:close() end
     end
-    if not target then return utils.notify("Couldn't find a terminal to close", "error") end
-    target:close()
+    utils.notify("Couldn't find a terminal to close", "error")
   end
 end
 
