@@ -212,6 +212,8 @@ function Terminal:is_split()
     and not ui.is_float(self.window)
 end
 
+function Terminal:is_tab() return self.direction == "tab" and not ui.is_float(self.window) end
+
 function Terminal:resize(size)
   if self:is_split() then ui.resize_split(self, size) end
 end
