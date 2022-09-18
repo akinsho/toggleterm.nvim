@@ -281,7 +281,7 @@ local function with_cr(...)
 end
 
 function Terminal:scroll_bottom()
-  if api.nvim_buf_is_loaded(self.bufnr) and api.nvim_buf_is_valid(self.bufnr) then return end
+  if not api.nvim_buf_is_loaded(self.bufnr) or not api.nvim_buf_is_valid(self.bufnr) then return end
   if ui.term_has_open_win(self) then api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom) end
 end
 
