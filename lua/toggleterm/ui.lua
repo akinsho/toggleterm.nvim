@@ -202,17 +202,29 @@ function M.switch_buf(buf)
   if cur_buf ~= buf then vim.cmd(fmt("keepalt buffer %d", buf)) end
 end
 
-local split_commands = {
-  horizontal = {
-    existing = "rightbelow vsplit",
-    new = "botright split",
-    resize = "resize",
-  },
-  vertical = {
-    existing = "rightbelow split",
-    new = "botright vsplit",
-    resize = "vertical resize",
-  },
+local function split_command(direction, existing)
+  if 'horizontal' == direction then
+    if existing == true then
+      return"rightbelow vsplit"
+    elseif vim.o.splitbelow then
+      return "botright split"
+    else
+      return"topleft split"
+    end
+  elseif 'vertical' == direction then
+    if existing == true then
+      return "rightbelow split"
+    elseif vim.o.splitright == true then
+      return "botright vsplit"
+    else
+      return "topleft vsplit"
+    end
+  end
+end
+
+local resize_command = {
+  horizontal = "resize",
+  vertical = "vertical resize"
 }
 
 ---Guess whether or not the window is a horizontal or vertical split
@@ -273,17 +285,18 @@ end
 --- @param term Terminal
 function M.open_split(size, term)
   local has_open, win_ids = M.find_open_windows()
-  local commands = split_commands[term.direction]
 
   if has_open then
     -- we need to be in the terminal window most recently opened
     -- in order to split it
     local split_win = win_ids[#win_ids]
+    local command = split_command(term.direction, true)
     if config.persist_size then M.save_window_size(term.direction, split_win) end
     api.nvim_set_current_win(split_win)
-    vim.cmd(commands.existing)
+    vim.cmd(command)
   else
-    vim.cmd(commands.new)
+    local command = split_command(term.direction, false)
+    vim.cmd(command)
   end
 
   M.resize_split(term, size)
@@ -363,7 +376,7 @@ end
 function M.resize_split(term, size)
   size = M._resolve_size(M.get_size(size, term.direction), term)
   if config.persist_size and size then M.save_direction_size(term.direction, size) end
-  vim.cmd(split_commands[term.direction].resize .. " " .. size)
+  vim.cmd(resize_command[term.direction] .. " " .. size)
 end
 
 ---Determine if a window is a float
