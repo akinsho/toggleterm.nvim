@@ -194,6 +194,9 @@ require("toggleterm").setup{
     height = <value>,
     winblend = 3,
   },
+  get_ctx = function ()
+    return vim.api.nvim_get_current_tabpage()
+  end,
   winbar = {
     enabled = false,
     name_formatter = function(term) --  term: Terminal
@@ -207,7 +210,7 @@ require("toggleterm").setup{
 
 ### `ToggleTerm`
 
-This is the command the mappings call under the hood. You can use it directly (see [Smart-Toggling](#smart-toggling))
+This is the command the mappings call under the hood. You can use it directly (see [Context-Based Toggling](#context-based-toggling))
 or prefix it with a count to target a specific terminal. This function also takes
 arguments `size`, `dir` and `direction`. e.g.
 
@@ -261,20 +264,25 @@ You can send commands to a terminal without opening its window by using the `ope
 
 see `:h expand()` for more details
 
-### Smart-Toggling
+### Context-Based Toggling
 
-When `:ToggleTerm` is used without a prefixed count, it defaults to "smart-toggling".
+When `:ToggleTerm` is used without a prefixed count, it defaults to "context-based toggling".
 This feature is designed to use your current neovim context to determine which terminal
 to open, thus helping to minimize the number of times you have to explicitly provide a count.
 
-Currently, terminal contexts exist on a per-tab basis. Each tab is "pinned" to
-the first terminal that is opened in it. If you call `:ToggleTerm` from a new tab,
+The configuration allows you to specify a function to extract the context.
+It returns a unique key corresponding to the current context -- for example,
+it can return the current tabpage, current window handle, current directory, etc.
+When a terminal is opened, it is "pinned" to that context, so
+if you call `:ToggleTerm` it will open a terminal corresponding
+to the current context if one already exists.
+If none exist for the current context,
 it defaults to opening, (and thus pinning) the last-opened terminal
-(which can be done explicitly with `:ToggleTermSmartLast`).
-Alternatively, you can call `:ToggleTermSmartNew` within a new tab to associate
-a brand-new terminal with that tab.
-If you want to re-associate a tab with a different terminal,
-you can call `:ToggleTermSmartClear` to clear the entry in the internal mapping
+(which can be done explicitly with `:ToggleTermLast`).
+Alternatively, you can call `:ToggleTermNew` within a new context to pin
+a brand-new terminal to it.
+If you want to re-associate a context with a different terminal,
+you can call `:ToggleTermContextClear` to clear the pin
 and then open the new terminal.
 
 ### Sending lines to the terminal
