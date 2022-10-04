@@ -4,7 +4,8 @@
         "redundant-parameter",
         "return-type-mismatch",
         "assign-type-mismatch",
-        "cast-local-type"
+        "cast-local-type",
+        "missing-parameter"
     ],
     "Lua.workspace.checkThirdParty": false
 }

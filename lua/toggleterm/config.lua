@@ -33,6 +33,7 @@ local function shade(color, factor) return colors.shade_color(color, factor) end
 --- @field float_opts table<string, any>
 --- @field highlights ToggleTermHighlights
 --- @field winbar WinbarOpts
+--- @field autochdir boolean
 
 ---@type ToggleTermConfig
 local config = {
@@ -49,6 +50,7 @@ local config = {
   direction = "horizontal",
   shading_factor = constants.shading_amount,
   shell = vim.o.shell,
+  autochdir = false,
   auto_scroll = true,
   get_ctx = function ()
     return 1

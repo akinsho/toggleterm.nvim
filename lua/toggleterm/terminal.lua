@@ -23,9 +23,9 @@ local mode = {
 local AUGROUP = api.nvim_create_augroup("ToggleTermBuffer", { clear = true })
 
 local is_windows = fn.has("win32") == 1
-local function is_cmd(shell) return string.find(shell, "cmd") end
+local function is_cmd(shell) return shell:find("cmd") end
 
-local function is_pwsh(shell) return string.find(shell, "pwsh") or string.find(shell, "powershell") end
+local function is_pwsh(shell) return shell:find("pwsh") or shell:find("powershell") end
 
 local function get_command_sep() return is_windows and is_cmd(vim.o.shell) and "&" or ";" end
 
@@ -121,13 +121,9 @@ end
 
 --- @param bufnr number
 local function setup_buffer_mappings(bufnr)
-  local conf = config.get()
-  local mapping = conf.open_mapping
-  if mapping and conf.terminal_mappings then
-    api.nvim_buf_set_keymap(bufnr, "t", mapping, "<Cmd>ToggleTerm<CR>", {
-      silent = true,
-      noremap = true,
-    })
+  local mapping = config.open_mapping
+  if mapping and config.terminal_mappings then
+    vim.keymap.set("t", mapping, "<Cmd>ToggleTerm<CR>", { buffer = bufnr, silent = true })
   end
 end
 
@@ -193,16 +189,16 @@ function Terminal:new(term)
   self.__index = self
   term.direction = term.direction or conf.direction
   term.id = id or next_id()
-  term.hidden = term.hidden or false
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
-  term.env = term.env or conf.env
   term.clear_env = term.clear_env
-  term.auto_scroll = term.auto_scroll or conf.auto_scroll
-  term.on_open = term.on_open or conf.on_open
-  term.on_close = term.on_close or conf.on_close
-  term.on_stdout = term.on_stdout or conf.on_stdout
-  term.on_stderr = term.on_stderr or conf.on_stderr
-  term.on_exit = term.on_exit or conf.on_exit
+  term.auto_scroll = vim.F.if_nil(term.auto_scroll, conf.auto_scroll)
+  term.env = vim.F.if_nil(term.env, conf.env)
+  term.hidden = vim.F.if_nil(term.hidden, false)
+  term.on_open = vim.F.if_nil(term.on_open, conf.on_open)
+  term.on_close = vim.F.if_nil(term.on_close, conf.on_close)
+  term.on_stdout = vim.F.if_nil(term.on_stdout, conf.on_stdout)
+  term.on_stderr = vim.F.if_nil(term.on_stderr, conf.on_stderr)
+  term.on_exit = vim.F.if_nil(term.on_exit, conf.on_exit)
   term.__state = { mode = "?" }
   if term.close_on_exit == nil then term.close_on_exit = conf.close_on_exit end
   -- Add the newly created terminal to the list of all terminals
@@ -238,6 +234,8 @@ function Terminal:is_split()
   return (self.direction == "vertical" or self.direction == "horizontal")
     and not ui.is_float(self.window)
 end
+
+function Terminal:is_tab() return self.direction == "tab" and not ui.is_float(self.window) end
 
 function Terminal:resize(size)
   if self:is_split() then ui.resize_split(self, size) end
@@ -305,16 +303,29 @@ local function with_cr(...)
   return table.concat(result, "")
 end
 
+function Terminal:scroll_bottom()
+  if not api.nvim_buf_is_loaded(self.bufnr) or not api.nvim_buf_is_valid(self.bufnr) then return end
+  if ui.term_has_open_win(self) then api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom) end
+end
+
+function Terminal:is_focused() return self.window == api.nvim_get_current_win() end
+
+function Terminal:focus()
+  if ui.term_has_open_win(self) then api.nvim_set_current_win(self.window) end
+end
+
 ---Send a command to a running terminal
 ---@param cmd string|string[]
 ---@param go_back boolean? whether or not to return to original window
 function Terminal:send(cmd, go_back)
   cmd = type(cmd) == "table" and with_cr(unpack(cmd)) or with_cr(cmd)
   fn.chansend(self.job_id, cmd)
-  if go_back then
-    ui.scroll_to_bottom()
+  self:scroll_bottom()
+  if go_back and self:is_focused() then
     ui.goto_previous()
     ui.stopinsert()
+  elseif not go_back and not self:is_focused() then
+    self:focus()
   end
 end
 
@@ -324,7 +335,9 @@ function Terminal:clear() self:send("clear") end
 ---@param dir string
 function Terminal:change_dir(dir)
   dir = _get_dir(dir)
-  if self.dir ~= dir then self:send({ fmt("cd %s", dir), "clear" }) end
+  if self.dir == dir then return end
+  self:send({ fmt("cd %s", dir), "clear" })
+  self.dir = dir
 end
 
 ---Update the direction of an already opened terminal
@@ -349,19 +362,6 @@ local function __handle_exit(term)
 end
 
 ---@private
----Pass self as first parameter to callback
-function Terminal:__stdout()
-  if self.auto_scroll or self.on_stdout then
-    return function(...)
-      if self.auto_scroll and api.nvim_buf_is_valid(self.bufnr) then
-        api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom)
-      end
-      if self.on_stdout then self.on_stdout(self, ...) end
-    end
-  end
-end
-
----@private
 ---Prepare callback for terminal output handling
 ---If `auto_scroll` is active, will create a handler that scrolls on terminal output
 ---If `handler` is present, will call it passing `self` as the first parameter
@@ -370,9 +370,7 @@ end
 function Terminal:__make_output_handler(handler)
   if self.auto_scroll or handler then
     return function(...)
-      if self.auto_scroll and api.nvim_buf_is_valid(self.bufnr) then
-        api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom)
-      end
+      if self.auto_scroll then self:scroll_bottom() end
       if handler then handler(self, ...) end
     end
   end
@@ -387,13 +385,14 @@ function Terminal:__spawn()
     cmd,
     command_sep,
     comment_sep,
-    constants.term_ft,
+    constants.FILETYPE,
     comment_sep,
     self.id,
   })
+  local dir = _get_dir(self.dir)
   self.job_id = fn.termopen(cmd, {
     detach = 1,
-    cwd = _get_dir(self.dir),
+    cwd = dir,
     on_exit = __handle_exit(self),
     on_stdout = self:__make_output_handler(self.on_stdout),
     on_stderr = self:__make_output_handler(self.on_stderr),
@@ -401,6 +400,7 @@ function Terminal:__spawn()
     clear_env = self.clear_env,
   })
   self.name = cmd
+  self.dir = dir
 end
 
 ---@private
@@ -409,8 +409,36 @@ function Terminal:__resurrect()
   self:__add()
   if self:is_split() then ui.resize_split(self) end
   -- set the window options including fixing height or width once the window is resized
-  ui.set_options(self.window, self.bufnr, self)
+  self:__set_options()
   ui.hl_term(self)
+end
+
+---@private
+function Terminal:__set_ft_options()
+  local buf = vim.bo[self.bufnr]
+  buf.filetype = constants.FILETYPE
+  buf.buflisted = false
+end
+
+---@private
+function Terminal:__set_win_options()
+  local win = vim.wo[self.window]
+  if self:is_split() then
+    local field = self.direction == "vertical" and "winfixwidth" or "winfixheight"
+    win[field] = true
+  end
+
+  if config.hide_numbers then
+    win.number = false
+    win.relativenumber = false
+  end
+end
+
+---@private
+function Terminal:__set_options()
+  self:__set_ft_options()
+  self:__set_win_options()
+  vim.b[self.bufnr].toggle_number = self.id
 end
 
 ---Open a terminal in a type of window i.e. a split,full window or tab
@@ -443,12 +471,11 @@ end
 ---Open a terminal window
 ---@param size number?
 ---@param direction string?
----@param is_new boolean?
-function Terminal:open(size, direction, is_new)
+function Terminal:open(size, direction)
   self.dir = _get_dir(self.dir)
   ui.set_origin_window()
   if direction then self:change_direction(direction) end
-  if not (self.bufnr and api.nvim_buf_is_valid(self.bufnr)) then
+  if not self.bufnr or not api.nvim_buf_is_valid(self.bufnr) then
     local ok, err = pcall(opener, size, self)
     if not ok and err then return utils.notify(err, "error") end
     self:__add()
@@ -459,7 +486,10 @@ function Terminal:open(size, direction, is_new)
     local ok, err = pcall(opener, size, self)
     if not ok and err then return utils.notify(err, "error") end
     ui.switch_buf(self.bufnr)
-    if not is_new then self:change_dir(self.dir) end
+    if config.autochdir then
+      local cwd = fn.getcwd()
+      if self.dir ~= cwd then self:change_dir(cwd) end
+    end
   end
   self:__set_last_term()
   self:__set_ctx_to_term()
@@ -503,6 +533,7 @@ end
 function M.get_or_create_term(num, dir, direction)
   local term = M.get(num)
   if term then return term, false end
+  if dir and fn.isdirectory(fn.expand(dir)) == 0 then dir = nil end
   return Terminal:new({ id = num, dir = dir, direction = direction }), true
 end
 

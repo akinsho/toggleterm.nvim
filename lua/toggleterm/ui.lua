@@ -52,28 +52,6 @@ function M.get_size(size, direction)
   return valid_size and size or persistent[direction] or config.size
 end
 
---- Add terminal buffer specific options
---- @param win number
---- @param buf number
---- @param term Terminal
-function M.set_options(win, buf, term)
-  if term:is_split() then
-    if term.direction == "horizontal" then
-      vim.wo[win].winfixheight = true
-    else
-      vim.wo[win].winfixwidth = true
-    end
-  end
-  vim.bo[buf].buflisted = false
-  vim.bo[buf].filetype = constants.term_ft
-
-  if require("toggleterm.config").get("hide_numbers") then
-    vim.wo[win].number = false
-    vim.wo[win].relativenumber = false
-  end
-  api.nvim_buf_set_var(buf, "toggle_number", term.id)
-end
-
 local function hl(name) return "%#" .. name .. "#" end
 
 local hl_end = "%*"
@@ -155,13 +133,12 @@ local function create_term_buf_if_needed(term)
   local valid_buf = term.bufnr and api.nvim_buf_is_valid(term.bufnr)
   local bufnr = valid_buf and term.bufnr or api.nvim_create_buf(false, false)
 
-  M.set_options(window, bufnr, term)
-  -- If the buffer didn't previously exist then assign it the window
-  if not valid_buf then
-    api.nvim_set_current_buf(bufnr)
-    api.nvim_win_set_buf(window, bufnr)
-  end
   term.window, term.bufnr = window, bufnr
+  term:__set_options()
+  if valid_buf then return end
+  -- If the buffer didn't previously exist then assign it the window
+  api.nvim_set_current_buf(bufnr)
+  api.nvim_win_set_buf(window, bufnr)
 end
 
 function M.create_buf() return api.nvim_create_buf(false, false) end
@@ -190,7 +167,11 @@ function M.goto_previous() vim.cmd("wincmd p") end
 
 function M.stopinsert() vim.cmd("stopinsert!") end
 
-local function compare_ft(buf) return vim.bo[buf].filetype == constants.term_ft end
+---@param buf integer
+---@return boolean
+local function default_compare(buf)
+  return vim.bo[buf].filetype == constants.FILETYPE or vim.b[buf].toggle_number ~= nil
+end
 
 --- Find the first open terminal window
 --- by iterating all windows and matching the
@@ -200,14 +181,14 @@ local function compare_ft(buf) return vim.bo[buf].filetype == constants.term_ft 
 --- @param comparator function?
 --- @return boolean, number[]
 function M.find_open_windows(comparator)
-  comparator = comparator or compare_ft
-  local wins = api.nvim_list_wins()
-  local is_open = false
-  local term_wins = {}
-  for _, win in pairs(wins) do
-    if comparator(api.nvim_win_get_buf(win)) then
-      is_open = true
-      table.insert(term_wins, win)
+  comparator = comparator or default_compare
+  local term_wins, is_open = {}, false
+  for _, tab in ipairs(api.nvim_list_tabpages()) do
+    for _, win in pairs(api.nvim_tabpage_list_wins(tab)) do
+      if comparator(api.nvim_win_get_buf(win)) then
+        is_open = true
+        table.insert(term_wins, win)
+      end
     end
   end
   return is_open, term_wins
@@ -293,13 +274,12 @@ end
 function M.open_split(size, term)
   local has_open, win_ids = M.find_open_windows()
   local commands = split_commands[term.direction]
-  local persist_size = require("toggleterm.config").get("persist_size")
 
   if has_open then
     -- we need to be in the terminal window most recently opened
     -- in order to split it
     local split_win = win_ids[#win_ids]
-    if persist_size then M.save_window_size(term.direction, split_win) end
+    if config.persist_size then M.save_window_size(term.direction, split_win) end
     api.nvim_set_current_win(split_win)
     vim.cmd(commands.existing)
   else
@@ -321,11 +301,12 @@ function M.open_tab(term)
   create_term_buf_if_needed(term)
 end
 
-local function close_tab()
+---@param term Terminal
+local function close_tab(term)
   if #vim.api.nvim_list_tabpages() == 1 then
     return utils.notify("You cannot close the last tab! This will exit neovim", "error")
   end
-  vim.cmd("tabclose")
+  api.nvim_win_close(term.window, true)
 end
 
 ---Close terminal window
@@ -354,7 +335,7 @@ function M.open_float(term)
   term.window, term.bufnr = win, buf
 
   if opts.winblend then vim.wo[win].winblend = opts.winblend end
-  M.set_options(term.window, term.bufnr, term)
+  term:__set_options()
 end
 
 ---Updates the floating terminal size
@@ -369,12 +350,10 @@ end
 function M.close(term)
   if term:is_split() then
     close_split(term)
-  elseif term.direction == "tab" then
-    close_tab()
-  else
-    if term.window and api.nvim_win_is_valid(term.window) then
-      api.nvim_win_close(term.window, true)
-    end
+  elseif term:is_tab() then
+    close_tab(term)
+  elseif term.window and api.nvim_win_is_valid(term.window) then
+    api.nvim_win_close(term.window, true)
   end
 end
 
@@ -399,8 +378,11 @@ function M.find_windows_by_bufnr(bufnr) return fn.win_findbuf(bufnr) end
 ---@return boolean
 function M.term_has_open_win(term)
   if not term.window then return false end
-  local open_wins = api.nvim_tabpage_list_wins(api.nvim_get_current_tabpage())
-  return vim.tbl_contains(open_wins, term.window)
+  local wins = {}
+  for _, tab in ipairs(api.nvim_list_tabpages()) do
+    vim.list_extend(wins, api.nvim_tabpage_list_wins(tab))
+  end
+  return vim.tbl_contains(wins, term.window)
 end
 
 return M

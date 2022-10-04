@@ -293,7 +293,7 @@ describe("ToggleTerm tests:", function()
     it("should set the correct filetype", function()
       local test1 = Terminal:new():toggle()
       local ft = vim.bo[test1.bufnr].filetype
-      assert.equals(constants.term_ft, ft)
+      assert.equals(constants.FILETYPE, ft)
     end)
   end)
 
