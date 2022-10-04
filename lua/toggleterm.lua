@@ -52,7 +52,7 @@ local function setup_global_mappings()
   end
 end
 
---- @param num number
+--- @param num number?
 --- @param size number?
 --- @param dir string?
 --- @param direction string?
@@ -313,6 +313,8 @@ function M.get_last_open_term()
   return target.id
 end
 
+-- pick the last opened terminal if none are currently open;
+-- if terminals are open, close them in order, starting from the end
 local function last_smart_toggle()
   if not ui.find_open_windows() then
     local last_term = terms.get_last_term()
@@ -321,11 +323,12 @@ local function last_smart_toggle()
   return M.get_last_open_term()
 end
 
--- use the first terminal in the terminal list
-local function smart_toggle()
+-- pick a terminal based on the current context if none are currently open;
+-- if terminals are open, close them in order, starting from the end
+local function ctx_toggle()
   if not ui.find_open_windows() then
-    local tab_term = terms.get_tab_term()
-    local id = tab_term and tab_term.id
+    local ctx_term = terms.get_ctx_term()
+    local id = ctx_term and ctx_term.id
     if not id then
       local last_term = terms.get_last_term()
       return last_term and last_term.id
@@ -352,15 +355,15 @@ function M.toggle(count, size, dir, direction)
   if count >= 1 then
     toggle_nth_term(count, size, dir, direction)
   else
-    toggle_nth_term(smart_toggle(), size, dir, direction)
+    toggle_nth_term(ctx_toggle(), size, dir, direction)
   end
 end
 
-function M.toggle_smart_clear()
-  terms.clear_tab_term()
+function M.toggle_ctx_clear()
+  terms.clear_ctx_term()
 end
 
-function M.toggle_smart_last(args)
+function M.toggle_last_command(args)
   local parsed = commandline.parse(args)
   vim.validate({
     size = { parsed.size, "number", true },
@@ -372,7 +375,7 @@ function M.toggle_smart_last(args)
   toggle_nth_term(last_smart_toggle(), args.size, args.dir, args.direction)
 end
 
-function M.toggle_smart_new(args)
+function M.toggle_new_command(args)
   local parsed = commandline.parse(args)
   vim.validate({
     size = { parsed.size, "number", true },
@@ -495,20 +498,20 @@ local function setup_commands()
   )
 
   cmd(
-    "ToggleTermSmartClear",
-    M.toggle_smart_clear,
+    "ToggleTermContextClear",
+    M.toggle_ctx_clear,
     {}
   )
 
   cmd(
-    "ToggleTermSmartNew",
-    function(opts) M.toggle_smart_new(opts.args) end,
+    "ToggleTermNew",
+    function(opts) M.toggle_new_command(opts.args) end,
     { complete = commandline.toggle_term_complete, nargs = "*" }
   )
 
   cmd(
-    "ToggleTermSmartLast",
-    function(opts) M.toggle_smart_last(opts.args) end,
+    "ToggleTermLast",
+    function(opts) M.toggle_last_command(opts.args) end,
     { complete = commandline.toggle_term_complete, nargs = "*" }
   )
 

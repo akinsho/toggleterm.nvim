@@ -44,9 +44,9 @@ end
 ---@type Terminal[]
 local terminals = {}
 
--- Table mapping from tabs to terminals, used with smart-toggling.
+-- Table mapping from context handles to terminals, used with context-based toggling.
 ---@type table<number, Terminal>
-local tabs_to_terms = {}
+local ctxs_to_terms = {}
 
 -- The last terminal opened; used for smart-toggling.
 ---@type Terminal
@@ -218,11 +218,11 @@ function Terminal:__add()
 end
 
 ---@private
----Associate the current tab with this terminal
-function Terminal:__set_tab_to_term()
+---Associate the current ctx with this terminal
+function Terminal:__set_ctx_to_term()
   if self.hidden then return end
-  local tab = api.nvim_get_current_tabpage()
-  if not tabs_to_terms[tab] then tabs_to_terms[tab] = self end
+  local ctx = config.get("get_ctx")()
+  if not ctxs_to_terms[ctx] then ctxs_to_terms[ctx] = self end
 end
 
 ---@private
@@ -462,7 +462,7 @@ function Terminal:open(size, direction, is_new)
     if not is_new then self:change_dir(self.dir) end
   end
   self:__set_last_term()
-  self:__set_tab_to_term()
+  self:__set_ctx_to_term()
   ui.hl_term(self)
   -- NOTE: it is important that this function is called at this point. i.e. the buffer has been correctly assigned
   if self.on_open then self:on_open() end
@@ -526,12 +526,12 @@ function M.get_all(include_hidden)
   return result
 end
 
-function M.clear_tab_term()
-  tabs_to_terms[api.nvim_get_current_tabpage()] = nil
+function M.clear_ctx_term()
+  ctxs_to_terms[config.get("get_ctx")()] = nil
 end
 
-function M.get_tab_term()
-  return tabs_to_terms[api.nvim_get_current_tabpage()]
+function M.get_ctx_term()
+  return ctxs_to_terms[config.get("get_ctx")()]
 end
 
 function M.get_last_term()
@@ -543,6 +543,7 @@ if _G.IS_TEST then
     for _, term in pairs(terminals) do
       term:shutdown()
     end
+    ctxs_to_terms = {}
   end
 
   M.__next_id = next_id

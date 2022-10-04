@@ -50,7 +50,9 @@ local config = {
   shading_factor = constants.shading_amount,
   shell = vim.o.shell,
   auto_scroll = true,
-  toggle_strategy = "first",
+  get_ctx = function ()
+    return 1
+  end,
   winbar = {
     enabled = false,
     name_formatter = function(term) return fmt("%d:%s", term.id, term:_display_name()) end,
