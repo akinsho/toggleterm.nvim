@@ -36,6 +36,11 @@ local function get_newline_chr()
   return is_windows and (is_pwsh(shell) and "\r" or "\r\n") or "\n"
 end
 
+local function get_ctx()
+  local _get_ctx = config.get("get_ctx")
+  return _get_ctx and _get_ctx()
+end
+
 ---@alias Mode "n" | "i" | "?"
 
 --- @class TerminalState
@@ -217,8 +222,8 @@ end
 ---Associate the current ctx with this terminal
 function Terminal:__set_ctx_to_term()
   if self.hidden then return end
-  local ctx = config.get("get_ctx")()
-  if not ctxs_to_terms[ctx] then ctxs_to_terms[ctx] = self end
+  local ctx = get_ctx()
+  if ctx and not ctxs_to_terms[ctx] then ctxs_to_terms[ctx] = self end
 end
 
 ---@private
@@ -557,12 +562,22 @@ function M.get_all(include_hidden)
   return result
 end
 
+---Disassociate the terminal associated with the current context.
 function M.clear_ctx_term()
-  ctxs_to_terms[config.get("get_ctx")()] = nil
+  local ctx = get_ctx()
+  if ctx then ctxs_to_terms[ctx] = nil end
 end
 
+---Get the terminal associated with the current context; returns `false` if context-based toggling has been disabled.
+---@return Terminal|boolean
 function M.get_ctx_term()
-  return ctxs_to_terms[config.get("get_ctx")()]
+  local ctx = get_ctx()
+  if ctx then
+    return ctxs_to_terms[ctx]
+  else
+    -- nil return means to disable context-based toggling
+    return false
+  end
 end
 
 function M.get_last_term()

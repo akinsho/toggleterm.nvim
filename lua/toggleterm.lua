@@ -252,14 +252,21 @@ local function last_smart_toggle()
 end
 
 -- pick a terminal based on the current context if none are currently open;
+-- if `get_ctx` has not been specified, default to the first opened terminal;
 -- if terminals are open, close them in order, starting from the end
 local function ctx_toggle()
   if not ui.find_open_windows() then
     local ctx_term = terms.get_ctx_term()
-    local id = ctx_term and ctx_term.id
-    if not id then
-      local last_term = terms.get_last_term()
-      return last_term and last_term.id
+    local id
+    if ctx_term == false then
+      -- context-based toggling has been disabled
+      id = terms.get_toggled_id()
+    else
+      id = ctx_term and ctx_term.id
+      if not id then
+        local last_term = terms.get_last_term()
+        return last_term and last_term.id
+      end
     end
     return id
   end

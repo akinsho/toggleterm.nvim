@@ -266,12 +266,13 @@ see `:h expand()` for more details
 
 ### Context-Based Toggling
 
-When `:ToggleTerm` is used without a prefixed count, it defaults to "context-based toggling".
+If the `get_ctx` configuration option is set, `:ToggleTerm` without a prefixed count
+defaults to "context-based toggling".
 This feature is designed to use your current neovim context to determine which terminal
 to open, thus helping to minimize the number of times you have to explicitly provide a count.
 
-The configuration allows you to specify a function to extract the context.
-It returns a unique key corresponding to the current context -- for example,
+The `get_ctx` configuration option specifies a function to extract the current context.
+It must return a unique key corresponding to the current context -- for example,
 it can return the current tabpage, current window handle, current directory, etc.
 When a terminal is opened, it is "pinned" to that context, so
 if you call `:ToggleTerm` it will open a terminal corresponding
@@ -282,8 +283,7 @@ it defaults to opening, (and thus pinning) the last-opened terminal
 Alternatively, you can call `:ToggleTermNew` within a new context to pin
 a brand-new terminal to it.
 If you want to re-associate a context with a different terminal,
-you can call `:ToggleTermContextClear` to clear the pin
-and then open the new terminal.
+call `:ToggleTermContextClear` to clear mapping and then open the new terminal.
 
 ### Sending lines to the terminal
 
