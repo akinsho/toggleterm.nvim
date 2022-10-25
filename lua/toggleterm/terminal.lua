@@ -59,6 +59,7 @@ local terminals = {}
 --- @field on_stdout fun(t: Terminal, job: number, data: string[]?, name: string?)?
 --- @field on_stderr fun(t: Terminal, job: number, data: string[], name: string)?
 --- @field on_exit fun(t: Terminal, job: number, exit_code: number?, name: string?)?
+--- @field on_create fun(term:Terminal)?
 --- @field on_open fun(term:Terminal)?
 --- @field on_close fun(term:Terminal)?
 
@@ -83,6 +84,7 @@ local terminals = {}
 --- @field on_stdout fun(t: Terminal, job: number, data: string[]?, name: string?)?
 --- @field on_stderr fun(t: Terminal, job: number, data: string[], name: string)?
 --- @field on_exit fun(t: Terminal, job: number, exit_code: number?, name: string?)?
+--- @field on_create fun(term:Terminal)?
 --- @field on_open fun(term:Terminal)?
 --- @field on_close fun(term:Terminal)?
 --- @field _display_name fun(term: Terminal): string
@@ -186,6 +188,7 @@ function Terminal:new(term)
   term.auto_scroll = vim.F.if_nil(term.auto_scroll, conf.auto_scroll)
   term.env = vim.F.if_nil(term.env, conf.env)
   term.hidden = vim.F.if_nil(term.hidden, false)
+  term.on_create = vim.F.if_nil(term.on_create, conf.on_create)
   term.on_open = vim.F.if_nil(term.on_open, conf.on_open)
   term.on_close = vim.F.if_nil(term.on_close, conf.on_close)
   term.on_stdout = vim.F.if_nil(term.on_stdout, conf.on_stdout)
@@ -459,6 +462,7 @@ function Terminal:open(size, direction)
     self:__spawn()
     setup_buffer_autocommands(self)
     setup_buffer_mappings(self.bufnr)
+    if self.on_create then self:on_create() end
   else
     local ok, err = pcall(opener, size, self)
     if not ok and err then return utils.notify(err, "error") end
