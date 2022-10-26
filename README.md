@@ -149,6 +149,7 @@ require("toggleterm").setup{
     end
   end,
   open_mapping = [[<c-\>]],
+  on_create = fun(t: Terminal), -- function to run when the terminal is first created
   on_open = fun(t: Terminal), -- function to run when the terminal opens
   on_close = fun(t: Terminal), -- function to run when the terminal closes
   on_stdout = fun(t: Terminal, job: number, data: string[], name: string) -- callback for processing output on stdout
