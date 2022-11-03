@@ -37,9 +37,15 @@ local function setup_global_mappings()
   local mapping = config.open_mapping
   -- v:count defaults the count to 0 but if a count is passed in uses that instead
   if mapping then
-    vim.keymap.set("n", mapping, '<Cmd>execute v:count . "ToggleTerm"<CR>', { silent = true })
+    vim.keymap.set("n", mapping, '<Cmd>execute v:count . "ToggleTerm"<CR>', {
+      desc = "Toggle Terminal",
+      silent = true,
+    })
     if config.insert_mappings then
-      vim.keymap.set("i", mapping, "<Esc><Cmd>ToggleTerm<CR>", { silent = true })
+      vim.keymap.set("i", mapping, "<Esc><Cmd>ToggleTerm<CR>", {
+        desc = "Toggle Terminal",
+        silent = true,
+      })
     end
   end
 end
