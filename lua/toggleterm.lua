@@ -215,6 +215,9 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, cmd_data)
     local res = utils.get_line_selection("visual")
     start_line, start_col = unpack(res.start_pos)
     lines = utils.get_visual_selection(res)
+  elseif selection_type == "current_buffer" then
+    start_line, start_col = unpack(api.nvim_win_get_cursor(0))
+    lines = api.nvim_buf_get_lines(0, 0, -1, false)
   end
 
   if not lines or not next(lines) then return end
