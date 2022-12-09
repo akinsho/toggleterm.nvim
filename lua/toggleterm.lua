@@ -295,7 +295,7 @@ end
 ---@param _ ToggleTermConfig
 local function setup_autocommands(_)
   api.nvim_create_augroup(AUGROUP, { clear = true })
-  local toggleterm_pattern = "term://*#toggleterm#*"
+  local toggleterm_pattern = { "term://*#toggleterm#*", "term://*::toggleterm::*" }
 
   api.nvim_create_autocmd("BufEnter", {
     pattern = toggleterm_pattern,
