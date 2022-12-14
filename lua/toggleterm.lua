@@ -80,10 +80,10 @@ function M.neighbor_float_term(terminal_chooser)
         if terminal:is_focused() then focused_term_index = index end
     end
 
-    local focused_term = terminals[focused_term_index]
-    if not focused_term:is_float() then return end
+    if not focused_term_index or not terminals[focused_term_index]:is_float() then return end
 
-    if not focused_term_index then return end
+    local focused_term = terminals[focused_term_index]
+
     local next_terminal_index = terminal_chooser(focused_term_index, #terminals)
 
     local next_terminal = terminals[next_terminal_index]
