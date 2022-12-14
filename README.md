@@ -294,6 +294,10 @@ You can map this to a key and call it with a count, which will then prompt you a
 Alternatively you can call it with just the name e.g. `:ToggleTermSetName work<CR>` this will the prompt you for which terminal it should apply to.
 Lastly you can call it without any arguments, and it will prompt you for which terminal it should apply to then prompt you for the name to use.
 
+### ToggleTermFloatNext/ToggleTermFloatPrev
+
+This functions allow you to switch the terminals by cycling through them when you are in a float one.
+
 ### Set terminal shading
 
 This plugin automatically shades terminal filetypes to be darker than other window
