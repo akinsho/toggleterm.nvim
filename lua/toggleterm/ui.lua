@@ -252,15 +252,23 @@ local curved = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
 --- @param opening boolean
 function M._get_float_config(term, opening)
   local opts = term.float_opts or {}
-  local width = M._resolve_size(opts.width, term)
-    or math.ceil(math.min(vim.o.columns, math.max(80, vim.o.columns - 20)))
-  local height = M._resolve_size(opts.height, term)
-    or math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 10)))
   local border = opts.border == "curved" and curved or opts.border or "single"
 
+  local width = math.ceil(math.min(vim.o.columns, math.max(80, vim.o.columns - 20)))
+  local height = math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 10)))
+
+  width = vim.F.if_nil(M._resolve_size(opts.width, term), width)
+  height = vim.F.if_nil(M._resolve_size(opts.height, term), height)
+
+  local row = math.ceil(vim.o.lines - height) * 0.5  - 1
+  local col = math.ceil(vim.o.columns - width) * 0.5 - 1
+
+  row = vim.F.if_nil(M._resolve_size(opts.row, term), row)
+  col = vim.F.if_nil(M._resolve_size(opts.col, term), col)
+
   return {
-    row = (opts.row or math.ceil(vim.o.lines - height) / 2) - 1,
-    col = (opts.col or math.ceil(vim.o.columns - width) / 2) - 1,
+    row = row,
+    col = col,
     relative = opts.relative or "editor",
     style = opening and "minimal" or nil,
     width = width,
