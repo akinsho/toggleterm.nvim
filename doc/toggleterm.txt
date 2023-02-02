@@ -46,6 +46,8 @@ Using vim-plug in vimscript
 
 >
     Plug 'akinsho/toggleterm.nvim', {'tag' : '*'}
+    
+    lua require("toggleterm").setup()
 <
 
 
