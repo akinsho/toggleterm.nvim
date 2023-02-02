@@ -78,6 +78,8 @@ Using vim-plug in vimscript
 
 ```vim
 Plug 'akinsho/toggleterm.nvim', {'tag' : '*'}
+
+lua require("toggleterm").setup()
 ```
 
 You can/should specify a tag for the current major version of the plugin, to avoid breaking changes as this plugin evolves.
