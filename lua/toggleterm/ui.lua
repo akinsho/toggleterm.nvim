@@ -291,7 +291,11 @@ function M.open_split(size, term)
     api.nvim_set_current_win(split_win)
     vim.cmd(commands.existing)
   else
-    vim.cmd(commands.new)
+    if term.direction == "horizontal" then
+      vim.cmd("split | resize " .. config.size .. " | wincmd p")
+    else
+      vim.cmd(commands.new)
+    end
   end
 
   M.resize_split(term, size)
