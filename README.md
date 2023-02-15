@@ -74,6 +74,18 @@ use {"akinsho/toggleterm.nvim", tag = '*', config = function()
 end}
 ```
 
+Using `lazy.nvim` in lua
+
+```lua
+require("lazy").setup({
+  {
+    "akinsho/toggleterm.nvim",
+    config = true,
+    keys = { { "<C-\\>", "<Cmd>ToggleTerm<CR>", mode = { "n", "t" } } },
+  }
+})
+```
+
 Using vim-plug in vimscript
 
 ```vim
