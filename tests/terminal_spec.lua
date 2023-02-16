@@ -156,6 +156,18 @@ describe("ToggleTerm tests:", function()
       assert.is_true(ui.term_has_open_win(term))
     end)
 
+    it("should open the last toggled terminal", function()
+      local term1 = Terminal:new({ count = 1 }):toggle()
+      term1:close()
+      local term2 = Terminal:new({ count = 2 }):toggle()
+      term2:close()
+
+      toggleterm.toggle(0)
+
+      assert.is_true(ui.term_has_open_win(term2))
+      assert.is_false(ui.term_has_open_win(term1))
+    end)
+
     it("should open a hidden terminal and a visible one", function()
       local hidden = Terminal:new({ hidden = true }):toggle()
       local visible = Terminal:new():toggle()

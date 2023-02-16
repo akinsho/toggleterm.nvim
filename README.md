@@ -115,8 +115,8 @@ I'm also going to be pretty conservative about what I add.
 
 This plugin must be explicitly enabled by using `require("toggleterm").setup{}`
 
-Setting the `open_mapping` key to use for toggling the terminal(s) will set up mappings for _normal_ mode
-If you prefix the mapping with a number that particular terminal will be opened.
+Setting the `open_mapping` key to use for toggling the terminal(s) will set up mappings for _normal_ mode.
+If you prefix the mapping with a number that particular terminal will be opened. Otherwise if a prefix is not set, then the last toggled terminal will be opened.
 
 If you set the `insert_mappings` key to true, the mapping will also take effect in insert mode; similarly setting `terminal_mappings` to will have the mappings take effect in the opened terminal.
 
