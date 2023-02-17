@@ -44,6 +44,8 @@ end
 ---@type Terminal[]
 local terminals = {}
 
+local last_toggled_id = nil
+
 --- @class TermCreateArgs
 --- @field cmd string
 --- @field direction? string the layout style for the terminal
@@ -112,6 +114,10 @@ function M.get_toggled_id(position)
   local t = M.get_all()
   return t[position] and t[position].id or nil
 end
+
+---Get a last toggled (opened or closed) terminal id.
+---@return number?
+function M.get_last_toggled_id() return last_toggled_id end
 
 --- @param bufnr number
 local function setup_buffer_mappings(bufnr)
@@ -263,6 +269,7 @@ function Terminal:close()
   ui.close(self)
   ui.stopinsert()
   ui.update_origin_window(self.window)
+  last_toggled_id = self.id
 end
 
 function Terminal:shutdown()

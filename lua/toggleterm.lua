@@ -58,8 +58,9 @@ end
 local function smart_toggle(_, size, dir, direction)
   local terminals = terms.get_all()
   if not ui.find_open_windows() then
-    -- Re-open the first terminal toggled
-    terms.get_or_create_term(terms.get_toggled_id(), dir, direction):open(size, direction)
+    -- Re-open the last terminal used (if exists) or the first terminal toggled.
+    local term_id = terms.get_last_toggled_id() or terms.get_toggled_id()
+    terms.get_or_create_term(term_id, dir, direction):open(size, direction)
   else
     -- count backwards from the end of the list
     for i = #terminals, 1, -1 do
