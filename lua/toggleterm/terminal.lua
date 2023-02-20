@@ -91,7 +91,6 @@ local terminals = {}
 --- @field __state TerminalState
 local Terminal = {}
 
----@private
 --- Get the next available id based on the next number in the sequence that
 --- hasn't already been allocated e.g. in a list of {1,2,5,6} the next id should
 --- be 3 then 4 then 7
@@ -130,7 +129,6 @@ local function setup_buffer_mappings(bufnr)
   end
 end
 
----@private
 ---@param id number terminal id
 local function on_vim_resized(id)
   local term = M.get(id)
@@ -210,7 +208,7 @@ function Terminal:new(term)
   return setmetatable(term, self)
 end
 
----@private
+---@package
 ---Add a terminal to the list of terminals
 function Terminal:__add()
   if not terminals[self.id] then terminals[self.id] = self end
@@ -238,7 +236,7 @@ function Terminal:is_open()
   return win_open and api.nvim_win_get_buf(self.window) == self.bufnr
 end
 
----@private
+---@package
 function Terminal:__restore_mode() self:set_mode(self.__state.mode) end
 
 --- Set the terminal's mode
@@ -264,7 +262,7 @@ function Terminal:persist_mode()
   self.__state.mode = m
 end
 
----@private
+---@package
 function Terminal:_display_name() return self.display_name or vim.split(self.name, ";")[1] end
 
 function Terminal:close()
@@ -307,7 +305,7 @@ end
 ---@param cmd string|string[]
 ---@param go_back boolean? whether or not to return to original window
 function Terminal:send(cmd, go_back)
-  cmd = type(cmd) == "table" and with_cr(unpack(cmd)) or with_cr(cmd)
+  cmd = type(cmd) == "table" and with_cr(unpack(cmd)) or with_cr(cmd --[[@as string]])
   fn.chansend(self.job_id, cmd)
   self:scroll_bottom()
   if go_back and self:is_focused() then
@@ -392,7 +390,7 @@ function Terminal:__spawn()
   self.dir = dir
 end
 
----@private
+---@package
 ---Add an orphaned terminal to the list of terminal and re-apply settings
 function Terminal:__resurrect()
   self:__add()
@@ -402,14 +400,14 @@ function Terminal:__resurrect()
   ui.hl_term(self)
 end
 
----@private
+---@package
 function Terminal:__set_ft_options()
   local buf = vim.bo[self.bufnr]
   buf.filetype = constants.FILETYPE
   buf.buflisted = false
 end
 
----@private
+---@package
 function Terminal:__set_win_options()
   local win = vim.wo[self.window]
   if self:is_split() then
@@ -423,7 +421,7 @@ function Terminal:__set_win_options()
   end
 end
 
----@private
+---@package
 function Terminal:__set_options()
   self:__set_ft_options()
   self:__set_win_options()
