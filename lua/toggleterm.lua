@@ -50,24 +50,21 @@ local function setup_global_mappings()
   end
 end
 
---Create a new terminal or close beginning from the last opened
+-- Creates a new terminal if none are present or closes terminals that are
+-- currently opened, or opens terminals that were previously closed.
 ---@param _ number
 ---@param size number?
 ---@param dir string?
 ---@param direction string?
 local function smart_toggle(_, size, dir, direction)
-  local terminals = terms.get_all()
-  if not ui.find_open_windows() then
-    -- Re-open the last terminal used (if exists) or the first terminal toggled.
-    local term_id = terms.get_last_toggled_id() or terms.get_toggled_id()
-    terms.get_or_create_term(term_id, dir, direction):open(size, direction)
-  else
-    -- count backwards from the end of the list
-    for i = #terminals, 1, -1 do
-      local term = terminals[i]
-      if term and ui.term_has_open_win(term) then return term:close() end
+  local has_open, windows = ui.find_open_windows()
+  if not has_open then
+    if not ui.open_terminal_view(size, direction) then
+      local term_id = terms.get_toggled_id()
+      terms.get_or_create_term(term_id, dir, direction):open(size, direction)
     end
-    utils.notify("Couldn't find a terminal to close", "error")
+  else
+    ui.close_and_save_terminal_view(windows)
   end
 end
 
@@ -79,6 +76,8 @@ local function toggle_nth_term(num, size, dir, direction)
   local term = terms.get_or_create_term(num, dir, direction)
   ui.update_origin_window(term.window)
   term:toggle(size, direction)
+  -- Save the terminal in view if it was last closed terminal.
+  if not ui.find_open_windows() then ui.save_terminal_view({ term.id }, term.id) end
 end
 
 ---Close the last window if only a terminal *split* is open
