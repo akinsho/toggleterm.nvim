@@ -66,7 +66,7 @@ This plugin only works in _Neovim 0.7_ or newer.
 
 ## Installation
 
-Using packer in lua
+Using [packer](https://github.com/wbthomason/packer.nvim) in lua
 
 ```lua
 use {"akinsho/toggleterm.nvim", tag = '*', config = function()
@@ -74,7 +74,18 @@ use {"akinsho/toggleterm.nvim", tag = '*', config = function()
 end}
 ```
 
-Using vim-plug in vimscript
+Using [lazy.nvim](https://github.com/folke/lazy.nvim) in lua
+
+```lua
+{
+  -- amongst your other plugins
+  {'akinsho/toggleterm.nvim', tag = "*", config = true}
+  -- or
+  {'akinsho/toggleterm.nvim', tag = "*", opts = {--[[ things you want to change go here]]}}
+}
+```
+
+Using [vim-plug](https://github.com/junegunn/vim-plug) in vimscript
 
 ```vim
 Plug 'akinsho/toggleterm.nvim', {'tag' : '*'}
