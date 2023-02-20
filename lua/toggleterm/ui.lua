@@ -9,6 +9,8 @@ local utils = lazy.require("toggleterm.utils")
 local colors = lazy.require("toggleterm.colors")
 ---@module "toggleterm.config"
 local config = lazy.require("toggleterm.config")
+---@module "toggleterm.terminal"
+local terms = lazy.require("toggleterm.terminal")
 
 local fn = vim.fn
 local fmt = string.format
@@ -17,6 +19,19 @@ local api = vim.api
 local origin_window
 local persistent = {}
 
+local terminal_view = {
+  ---@type number[]
+  -- A list of terminal IDs that are saved from the view on smart toggle.
+  terminals = {},
+  ---@type number
+  ---Last focused terminal ID in the view.
+  focus_term_id = nil,
+}
+
+--- @class TerminalWindow
+--- @field term_id number ID for the terminal in the window
+--- @field window number window handle
+--
 --- Save the size of a split window before it is hidden
 --- @param direction string
 --- @param window number
@@ -179,15 +194,16 @@ end
 --- comparator function or the default which matches
 --- the filetype
 --- @param comparator function?
---- @return boolean, number[]
+--- @return boolean, TerminalWindow[]
 function M.find_open_windows(comparator)
   comparator = comparator or default_compare
   local term_wins, is_open = {}, false
   for _, tab in ipairs(api.nvim_list_tabpages()) do
     for _, win in pairs(api.nvim_tabpage_list_wins(tab)) do
-      if comparator(api.nvim_win_get_buf(win)) then
+      local buf = api.nvim_win_get_buf(win)
+      if comparator(buf) then
         is_open = true
-        table.insert(term_wins, win)
+        table.insert(term_wins, { window = win, term_id = vim.b[buf].toggle_number })
       end
     end
   end
@@ -260,7 +276,7 @@ function M._get_float_config(term, opening)
   width = vim.F.if_nil(M._resolve_size(opts.width, term), width)
   height = vim.F.if_nil(M._resolve_size(opts.height, term), height)
 
-  local row = math.ceil(vim.o.lines - height) * 0.5  - 1
+  local row = math.ceil(vim.o.lines - height) * 0.5 - 1
   local col = math.ceil(vim.o.columns - width) * 0.5 - 1
 
   row = vim.F.if_nil(M._resolve_size(opts.row, term), row)
@@ -280,15 +296,15 @@ end
 --- @param size number
 --- @param term Terminal
 function M.open_split(size, term)
-  local has_open, win_ids = M.find_open_windows()
+  local has_open, windows = M.find_open_windows()
   local commands = split_commands[term.direction]
 
   if has_open then
     -- we need to be in the terminal window most recently opened
     -- in order to split it
-    local split_win = win_ids[#win_ids]
-    if config.persist_size then M.save_window_size(term.direction, split_win) end
-    api.nvim_set_current_win(split_win)
+    local split_win = windows[#windows]
+    if config.persist_size then M.save_window_size(term.direction, split_win.window) end
+    api.nvim_set_current_win(split_win.window)
     vim.cmd(commands.existing)
   else
     vim.cmd(commands.new)
@@ -391,6 +407,50 @@ function M.term_has_open_win(term)
     vim.list_extend(wins, api.nvim_tabpage_list_wins(tab))
   end
   return vim.tbl_contains(wins, term.window)
+end
+
+---Close and save terminals that are currently in view.
+---@param windows TerminalWindow[]
+function M.close_and_save_terminal_view(windows)
+  local terminals = {}
+  local focused_term_id = terms.get_focused_id()
+  -- NOTE: Use windows to close terminals in order they are being shown on
+  -- the view.
+  for _, window in pairs(windows) do
+    local term = terms.get(window.term_id)
+    if term then
+      table.insert(terminals, term.id)
+      term:close()
+    end
+  end
+  M.save_terminal_view(terminals, focused_term_id)
+end
+
+---Open terminals that were saved in the last terminal view.
+---@return boolean
+function M.open_terminal_view(size, direction)
+  local opened = false
+  if not vim.tbl_isempty(terminal_view.terminals) then
+    for _, term_id in pairs(terminal_view.terminals) do
+      local term = terms.get(term_id)
+      if term then
+        term:open(size, direction)
+        opened = true
+      end
+    end
+    local focus_term = terms.get(terminal_view.focus_term_id)
+    if focus_term then focus_term:focus() end
+    M.save_terminal_view({}, nil)
+  end
+  return opened
+end
+
+---Save the terminal view with the just closed terminals and the previously
+--focused terminal.
+---@param terminals number[]
+---@param focus_term_id number?
+function M.save_terminal_view(terminals, focus_term_id)
+  terminal_view = { terminals = terminals, focus_term_id = focus_term_id }
 end
 
 return M

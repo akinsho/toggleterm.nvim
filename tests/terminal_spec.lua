@@ -19,7 +19,7 @@ local get_all = t.get_all
 
 ---Return if a terminal has windows
 ---@param term table
----@return boolean, number[]
+---@return boolean, TerminalWindow[]
 local function term_has_windows(term)
   return ui.find_open_windows(function(buf) return buf == term.bufnr end)
 end
@@ -157,15 +157,62 @@ describe("ToggleTerm tests:", function()
     end)
 
     it("should open the last toggled terminal", function()
-      local term1 = Terminal:new({ count = 1 }):toggle()
-      term1:close()
-      local term2 = Terminal:new({ count = 2 }):toggle()
-      term2:close()
-
+      -- GIVEN two opened terminals
+      toggleterm.toggle(1)
+      toggleterm.toggle(2)
+      -- AND then closed first terminal
+      toggleterm.toggle(1)
+      -- AND then close second terminal via smart toggle
       toggleterm.toggle(0)
 
+      -- WHEN a smart toggle is hit
+      toggleterm.toggle(0)
+
+      local terms = get_all()
+      --- THEN only the second terminal should be opened
+      assert.is_true(ui.term_has_open_win(terms[2]))
+      assert.is_false(ui.term_has_open_win(terms[1]))
+    end)
+
+    it("should open the last toggled terminal view", function()
+      -- GIVEN two opened terminals
+      toggleterm.toggle(1)
+      toggleterm.toggle(2)
+      get_all()[1]:focus()
+      -- AND then closed terminal view via smart toggle
+      toggleterm.toggle(0)
+
+      -- WHEN a smart toggle is hit
+      toggleterm.toggle(0)
+
+      --- THEN both terminals should be opened
+      local terms = get_all()
+      local term1 = terms[1]
+      local term2 = terms[2]
+      assert.is_true(term1:is_focused())
+      assert.is_false(term2:is_focused())
       assert.is_true(ui.term_has_open_win(term2))
-      assert.is_false(ui.term_has_open_win(term1))
+      assert.is_true(ui.term_has_open_win(term1))
+    end)
+
+    it("should open the last toggled nth terminal", function()
+      -- GIVEN two opened terminals
+      toggleterm.toggle(1)
+      toggleterm.toggle(2)
+      -- AND then closed terminal view via smart toggle
+      toggleterm.toggle(0)
+      -- AND then open and close 3rd terminal
+      toggleterm.toggle(3)
+      toggleterm.toggle(3)
+
+      -- WHEN a smart toggle is hit
+      toggleterm.toggle(0)
+
+      local terms = get_all()
+      --- THEN only 3rd terminal should be opened
+      assert.is_true(ui.term_has_open_win(terms[3]))
+      assert.is_false(ui.term_has_open_win(terms[2]))
+      assert.is_false(ui.term_has_open_win(terms[1]))
     end)
 
     it("should open a hidden terminal and a visible one", function()
@@ -325,7 +372,7 @@ describe("ToggleTerm tests:", function()
       local term = Terminal:new({ direction = "float" }):toggle()
       local _, wins = term_has_windows(term)
       assert.equal(#wins, 1)
-      assert.equal("popup", fn.win_gettype(fn.win_id2win(wins[1])))
+      assert.equal("popup", fn.win_gettype(fn.win_id2win(wins[1].window)))
     end)
 
     it("should not change numbers when resolving size", function()
@@ -379,7 +426,7 @@ describe("ToggleTerm tests:", function()
       local term = Terminal:new({ direction = "float" }):toggle()
       local _, wins = term_has_windows(term)
       ---@type table
-      local config = api.nvim_win_get_config(wins[1])
+      local config = api.nvim_win_get_config(wins[1].window)
       assert.equal(config.width, 20)
     end)
 
