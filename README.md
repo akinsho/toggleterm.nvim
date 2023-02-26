@@ -464,7 +464,7 @@ let statusline .= '%{&ft == "toggleterm" ? "terminal (".b:toggle_number.")" : ""
 
 ### Custom commands
 
-You can create your on commands by using the lua functions this plugin provides directly
+You can create your own commands by using the lua functions this plugin provides directly
 
 ```vim
 command! -count=1 TermGitPush  lua require'toggleterm'.exec("git push",    <count>, 12)
