@@ -3,11 +3,11 @@
 ==============================================================================
 Table of Contents                               *toggleterm-table-of-contents*
 
-  - Requirements                                 |toggleterm-nil-requirements|
-  - Installation                                 |toggleterm-nil-installation|
-  - Notices                                           |toggleterm-nil-notices|
-  - Why?                                                 |toggleterm-nil-why?|
-  - Roadmap                                           |toggleterm-nil-roadmap|
+  - Requirements                                     |toggleterm-requirements|
+  - Installation                                     |toggleterm-installation|
+  - Notices                                               |toggleterm-notices|
+  - Why?                                                     |toggleterm-why?|
+  - Roadmap                                               |toggleterm-roadmap|
 
 MULTIPLE ORIENTATIONS ~
 
@@ -27,12 +27,12 @@ SEND COMMANDS TO DIFFERENT TERMINALS ~
 WINBAR (EXPERIMENTAL/NIGHTLY ONLY) ~
 
 
-REQUIREMENTS                                     *toggleterm-nil-requirements*
+REQUIREMENTS                                         *toggleterm-requirements*
 
 This plugin only works in _Neovim 0.7_ or newer.
 
 
-INSTALLATION                                     *toggleterm-nil-installation*
+INSTALLATION                                         *toggleterm-installation*
 
 Using packer <https://github.com/wbthomason/packer.nvim> in lua
 
@@ -66,13 +66,13 @@ avoid breaking changes as this plugin evolves. To use a version of this plugin
 compatible with nvim versions less than 0.7 please use the tag `v1.*`.
 
 
-NOTICES                                               *toggleterm-nil-notices*
+NOTICES                                                   *toggleterm-notices*
 
 
 - **28/07/1990** — If using `persist_mode` terminal mappings should be changed to use `wincmd` instead otherwise persist mode will not work correctly. See |toggleterm-here| for details.
 
 
-WHY?                                                     *toggleterm-nil-why?*
+WHY?                                                         *toggleterm-why?*
 
 Neovim’s terminal is a very cool, but not super ergonomic tool to use. I find
 that I often want to set a process going and leave it to continue to run in the
@@ -89,7 +89,7 @@ This is the exact use case this was designed for. If that’s your use case
 this might work for you.
 
 
-ROADMAP                                               *toggleterm-nil-roadmap*
+ROADMAP                                                   *toggleterm-roadmap*
 
 All I really want this plugin to be is what I described above. A wrapper around
 the terminal functionality.
@@ -112,9 +112,9 @@ last toggled terminal will be opened. In case there are multiple terminals
 opened they’ll all be closed, and on the next mapping key they’ll be
 restored.
 
-If you set the `insert_mappings` key to true, the mapping will also take effect
-in insert mode; similarly setting `terminal_mappings` to will have the mappings
-take effect in the opened terminal.
+If you set the `insert_mappings` key to `true`, the mapping will also take
+effect in insert mode; similarly setting `terminal_mappings` to `true` will
+have the mappings take effect in the opened terminal.
 
 However you will not be able to use a count with the open mapping in terminal
 and insert modes. You can create buffer specific mappings to exit terminal mode
@@ -473,8 +473,8 @@ To tell each terminal apart you can use the terminal buffer variable
 
 CUSTOM COMMANDS ~
 
-You can create your on commands by using the lua functions this plugin provides
-directly
+You can create your own commands by using the lua functions this plugin
+provides directly
 
 >vim
     command! -count=1 TermGitPush  lua require'toggleterm'.exec("git push",    <count>, 12)
