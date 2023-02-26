@@ -129,7 +129,7 @@ This plugin must be explicitly enabled by using `require("toggleterm").setup{}`
 Setting the `open_mapping` key to use for toggling the terminal(s) will set up mappings for _normal_ mode.
 If you prefix the mapping with a number that particular terminal will be opened. Otherwise if a prefix is not set, then the last toggled terminal will be opened. In case there are multiple terminals opened they'll all be closed, and on the next mapping key they'll be restored.
 
-If you set the `insert_mappings` key to true, the mapping will also take effect in insert mode; similarly setting `terminal_mappings` to will have the mappings take effect in the opened terminal.
+If you set the `insert_mappings` key to `true`, the mapping will also take effect in insert mode; similarly setting `terminal_mappings` to `true` will have the mappings take effect in the opened terminal.
 
 However you will not be able to use a count with the open mapping in terminal and insert modes. You can create buffer specific mappings to exit terminal mode and then use a count with the open mapping. Check _Terminal window mappings_ for an example of how to do this.
 
@@ -464,7 +464,7 @@ let statusline .= '%{&ft == "toggleterm" ? "terminal (".b:toggle_number.")" : ""
 
 ### Custom commands
 
-You can create your on commands by using the lua functions this plugin provides directly
+You can create your own commands by using the lua functions this plugin provides directly
 
 ```vim
 command! -count=1 TermGitPush  lua require'toggleterm'.exec("git push",    <count>, 12)
