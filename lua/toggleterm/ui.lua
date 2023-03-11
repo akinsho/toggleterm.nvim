@@ -96,6 +96,7 @@ function M.set_winbar(term)
     or not term
     or term:is_float()
     or fn.exists("+winbar") ~= 1
+    or not term.window
     or not api.nvim_win_is_valid(term.window)
   then
     return

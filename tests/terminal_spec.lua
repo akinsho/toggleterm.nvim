@@ -5,6 +5,7 @@ local fn = vim.fn
 local fmt = string.format
 
 local spy = require("luassert.spy")
+local match = require("luassert.match")
 
 local toggleterm = require("toggleterm")
 local constants = require("toggleterm.constants")
@@ -300,10 +301,11 @@ describe("ToggleTerm tests:", function()
 
     it("should send commands to a terminal on exec", function()
       local test1 = Terminal:new():toggle()
+      local _ = match._
       spy.on(test1, "send")
       toggleterm.exec('echo "hello world"', 1)
       assert.spy(test1.send).was_called()
-      assert.spy(test1.send).was_called_with(test1, 'echo "hello world"', true)
+      assert.spy(test1.send).was_called_with(_, 'echo "hello world"', true)
       assert.is_true(vim.tbl_contains(api.nvim_list_wins(), test1.window))
     end)
 
