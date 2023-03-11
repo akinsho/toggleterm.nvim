@@ -52,11 +52,10 @@ end
 
 -- Creates a new terminal if none are present or closes terminals that are
 -- currently opened, or opens terminals that were previously closed.
----@param _ number
 ---@param size number?
 ---@param dir string?
 ---@param direction string?
-local function smart_toggle(_, size, dir, direction)
+local function smart_toggle(size, dir, direction)
   local has_open, windows = ui.find_open_windows()
   if not has_open then
     if not ui.open_terminal_view(size, direction) then
@@ -254,17 +253,15 @@ end
 --- to be the primary. However if several are open we close them.
 --- this can be used with the count commands to allow specific operations
 --- per term or mass actions
---- @param count number
+--- @param count number?
 --- @param size number?
 --- @param dir string?
 --- @param direction string?
 function M.toggle(count, size, dir, direction)
-  vim.validate({ count = { count, "number", true }, size = { size, "number", true } })
-  -- TODO: this should toggle the specified term if any count is passed in
-  if count >= 1 then
+  if count and count >= 1 then
     toggle_nth_term(count, size, dir, direction)
   else
-    smart_toggle(count, size, dir, direction)
+    smart_toggle(size, dir, direction)
   end
 end
 
