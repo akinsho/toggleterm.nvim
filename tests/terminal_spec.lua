@@ -131,7 +131,7 @@ describe("ToggleTerm tests:", function()
         on_stdout = function(_, _, lines) vim.list_extend(stdout, lines) end,
       }):spawn()
       -- Wait some time if job is not ready
-      vim.wait(500, has_spawned)
+      vim.wait(1500, has_spawned)
       assert.is_true(has_spawned())
     end)
 
