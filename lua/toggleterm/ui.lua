@@ -19,6 +19,9 @@ local api = vim.api
 local origin_window
 local persistent = {}
 
+---@alias TerminalView {terminals: number[], focus_term_id: number}
+
+---@type TerminalView
 local terminal_view = {
   ---@type number[]
   -- A list of terminal IDs that are saved from the view on smart toggle.
@@ -453,5 +456,8 @@ end
 function M.save_terminal_view(terminals, focus_term_id)
   terminal_view = { terminals = terminals, focus_term_id = focus_term_id }
 end
+
+---@return TerminalView
+function M.get_terminal_view() return terminal_view end
 
 return M
