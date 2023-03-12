@@ -78,9 +78,9 @@ local hl_end = "%*"
 ---@param id number
 ---@return string
 function M.winbar(id)
-  local terms = require("toggleterm.terminal").get_all()
+  local terminals = require("toggleterm.terminal").get_all()
   local str = " "
-  for _, t in pairs(terms) do
+  for _, t in pairs(terminals) do
     local h = id == t.id and "WinBarActive" or "WinBarInactive"
     str = str
       .. fmt("%%%d@v:lua.___toggleterm_winbar_click@", t.id)
