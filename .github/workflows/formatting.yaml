@@ -12,6 +12,7 @@ jobs:
 
       - uses: JohnnyMorganz/stylua-action@1.0.0
         with:
+          version: v0.14.3
           token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
           args: --config-path=stylua.toml lua/
 
