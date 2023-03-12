@@ -295,7 +295,7 @@ function M._get_float_config(term, opening)
     height = height,
     border = opening and border or nil,
   }
-  if vim.version().minor >= 0.9 then win_opts.title = term:float_title() end
+  if utils.is_nightly() then win_opts.title = term:float_title() end
   return win_opts
 end
 
