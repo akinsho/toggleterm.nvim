@@ -121,6 +121,11 @@ function M.get_focused_id()
   return nil
 end
 
+function M.get_last_focused()
+  local last_focus = ui.get_terminal_view().focus_term_id
+  return M.get(last_focus, true)
+end
+
 --- @param bufnr number
 local function setup_buffer_mappings(bufnr)
   local mapping = config.open_mapping
@@ -526,10 +531,11 @@ end
 
 ---Get a single terminal by id, unless it is hidden
 ---@param id number?
+---@param include_hidden boolean? whether or nor to filter out hidden
 ---@return Terminal?
-function M.get(id)
+function M.get(id, include_hidden)
   local term = terminals[id]
-  return (term and not term.hidden) and term or nil
+  return (term and (include_hidden == true or not term.hidden)) and term or nil
 end
 
 ---Return the potentially non contiguous map of terminals as a sorted array
