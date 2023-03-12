@@ -44,13 +44,23 @@ end
 ---@type Terminal[]
 local terminals = {}
 
+---@class FloatOpts
+---@field border string | string[]
+---@field title string | fun(count: integer, term: Terminal): string
+---@field width integer
+---@field height integer
+---@field row integer
+---@field col integer
+---@field relative boolean
+---@field winblend integer
+
 --- @class TermCreateArgs
 --- @field cmd string
 --- @field direction? string the layout style for the terminal
 --- @field id number?
 --- @field highlights table<string, table<string, string>>?
 --- @field dir string? the directory for the terminal
---- @field count number? the count that triggers that specific terminal
+--- @field count integer? the count that triggers that specific terminal
 --- @field display_name string?
 --- @field hidden boolean? whether or not to include this terminal in the terminals list
 --- @field close_on_exit boolean? whether or not to close the terminal window when the process exits
@@ -77,7 +87,7 @@ local terminals = {}
 --- @field hidden boolean whether or not to include this terminal in the terminals list
 --- @field close_on_exit boolean? whether or not to close the terminal window when the process exits
 --- @field auto_scroll boolean? whether or not to scroll down on terminal output
---- @field float_opts table<string, any>?
+--- @field float_opts FloatOpts?
 --- @field display_name string?
 --- @field env table<string, string> environmental variables passed to jobstart()
 --- @field clear_env boolean use clean job environment, passed to jobstart()
@@ -267,7 +277,11 @@ function Terminal:persist_mode()
   self.__state.mode = m
 end
 
----@package
+function Terminal:float_title()
+  local count = #M.get_all(true)
+  return fmt(" toggleterm (%d/%d) ", self.id, count + 1)
+end
+
 function Terminal:_display_name() return self.display_name or vim.split(self.name, ";")[1] end
 
 function Terminal:close()
