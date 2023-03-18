@@ -50,6 +50,7 @@ local config = {
   direction = "horizontal",
   shading_factor = constants.shading_amount,
   shell = vim.o.shell,
+  quote_command = false,
   autochdir = false,
   auto_scroll = true,
   winbar = {
