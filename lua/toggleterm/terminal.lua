@@ -375,13 +375,16 @@ function Terminal:__spawn()
   local cmd = self.cmd or config.get("shell")
   local command_sep = get_command_sep()
   local comment_sep = get_comment_sep()
+  local quote = config.get("quote_command") and "\"" or ""
   cmd = table.concat({
+    quote,
     cmd,
     command_sep,
     comment_sep,
     constants.FILETYPE,
     comment_sep,
     self.id,
+    quote,
   })
   local dir = _get_dir(self.dir)
   self.job_id = fn.termopen(cmd, {
