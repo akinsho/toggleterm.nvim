@@ -21,12 +21,6 @@ jobs:
           wget -q https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.deb -O /tmp/nvim.deb
           sudo dpkg -i /tmp/nvim.deb
 
-      - name: Fetch dependencies
-        run: |
-          git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
-          git clone --depth 1 https://github.com/kyazdani42/nvim-web-devicons ~/.local/share/nvim/site/pack/vendor/start/nvim-web-devicons
-          ln -s $(pwd) ~/.local/share/nvim/site/pack/vendor/start
-
       - name: Run tests
         run: |
           nvim --version
