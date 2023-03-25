@@ -197,6 +197,7 @@ show what options are available. It is not written to be used as is.
         width = <value>,
         height = <value>,
         winblend = 3,
+        zindex = <value>,
       },
       winbar = {
         enabled = false,
