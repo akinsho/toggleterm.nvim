@@ -207,6 +207,7 @@ require("toggleterm").setup{
     width = <value>,
     height = <value>,
     winblend = 3,
+    zindex = <value>,
   },
   winbar = {
     enabled = false,
