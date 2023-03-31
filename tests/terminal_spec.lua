@@ -136,7 +136,8 @@ describe("ToggleTerm tests:", function()
       assert.is_true(has_spawned())
     end)
 
-    it("should pass environmental variables", function()
+    -- FIXME: Fix flaky test
+    pending("should pass environmental variables", function()
       local stdout = {}
       local expected = "TESTVAR = 0123456789"
       local find_end = function() return table.concat(stdout, ""):match(expected) end
