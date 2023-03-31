@@ -1,4 +1,4 @@
-*toggleterm.txt*                         persist and toggle multiple terminals
+*toggleterm.txt*         For Neovim >= 0.8.0        Last change: 2023 March 31
 
 ==============================================================================
 Table of Contents                               *toggleterm-table-of-contents*
@@ -37,7 +37,7 @@ INSTALLATION                                         *toggleterm-installation*
 Using packer <https://github.com/wbthomason/packer.nvim> in lua
 
 >lua
-    use {"akinsho/toggleterm.nvim", tag = '*', config = function()
+    use {"akinsho/toggleterm.nvim", tag = '', config = function()
       require("toggleterm").setup()
     end}
 <
@@ -47,23 +47,23 @@ Using lazy.nvim <https://github.com/folke/lazy.nvim> in lua
 >lua
     {
       -- amongst your other plugins
-      {'akinsho/toggleterm.nvim', version = "*", config = true}
+      {'akinsho/toggleterm.nvim', version = "", config = true}
       -- or
-      {'akinsho/toggleterm.nvim', version = "*", opts = {--[[ things you want to change go here]]}}
+      {'akinsho/toggleterm.nvim', version = "", opts = {--[[ things you want to change go here]]}}
     }
 <
 
 Using vim-plug <https://github.com/junegunn/vim-plug> in vimscript
 
 >vim
-    Plug 'akinsho/toggleterm.nvim', {'tag' : '*'}
+    Plug 'akinsho/toggleterm.nvim', {'tag' : ''}
     
     lua require("toggleterm").setup()
 <
 
 You can/should specify a tag for the current major version of the plugin, to
 avoid breaking changes as this plugin evolves. To use a version of this plugin
-compatible with nvim versions less than 0.7 please use the tag `v1.*`.
+compatible with nvim versions less than 0.7 please use the tag `v1.`.
 
 
 NOTICES                                                   *toggleterm-notices*
@@ -125,7 +125,7 @@ alternatively you can do this manually (not recommended but, your prerogative)
 
 >vim
     " set
-    autocmd TermEnter term://*toggleterm#*
+    autocmd TermEnter term://toggleterm
           \ tnoremap <silent><c-t> <Cmd>exe v:count1 . "ToggleTerm"<CR>
     
     " By applying the mappings this way you can pass a count to your
@@ -135,11 +135,11 @@ alternatively you can do this manually (not recommended but, your prerogative)
     inoremap <silent><c-t> <Esc><Cmd>exe v:count1 . "ToggleTerm"<CR>
 <
 
-**NOTE**: Please ensure you have set `hidden` in your neovim config, otherwise
+**NOTE**Please ensure you have set `hidden` in your neovim config, otherwise
 the terminals will be discarded when closed.
 
-**WARNING**: Please do not copy and paste this configuration! It is here to
-show what options are available. It is not written to be used as is.
+**WARNING**Please do not copy and paste this configuration! It is here to show
+what options are available. It is not written to be used as is.
 
 >lua
     require("toggleterm").setup{
@@ -148,7 +148,7 @@ show what options are available. It is not written to be used as is.
         if term.direction == "horizontal" then
           return 15
         elseif term.direction == "vertical" then
-          return vim.o.columns * 0.4
+          return vim.o.columns  0.4
         end
       end,
       open_mapping = [[<c-\>]],
@@ -188,7 +188,7 @@ show what options are available. It is not written to be used as is.
       auto_scroll = true, -- automatically scroll to the bottom on terminal output
       -- This field is only relevant if direction is set to 'float'
       float_opts = {
-        -- The border key is *almost* the same as 'nvim_open_win'
+        -- The border key is almost the same as 'nvim_open_win'
         -- see :h nvim_open_win for details on borders however
         -- the 'curved' border is a custom border type
         -- not natively supported but implemented in this plugin.
@@ -227,7 +227,7 @@ directory. If the terminal has already been opened at a particular directory it
 will remain in that directory.
 
 The directory can also be specified as `git_dir` which toggleterm will then use
-to try and derive the git repo directory. _NOTE_: This will not work for
+to try and derive the git repo directory. _NOTE_This will not work for
 `git-worktrees` or other more complex setups.
 
 If `size` is specified, and the command opens a split (horizontal/vertical)
@@ -286,9 +286,9 @@ SENDING LINES TO THE TERMINAL ~
 You can "send lines" to the toggled terminals with the following commands:
 
 
-- `:ToggleTermSendCurrentLine <T_ID>`: sends the whole line where you are standing with your cursor
-- `:ToggleTermSendVisualLines <T_ID>`: sends all the (whole) lines in your visual selection
-- `:ToggleTermSendVisualSelection <T_ID>`: sends only the visually selected text (this can be a block of text or a selection in a single line)
+- `:ToggleTermSendCurrentLine <T_ID>`sends the whole line where you are standing with your cursor
+- `:ToggleTermSendVisualLines <T_ID>`sends all the (whole) lines in your visual selection
+- `:ToggleTermSendVisualSelection <T_ID>`sends only the visually selected text (this can be a block of text or a selection in a single line)
 
 (`<T_ID` is an optional terminal ID parameter, which defines where should we
 send the lines. If the parameter is not provided, then the default is the
@@ -365,8 +365,8 @@ easier once toggled, whilst still keeping it open.
       vim.keymap.set('t', '<C-w>', [[<C-\><C-n><C-w>]], opts)
     end
     
-    -- if you only want these mappings for toggle term use term://*toggleterm#* instead
-    vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
+    -- if you only want these mappings for toggle term use term://toggleterm instead
+    vim.cmd('autocmd! TermOpen term:// lua set_terminal_keymaps()')
 <
 
 
@@ -457,8 +457,8 @@ You can also set a custom layout for a terminal.
     vim.api.nvim_set_keymap("n", "<leader>g", "<cmd>lua _lazygit_toggle()<CR>", {noremap = true, silent = true})
 <
 
-**WARNING**: do not use any of the private functionality of the terminal or
-other non-public parts of the API as these can change in the future.
+**WARNING**do not use any of the private functionality of the terminal or other
+non-public parts of the API as these can change in the future.
 
 
 STATUSLINE ~
@@ -487,20 +487,20 @@ OPEN MULTIPLE TERMINALS SIDE-BY-SIDE ~
 
   Direction    Supported
   ------------ -----------
-  vertical     ✔️
-  horizontal   ✔️
-  tab          ✖️
-  float        ✖️
-In your first terminal, you need to leave the `TERMINAL` mode using C-\C-N
-which can be remapped to Esc for ease of use.
+  vertical     
+  horizontal   
+  tab          
+  float        
+Inyour first terminal, you need to leave the `TERMINAL` mode using C-\C-N which
+can be remapped to Esc for ease of use.
 
 Then you type on: `2<C-\>`, and the result:
 
 Explain:
 
 
-- `2`: this is the terminal’s number (or ID), your first terminal is `1` (e.g. your 3rd terminal will be `3<C-\>`, so on).
-- C-\: this is the combined key mapping to the command `:ToggleTerm`.
+- `2`this is the terminal’s number (or ID), your first terminal is `1` (e.g. your 3rd terminal will be `3<C-\>`, so on).
+- C-\this is the combined key mapping to the command `:ToggleTerm`.
 
 
 FAQ ~
