@@ -70,6 +70,7 @@ jobs:
       - name: Push changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
+          token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
           commit_message: "chore(build): auto-generate vimdoc"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
