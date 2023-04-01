@@ -373,6 +373,9 @@ end
 ---@private
 function Terminal:__spawn()
   local cmd = self.cmd or config.get("shell")
+  if type(cmd) == "function" then
+    cmd = cmd()
+  end
   local command_sep = get_command_sep()
   local comment_sep = get_comment_sep()
   cmd = table.concat({
