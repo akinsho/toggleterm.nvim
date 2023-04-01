@@ -195,6 +195,7 @@ require("toggleterm").setup{
   direction = 'vertical' | 'horizontal' | 'tab' | 'float',
   close_on_exit = true, -- close the terminal window when the process exits
   shell = vim.o.shell, -- change the default shell
+  quote_command = false, -- put quotes arround the command sent to the terminal, required for Windows using git bash
   auto_scroll = true, -- automatically scroll to the bottom on terminal output
   -- This field is only relevant if direction is set to 'float'
   float_opts = {
