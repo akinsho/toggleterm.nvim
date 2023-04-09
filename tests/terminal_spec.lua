@@ -320,6 +320,17 @@ describe("ToggleTerm tests:", function()
       assert.is_false(vim.tbl_contains(api.nvim_list_wins(), test1.window))
     end)
 
+    it("should execute the same regardless whether shell is a string or a function", function()
+      toggleterm.setup { shell = function() return vim.o.shell end }
+      local test1 = Terminal:new():toggle()
+      local _ = match._
+      spy.on(test1, "send")
+      toggleterm.exec('echo "hello world"', 1)
+      assert.spy(test1.send).was_called()
+      assert.spy(test1.send).was_called_with(_, 'echo "hello world"', true)
+      assert.is_true(vim.tbl_contains(api.nvim_list_wins(), test1.window))
+    end)
+
     it("should expand vim wildcards", function()
       local file = vim.fn.tempname() .. ".txt"
       vim.cmd(fmt("e %s", file))
