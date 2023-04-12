@@ -67,6 +67,37 @@ local function smart_toggle(size, dir, direction)
   end
 end
 
+---@param terminal_chooser fun(terminal_index: number, terminals_size: number)
+function M.neighbor_float_term(terminal_chooser)
+    if not ui.find_open_windows() then return end
+
+    local terminals = terms.get_all()
+    local focused_term_index
+    for index, terminal in ipairs(terminals) do
+        if terminal:is_focused() then focused_term_index = index end
+    end
+
+    if not focused_term_index or not terminals[focused_term_index]:is_float() then return end
+
+    local focused_term = terminals[focused_term_index]
+
+    local next_terminal_index = terminal_chooser(focused_term_index, #terminals)
+
+    local next_terminal = terminals[next_terminal_index]
+
+    focused_term:close()
+    terms.get_or_create_term(next_terminal.id):open()
+end
+
+function M.prev_float_term()
+    M.neighbor_float_term(function(focused_index, terminals_number) return focused_index == 1 and terminals_number or focused_index - 1 end)
+end
+
+function M.next_float_term()
+    M.neighbor_float_term(function(focused_index, terminals_number) return focused_index == terminals_number and 1 or focused_index + 1 end)
+end
+
+
 --- @param num number
 --- @param size number?
 --- @param dir string?
@@ -394,6 +425,16 @@ local function setup_commands()
     function(args) M.send_lines_to_terminal("single_line", true, args) end,
     { nargs = "?" }
   )
+
+  cmd(
+      "ToggleTermFloatNext",
+      function() M.next_float_term() end,
+      {})
+
+  cmd(
+      "ToggleTermFloatPrev",
+      function() M.prev_float_term() end,
+      {})
 
   cmd("ToggleTermSetName", function(opts)
     local no_count = not opts.count or opts.count < 1
