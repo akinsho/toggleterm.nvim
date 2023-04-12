@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.0](https://github.com/akinsho/toggleterm.nvim/compare/v2.5.0...v2.6.0) (2023-04-09)
+
+
+### Features
+
+* **config:** allow `shell` parameter to be a function ([#423](https://github.com/akinsho/toggleterm.nvim/issues/423)) ([a7857b6](https://github.com/akinsho/toggleterm.nvim/commit/a7857b6cbfdfc98df2a7b61591be16e1020c7a82))
+
 ## [2.5.0](https://github.com/akinsho/toggleterm.nvim/compare/2.4.0...v2.5.0) (2023-03-31)
 
 
