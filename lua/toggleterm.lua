@@ -120,13 +120,14 @@ end
 local function on_term_open()
   local id, term = terms.identify()
   if not term then
+    local buf = api.nvim_get_current_buf()
     terms.Terminal
       :new({
         id = id,
-        bufnr = api.nvim_get_current_buf(),
+        bufnr = buf,
         window = api.nvim_get_current_win(),
         highlights = config.highlights,
-        job_id = vim.b.terminal_job_id,
+        job_id = vim.b[buf].terminal_job_id,
         direction = ui.guess_direction(),
       })
       :__resurrect()
@@ -360,42 +361,59 @@ local function request_term_name(term)
   end)
 end
 
+local function select_terminal(opts)
+  local terminals = terms.get_all(opts.bang)
+  if #terminals == 0 then return utils.notify("No toggleterms are open yet", "info") end
+  vim.ui.select(terminals, {
+    prompt = "Please select a terminal to open (or focus): ",
+    format_item = function(term) return term.id .. ": " .. term:_display_name() end,
+  }, function(term)
+    if not term then return end
+    if term:is_open() then
+      term:focus()
+    else
+      term:open()
+    end
+  end)
+end
+
 local function setup_commands()
-  local cmd = api.nvim_create_user_command
+  local command = api.nvim_create_user_command
+  command("TermSelect", select_terminal, { bang = true })
   -- Count is 0 by default
-  cmd(
+  command(
     "TermExec",
     function(opts) M.exec_command(opts.args, opts.count) end,
     { count = true, complete = commandline.term_exec_complete, nargs = "*" }
   )
 
-  cmd(
+  command(
     "ToggleTerm",
     function(opts) M.toggle_command(opts.args, opts.count) end,
     { count = true, complete = commandline.toggle_term_complete, nargs = "*" }
   )
 
-  cmd("ToggleTermToggleAll", function(opts) M.toggle_all(opts.bang) end, { bang = true })
+  command("ToggleTermToggleAll", function(opts) M.toggle_all(opts.bang) end, { bang = true })
 
-  cmd(
+  command(
     "ToggleTermSendVisualLines",
     function(args) M.send_lines_to_terminal("visual_lines", true, args) end,
     { range = true, nargs = "?" }
   )
 
-  cmd(
+  command(
     "ToggleTermSendVisualSelection",
     function(args) M.send_lines_to_terminal("visual_selection", true, args) end,
     { range = true, nargs = "?" }
   )
 
-  cmd(
+  command(
     "ToggleTermSendCurrentLine",
     function(args) M.send_lines_to_terminal("single_line", true, args) end,
     { nargs = "?" }
   )
 
-  cmd("ToggleTermSetName", function(opts)
+  command("ToggleTermSetName", function(opts)
     local no_count = not opts.count or opts.count < 1
     local no_name = opts.args == ""
     if no_count and no_name then

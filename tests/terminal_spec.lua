@@ -321,7 +321,7 @@ describe("ToggleTerm tests:", function()
     end)
 
     it("should execute the same regardless whether shell is a string or a function", function()
-      toggleterm.setup { shell = function() return vim.o.shell end }
+      toggleterm.setup({ shell = function() return vim.o.shell end })
       local test1 = Terminal:new():toggle()
       local _ = match._
       spy.on(test1, "send")
