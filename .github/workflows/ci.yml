@@ -3,11 +3,12 @@ on:
   push:
   pull_request:
 
+
 jobs:
   tests:
     strategy:
       matrix:
-        os: [ubuntu-latest] # TODO: one day -> windows-latest
+        os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
     permissions:
       # Give the default GITHUB_TOKEN write permission to commit and push the
@@ -34,13 +35,12 @@ jobs:
   stylua:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
-
-      - uses: JohnnyMorganz/stylua-action@1.0.0
+      - uses: JohnnyMorganz/stylua-action@v2
         with:
-          version: v0.14.3
+          version: latest
           token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
           args: --config-path=stylua.toml lua/
 
