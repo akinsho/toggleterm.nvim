@@ -282,6 +282,13 @@ You can send commands to a terminal without opening its window by using the
 see `:h expand()` for more details
 
 
+TERMSELECT ~
+
+This command uses `vim.ui.select` to allow a user to select a terminal to open
+or to focus it if it’s already open. This can be useful if you have a lot of
+terminals and want to open a specific one.
+
+
 SENDING LINES TO THE TERMINAL ~
 
 You can "send lines" to the toggled terminals with the following commands:
