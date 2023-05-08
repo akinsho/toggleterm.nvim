@@ -325,10 +325,10 @@ function Terminal:clear() self:send("clear") end
 
 ---Update the directory of an already opened terminal
 ---@param dir string
-function Terminal:change_dir(dir)
+function Terminal:change_dir(dir, go_back)
   dir = _get_dir(dir)
   if self.dir == dir then return end
-  self:send({ fmt("cd %s", dir), "clear" })
+  self:send({ fmt("cd %s", dir), "clear" }, go_back)
   self.dir = dir
 end
 
