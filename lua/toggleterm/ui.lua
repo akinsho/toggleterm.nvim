@@ -362,6 +362,8 @@ function M.open_float(term)
   local win = api.nvim_open_win(buf, true, M._get_float_config(term, true))
 
   term.window, term.bufnr = win, buf
+  -- partial fix for #391
+  vim.wo[win].sidescrolloff = 0
 
   if opts.winblend then vim.wo[win].winblend = opts.winblend end
   term:__set_options()
