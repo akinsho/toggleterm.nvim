@@ -1,4 +1,4 @@
-*toggleterm.txt*         For Neovim >= 0.8.0        Last change: 2023 April 24
+*toggleterm.txt*          For Neovim >= 0.8.0         Last change: 2023 May 18
 
 ==============================================================================
 Table of Contents                               *toggleterm-table-of-contents*
@@ -11,12 +11,9 @@ Table of Contents                               *toggleterm-table-of-contents*
 
 MULTIPLE ORIENTATIONS ~
 
-
 - **Float**
 
-
 - **Vertical**
-
 
 - **Tab**
 
@@ -67,7 +64,6 @@ compatible with nvim versions less than 0.7 please use the tag `v1.`.
 
 
 NOTICES                                                   *toggleterm-notices*
-
 
 - **28/07/1990** — If using `persist_mode` terminal mappings should be changed to use `wincmd` instead otherwise persist mode will not work correctly. See |toggleterm-here| for details.
 
@@ -243,7 +239,6 @@ will be changed to the specified direction.
 
 CAVEATS
 
-
 - Having multiple terminals with different directions open at the same time is unsupported.
 
 
@@ -292,7 +287,6 @@ terminals and want to open a specific one.
 SENDING LINES TO THE TERMINAL ~
 
 You can "send lines" to the toggled terminals with the following commands:
-
 
 - `:ToggleTermSendCurrentLine <T_ID>`sends the whole line where you are standing with your cursor
 - `:ToggleTermSendVisualLines <T_ID>`sends all the (whole) lines in your visual selection
@@ -505,7 +499,6 @@ can be remapped to Esc for ease of use.
 Then you type on: `2<C-\>`, and the result:
 
 Explain:
-
 
 - `2`this is the terminal’s number (or ID), your first terminal is `1` (e.g. your 3rd terminal will be `3<C-\>`, so on).
 - C-\this is the combined key mapping to the command `:ToggleTerm`.
