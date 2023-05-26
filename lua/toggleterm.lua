@@ -331,6 +331,58 @@ local function setup_autocommands(_)
     pattern = "term://*",
     callback = apply_colors,
   })
+  
+   -- PATCH: Add mouse support for ToggleTerm
+  local function set_mouse_with_toggleterm()
+    local n_mouse = vim.o.mouse
+
+    -- Disable nvim mouse support while we are on the toggleterm buffer
+    if string.match(n_mouse, "[a|h|n]") then
+      api.nvim_create_autocmd({ "TermEnter", "WinEnter <buffer>" }, {
+        desc = "Disable nvim mouse support while we are on the toggleterm buffer",
+        group = AUGROUP,
+        callback = function() vim.api.nvim_set_option("mouse", "") end,
+      })
+      -- Restore mouse mode on exiting toggleterm
+      api.nvim_create_autocmd({ "TermLeave", "WinLeave <buffer>" }, {
+        desc = "Disable nvim mouse support while we are on the toggleterm buffer",
+        group = AUGROUP,
+        callback = function() vim.api.nvim_set_option("mouse", n_mouse) end,
+      })
+    end
+
+    -- Extra mouse fix for tmux
+    -- If tmux mouse mode is enabled
+    local output = vim.fn.system 'tmux display -p "#{mouse}"'
+    if output:sub(1, 1) == "1" then
+      -- Disable tmux mouse while using toggleterm
+      api.nvim_create_autocmd({ "TermEnter", "WinEnter <buffer>" }, {
+        desc = "Disable tmux mouse while using toggleterm",
+        group = AUGROUP,
+        callback = function() vim.fn.system "tmux set mouse off" end,
+      })
+
+      -- Enable tmux mouse when mouse leaves toggleterm
+      api.nvim_create_autocmd({ "WinLeave <buffer>" }, {
+        desc = "Enable tmux mouse when mouse leaves toggleterm",
+        group = AUGROUP,
+        callback = function() vim.fn.system "tmux set mouse on" end,
+      })
+    end
+  end
+
+  -- Entry point
+  api.nvim_create_autocmd({ "FileType rnvimr" }, {
+    desc = "If we are on the rnvimr buffer, execute the callback",
+    group = AUGROUP,
+    callback = function()
+      -- Apply only to toggleterm
+      if vim.bo.filetype == "toggleterm" then
+        set_mouse_with_toggleterm()
+      end
+    end,
+  })
+
 end
 
 ---------------------------------------------------------------------------------
