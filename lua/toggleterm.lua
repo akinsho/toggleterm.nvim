@@ -352,22 +352,23 @@ local function setup_autocommands(_)
     end
 
     -- Extra mouse fix for tmux
-    -- If tmux mouse mode is enabled
-    local output = vim.fn.system 'tmux display -p "#{mouse}"'
-    if output:sub(1, 1) == "1" then
-      -- Disable tmux mouse while using toggleterm
-      api.nvim_create_autocmd({ "TermEnter", "WinEnter <buffer>" }, {
-        desc = "Disable tmux mouse while using toggleterm",
-        group = AUGROUP,
-        callback = function() vim.fn.system "tmux set mouse off" end,
-      })
+    if os.getenv "TMUX" ~= nil then
+      local output = vim.fn.system 'tmux display -p "#{mouse}"'
+      if output:sub(1, 1) == "1" then
+        -- Disable tmux mouse while using toggleterm
+        autocmd({ "TermEnter", "WinEnter <buffer>" }, {
+          desc = "Disable tmux mouse while using toggleterm",
+          group = toggleterm_mouse_group,
+          callback = function() vim.fn.system "tmux set mouse off" end,
+        })
 
-      -- Enable tmux mouse when mouse leaves toggleterm
-      api.nvim_create_autocmd({ "WinLeave <buffer>" }, {
-        desc = "Enable tmux mouse when mouse leaves toggleterm",
-        group = AUGROUP,
-        callback = function() vim.fn.system "tmux set mouse on" end,
-      })
+        -- Enable tmux mouse when mouse leaves toggleterm
+        autocmd({ "WinLeave <buffer>" }, {
+          desc = "Enable tmux mouse when mouse leaves toggleterm",
+          group = toggleterm_mouse_group,
+          callback = function() vim.fn.system "tmux set mouse on" end,
+        })
+      end
     end
   end
 
