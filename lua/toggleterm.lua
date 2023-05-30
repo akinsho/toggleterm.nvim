@@ -373,7 +373,6 @@ local function setup_autocommands(_)
     end
   end
 
-
   -- Entry point
   api.nvim_create_autocmd({ "FileType rnvimr" }, {
     desc = "If we are on the rnvimr buffer, execute the callback",
