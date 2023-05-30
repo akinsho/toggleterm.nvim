@@ -340,13 +340,13 @@ local function setup_autocommands(_)
     if string.match(n_mouse, "[a|h|n]") then
       api.nvim_create_autocmd({ "TermEnter", "WinEnter" }, {
         desc = "Disable nvim mouse support while we are on the toggleterm buffer",
-        group = toggleterm_mouse_group,
+        group = AUGROUP,
         callback = function() vim.api.nvim_set_option("mouse", "") end,
       })
       -- Restore mouse mode on exiting toggleterm, or vim.
       api.nvim_create_autocmd({ "TermLeave", "WinLeave" }, {
         desc = "Disable nvim mouse support while we are on the toggleterm buffer",
-        group = toggleterm_mouse_group,
+        group = AUGROUP,
         callback = function() vim.api.nvim_set_option("mouse", n_mouse) end,
       })
     end
@@ -359,14 +359,14 @@ local function setup_autocommands(_)
         -- Disable tmux mouse while using toggleterm
         api.nvim_create_autocmd({ "TermEnter", "WinEnter" }, {
           desc = "Disable tmux mouse while using toggleterm",
-          group = toggleterm_mouse_group,
+          group = AUGROUP,
           callback = function() vim.fn.system("tmux set mouse off") end,
         })
 
         -- Enable tmux mouse when mouse leaves toggleterm
         api.nvim_create_autocmd({ "WinLeave", "VimLeave" }, {
           desc = "Enable tmux mouse when mouse leaves toggleterm",
-          group = toggleterm_mouse_group,
+          group = AUGROUP,
           callback = function() vim.fn.system("tmux set mouse on") end,
         })
       end
