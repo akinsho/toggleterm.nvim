@@ -352,7 +352,7 @@ local function setup_autocommands(_)
     end
 
     -- Extra mouse fix for tmux
-    if os.getenv "TMUX" ~= nil then
+    if vim.env.TMUX then
       local output = vim.fn.system 'tmux display -p "#{mouse}"'
       if output:sub(1, 1) == "1" then
         -- Disable tmux mouse while using toggleterm
