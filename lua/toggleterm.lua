@@ -332,7 +332,7 @@ local function setup_autocommands(_)
     callback = apply_colors,
   })
   
-   -- PATCH: Add mouse support for ToggleTerm
+  -- PATCH: Add mouse support for ToggleTerm
   local function set_mouse_with_toggleterm()
     local n_mouse = vim.o.mouse
 
