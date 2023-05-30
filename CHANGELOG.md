@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.7.0](https://github.com/akinsho/toggleterm.nvim/compare/v2.6.0...v2.7.0) (2023-05-22)
+
+
+### Features
+
+* add a terminal select command ([#429](https://github.com/akinsho/toggleterm.nvim/issues/429)) ([c8574d7](https://github.com/akinsho/toggleterm.nvim/commit/c8574d7a7d2e5682de4479463ddba794390c0e40))
+* allow changing terminal dir in background ([#438](https://github.com/akinsho/toggleterm.nvim/issues/438)) ([f5cf0b1](https://github.com/akinsho/toggleterm.nvim/commit/f5cf0b1eebd95ba4edc69e2fbd13e1a289048d5d))
+
+
+### Bug Fixes
+
+* **float:** ensure sidescroll is zero ([43b75f4](https://github.com/akinsho/toggleterm.nvim/commit/43b75f43aa7590228d88945525c737f0ddc05c22))
+
 ## [2.6.0](https://github.com/akinsho/toggleterm.nvim/compare/v2.5.0...v2.6.0) (2023-04-09)
 
 
