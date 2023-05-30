@@ -52,6 +52,7 @@ local config = {
   shell = vim.o.shell,
   autochdir = false,
   auto_scroll = true,
+  mouse_support = true,
   winbar = {
     enabled = false,
     name_formatter = function(term) return fmt("%d:%s", term.id, term:_display_name()) end,
