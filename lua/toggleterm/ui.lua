@@ -139,7 +139,11 @@ function M.hl_term(term)
     return hi_target
   end, hl_names)
 
-  vim.wo[window].winhighlight = table.concat(highlights, ",")
+  vim.api.nvim_set_option_value(
+    "winhighlight",
+    table.concat(highlights, ","),
+    { scope = "local", win = window }
+  )
 end
 
 ---Create a terminal buffer with the correct buffer/window options
@@ -151,13 +155,11 @@ local function create_term_buf_if_needed(term)
   -- If the buffer doesn't exist create a new one
   local valid_buf = term.bufnr and api.nvim_buf_is_valid(term.bufnr)
   local bufnr = valid_buf and term.bufnr or api.nvim_create_buf(false, false)
-
+  -- Assign buf to window to ensure window options are set correctly
+  api.nvim_win_set_buf(window, bufnr)
   term.window, term.bufnr = window, bufnr
   term:__set_options()
-  if valid_buf then return end
-  -- If the buffer didn't previously exist then assign it the window
   api.nvim_set_current_buf(bufnr)
-  api.nvim_win_set_buf(window, bufnr)
 end
 
 function M.create_buf() return api.nvim_create_buf(false, false) end
@@ -365,7 +367,9 @@ function M.open_float(term)
   -- partial fix for #391
   vim.wo[win].sidescrolloff = 0
 
-  if opts.winblend then vim.wo[win].winblend = opts.winblend end
+  if opts.winblend then
+    vim.api.nvim_set_option_value("winblend", opts.winblend, { scope = "local", win = win })
+  end
   term:__set_options()
 end
 
