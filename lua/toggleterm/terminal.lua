@@ -417,12 +417,12 @@ end
 function Terminal:__set_win_options()
   if self:is_split() then
     local field = self.direction == "vertical" and "winfixwidth" or "winfixheight"
-    vim.api.nvim_set_option_value(field, true, { scope = "local", win = self.window })
+    utils.wo_setlocal(self.window, field, true)
   end
 
   if config.hide_numbers then
-    vim.api.nvim_set_option_value("number", false, { scope = "local", win = self.window })
-    vim.api.nvim_set_option_value("relativenumber", false, { scope = "local", win = self.window })
+    utils.wo_setlocal(self.window, "number", false)
+    utils.wo_setlocal(self.window, "relativenumber", false)
   end
 end
 

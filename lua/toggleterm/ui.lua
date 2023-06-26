@@ -104,7 +104,8 @@ function M.set_winbar(term)
   then
     return
   end
-  vim.wo[term.window].winbar = fmt('%%{%%v:lua.require("toggleterm.ui").winbar(%d)%%}', term.id)
+  local value = fmt('%%{%%v:lua.require("toggleterm.ui").winbar(%d)%%}', term.id)
+  utils.wo_setlocal(term.window, "winbar", value)
 end
 
 ---apply highlights to a terminal
@@ -139,11 +140,7 @@ function M.hl_term(term)
     return hi_target
   end, hl_names)
 
-  vim.api.nvim_set_option_value(
-    "winhighlight",
-    table.concat(highlights, ","),
-    { scope = "local", win = window }
-  )
+  utils.wo_setlocal(window, "winhighlight", table.concat(highlights, ","))
 end
 
 ---Create a terminal buffer with the correct buffer/window options
@@ -365,11 +362,9 @@ function M.open_float(term)
 
   term.window, term.bufnr = win, buf
   -- partial fix for #391
-  vim.wo[win].sidescrolloff = 0
+  utils.wo_setlocal(win, "sidescrolloff", 0)
 
-  if opts.winblend then
-    vim.api.nvim_set_option_value("winblend", opts.winblend, { scope = "local", win = win })
-  end
+  if opts.winblend then utils.wo_setlocal(win, "winblend", opts.winblend) end
   term:__set_options()
 end
 
