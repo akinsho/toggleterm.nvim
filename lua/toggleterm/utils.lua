@@ -100,4 +100,13 @@ function M.get_visual_selection(res)
   end
 end
 
+--- Sets a local window option, like `:setlocal`
+--- TODO: replace with double-indexing on `vim.wo` when neovim/neovim#20288 (hopefully) merges
+---@param win number
+---@param option string
+---@param value any
+function M.wo_setlocal(win, option, value)
+  api.nvim_set_option_value(option, value, { scope = "local", win = win })
+end
+
 return M
