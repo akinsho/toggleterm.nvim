@@ -86,8 +86,8 @@ local function close_last_window(term)
   local only_one_window = fn.winnr("$") == 1
   if only_one_window and vim.bo[term.bufnr].filetype == constants.FILETYPE then
     if term:is_split() then
-      vim.cmd("keepalt bnext")
-      return true
+      local has_next = pcall(vim.cmd, "keepalt bnext")
+      return has_next
     end
   end
   return false
@@ -247,6 +247,7 @@ function _G.___toggleterm_winbar_click(id)
     term:toggle()
   end
 end
+
 --- If a count is provided we operate on the specific terminal buffer
 --- i.e. 2ToggleTerm => open or close Term 2
 --- if the count is 1 we use a heuristic which is as follows
