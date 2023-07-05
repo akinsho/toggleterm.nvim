@@ -1,4 +1,4 @@
-*toggleterm.txt*         For Neovim >= 0.8.0         Last change: 2023 July 03
+*toggleterm.txt*         For Neovim >= 0.8.0         Last change: 2023 July 05
 
 ==============================================================================
 Table of Contents                               *toggleterm-table-of-contents*
@@ -399,6 +399,9 @@ Each terminal can take the following arguments:
       on_exit = fun(t: Terminal, job: number, exit_code: number, name: string) -- function to run when terminal process exits
     }
 <
+
+If you want to spawn a custom terminal without running any command, you can
+omit the `cmd` option.
 
 
 CUSTOM TERMINAL USAGE
