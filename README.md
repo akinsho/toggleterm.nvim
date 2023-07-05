@@ -401,6 +401,8 @@ Terminal:new {
 }
 ```
 
+If you want to spawn a custom terminal without running any command, you can omit the `cmd` option.
+
 #### Custom terminal usage
 
 ```lua
