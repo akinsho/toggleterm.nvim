@@ -136,7 +136,7 @@ end
 
 ---@param id number terminal id
 local function on_vim_resized(id)
-  local term = M.get(id)
+  local term = M.get(id, true)
   if not term or not term:is_float() or not term:is_open() then return end
   ui.update_float(term)
 end
@@ -150,7 +150,6 @@ end
 ---Terminal buffer autocommands
 ---@param term Terminal
 local function setup_buffer_autocommands(term)
-  local conf = config.get()
   api.nvim_create_autocmd("TermClose", {
     buffer = term.bufnr,
     group = AUGROUP,
@@ -164,7 +163,7 @@ local function setup_buffer_autocommands(term)
     })
   end
 
-  if conf.start_in_insert then
+  if config.start_in_insert then
     -- Avoid entering insert mode when spawning terminal in the background
     if term.window == api.nvim_get_current_win() then vim.cmd("startinsert") end
   end

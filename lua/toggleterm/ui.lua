@@ -97,7 +97,7 @@ function M.set_winbar(term)
   if
     not config.winbar.enabled
     or not term
-    or term:is_float()
+    or term:is_float() -- TODO: make this configurable
     or fn.exists("+winbar") ~= 1
     or not term.window
     or not api.nvim_win_is_valid(term.window)
