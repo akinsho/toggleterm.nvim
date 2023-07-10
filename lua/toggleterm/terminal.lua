@@ -393,8 +393,6 @@ function Terminal:__spawn()
   })
   self.name = cmd
   self.dir = dir
-  setup_buffer_autocommands(self)
-  setup_buffer_mappings(self.bufnr)
 end
 
 ---@package
@@ -452,12 +450,16 @@ end
 
 ---Spawn terminal background job in a buffer without a window
 function Terminal:spawn()
-  if not (self.bufnr and api.nvim_buf_is_valid(self.bufnr)) then
-    self.bufnr = ui.create_buf()
-    self:__add()
+  if not self.bufnr or not api.nvim_buf_is_valid(self.bufnr) then self.bufnr = ui.create_buf() end
+  self:__add()
+  if api.nvim_get_current_buf() ~= self.bufnr then
     api.nvim_buf_call(self.bufnr, function() self:__spawn() end)
-    if self.on_create then self:on_create() end
+  else
+    self:__spawn()
   end
+  setup_buffer_autocommands(self)
+  setup_buffer_mappings(self.bufnr)
+  if self.on_create then self:on_create() end
 end
 
 ---Open a terminal window
@@ -470,11 +472,7 @@ function Terminal:open(size, direction)
   if not self.bufnr or not api.nvim_buf_is_valid(self.bufnr) then
     local ok, err = pcall(opener, size, self)
     if not ok and err then return utils.notify(err, "error") end
-    self:__add()
-    self:__spawn()
-    setup_buffer_autocommands(self)
-    setup_buffer_mappings(self.bufnr)
-    if self.on_create then self:on_create() end
+    self:spawn()
   else
     local ok, err = pcall(opener, size, self)
     if not ok and err then return utils.notify(err, "error") end
