@@ -393,6 +393,8 @@ function Terminal:__spawn()
   })
   self.name = cmd
   self.dir = dir
+  setup_buffer_autocommands(self)
+  setup_buffer_mappings(self.bufnr)
 end
 
 ---@package
@@ -454,8 +456,6 @@ function Terminal:spawn()
     self.bufnr = ui.create_buf()
     self:__add()
     api.nvim_buf_call(self.bufnr, function() self:__spawn() end)
-    setup_buffer_autocommands(self)
-    setup_buffer_mappings(self.bufnr)
     if self.on_create then self:on_create() end
   end
 end
