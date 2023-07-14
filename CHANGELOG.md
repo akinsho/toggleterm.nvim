@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.7.1](https://github.com/akinsho/toggleterm.nvim/compare/v2.7.0...v2.7.1) (2023-07-10)
+
+
+### Bug Fixes
+
+* handle errors when switching buffer [#453](https://github.com/akinsho/toggleterm.nvim/issues/453) ([#454](https://github.com/akinsho/toggleterm.nvim/issues/454)) ([029ad96](https://github.com/akinsho/toggleterm.nvim/commit/029ad968fd5a06ac5e29afe083d0a61be68e792b))
+* replace vim.wo with nvim_set_option_value ([#449](https://github.com/akinsho/toggleterm.nvim/issues/449)) ([7da102a](https://github.com/akinsho/toggleterm.nvim/commit/7da102a9c2fa1dd190c11faea03ee1c47af03d02))
+* **terminal:** allow resizing hidden terminals ([bacbaa7](https://github.com/akinsho/toggleterm.nvim/commit/bacbaa7480344e4cfcebdf46fdfc058b3cb04648)), closes [#459](https://github.com/akinsho/toggleterm.nvim/issues/459)
+
 ## [2.7.0](https://github.com/akinsho/toggleterm.nvim/compare/v2.6.0...v2.7.0) (2023-05-22)
 
 
