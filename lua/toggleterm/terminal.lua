@@ -33,6 +33,7 @@ local function get_comment_sep() return is_windows and is_cmd(vim.o.shell) and "
 
 local function get_newline_chr()
   local shell = config.get("shell")
+  if type(shell) == "function" then shell = shell() end
   return is_windows and (is_pwsh(shell) and "\r" or "\r\n") or "\n"
 end
 
