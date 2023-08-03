@@ -46,7 +46,7 @@ end
 local terminals = {}
 
 --- @class TermCreateArgs
---- @field cmd string
+--- @field cmd? string a custom command to run
 --- @field direction? string the layout style for the terminal
 --- @field id number?
 --- @field highlights table<string, table<string, string>>?
