@@ -357,7 +357,7 @@ end
 local function set_term_name(name, term) term.display_name = name end
 
 local function request_term_name(term)
-  vim.ui.input({ prompt = "Please set a name for the terminal" }, function(name)
+  vim.ui.input({ prompt = "Please set a name for the terminal: " }, function(name)
     if name and #name > 0 then set_term_name(name, term) end
   end)
 end
