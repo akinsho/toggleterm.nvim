@@ -15,6 +15,7 @@ local is_windows = vim.loop.os_uname().version:match("Windows")
 ---@field cmd string?
 ---@field dir string?
 ---@field size number?
+---@field name string?
 ---@field go_back boolean?
 ---@field open boolean?
 
@@ -144,12 +145,16 @@ local term_exec_options = {
   --- The size param takes in arbitrary numbers, we keep this function only to
   --- match the signature of other options
   size = function() return {} end,
+  --- The name param takes in arbitrary strings, we keep this function only to
+  --- match the signature of other options
+  name = function() return {} end,
 }
 
 local toggle_term_options = {
   dir = term_exec_options.dir,
   direction = term_exec_options.direction,
   size = term_exec_options.size,
+  name = term_exec_options.name,
 }
 
 ---@param options table a dictionary of key to function

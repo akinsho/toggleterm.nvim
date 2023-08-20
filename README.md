@@ -225,10 +225,10 @@ require("toggleterm").setup{
 
 This is the command the mappings call under the hood. You can use it directly
 and prefix it with a count to target a specific terminal. This function also takes
-arguments `size`, `dir` and `direction`. e.g.
+arguments `size`, `dir`, `direction` and `name`. e.g.
 
 ```vim
-:ToggleTerm size=40 dir=~/Desktop direction=horizontal
+:ToggleTerm size=40 dir=~/Desktop direction=horizontal name=desktop
 ```
 
 If `dir` is specified on creation toggle term will open at the specified directory.
@@ -243,6 +243,9 @@ the height/width of all terminals in the same direction will be changed to `size
 
 If `direction` is specified, and the command opens a terminal,
 the terminal will be changed to the specified direction.
+
+If `name` is specified, the display name is set for the toggled terminal. This name will be visible
+when using `TermSelect` command to indicate the specific terminal.
 
 `size` and `direction` are ignored if the command closes a terminal.
 
@@ -268,7 +271,7 @@ The `cmd` and `dir` arguments can also expand the same special keywords as `:h e
 
 These special keywords can be escaped using the `\` character, if you want to print character as is.
 
-The `size` and `direction` arguments are like the `size` and `direction` arguments of `ToggleTerm`.
+The `size`, `direction` and `name` arguments are like the `size`, `direction` and `name` arguments of `ToggleTerm`.
 
 By default, focus is returned to the original window after executing the command
 (except for floating terminals). Use argument `go_back=0` to disable this behaviour.

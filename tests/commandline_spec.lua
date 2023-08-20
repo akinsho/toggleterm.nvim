@@ -34,6 +34,13 @@ describe("Commandline tests:", function()
     assert.equal(34, result.size)
   end)
 
+  it("should handle name args correctly", function()
+    local result = parser.parse("name=sample")
+    assert.is_truthy(result.name)
+    assert.is_true(type(result.name) == "string")
+    assert.equal("sample", result.name)
+  end)
+
   it("should handle go_back args correctly", function()
     local result = parser.parse("go_back=0")
     assert.is_true(type(result.go_back) == "boolean")
