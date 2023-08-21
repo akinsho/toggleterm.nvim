@@ -2,6 +2,7 @@
   uses: actions/checkout@v3
   with:
     path: main
+    token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
 
 - name: Checkout private tools
   uses: actions/checkout@v3
