@@ -92,11 +92,12 @@ local term_exec_options = {
     local commands = {}
 
     for _, path in ipairs(paths) do
-      -- solve space in file names
-      local glob_str = ''
+      local glob_str
       if string.match(path, '%s+') or #(path) == 0 then
+        -- path with spaces
         glob_str = path:gsub(" ", "\\ ") .. "/" .. (typed_cmd or "") .. "*"
       else
+        -- path without spaces
         glob_str = path .. "/" .. (typed_cmd or "") .. "*"
       end
 
