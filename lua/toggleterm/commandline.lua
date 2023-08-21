@@ -94,8 +94,7 @@ local term_exec_options = {
     for _, path in ipairs(paths) do
       -- solve space in file names
       if path ~= '' 
-      local glob_str = path.gsub(" ", "\\ ") 
-          .. "/" .. (typed_cmd or "") .. "*"
+      local glob_str = path.gsub(" ", "\\ ") .. "/" .. (typed_cmd or "") .. "*"
       end
       else
         local glob_str = path .. "/" .. (typed_cmd or "") .. "*"
