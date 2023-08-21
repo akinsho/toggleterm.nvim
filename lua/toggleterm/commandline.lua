@@ -93,13 +93,13 @@ local term_exec_options = {
 
     for _, path in ipairs(paths) do
       -- solve space in file names
-      local glob_str = ""
-
-      if (string.match(path, "%s+")) then
-        glob_str = "'" .. path .. "'"
+      local glob_str = ''
+      if string.match(path, '%s+') then
+        glob_str = path:gsub(" ", "\\ ") .. "/" ..  (typed_cmd or "") .. "/*"
       else
-        glob_str = path.gsub(" ", "\\ ") .. "/" .. (typed_cmd or "") .. "*"
+        glob_str = path .. "/" ..  (typed_cmd or "") .. "/*"
       end
+      
       local dir_cmds = vim.split(vim.fn.glob(glob_str), "\n")
 
       for _, cmd in ipairs(dir_cmds) do
