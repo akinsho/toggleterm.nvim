@@ -21,4 +21,4 @@ runner."
         run: |
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
-
+token: ${{ secrets.GITHUB_TOKEN }}
