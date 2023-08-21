@@ -95,7 +95,6 @@ local term_exec_options = {
       -- solve space in file names
       if path == nil then 
       local glob_str = path .. "/" .. (typed_cmd or "") .. "*"
-      end
       else 
         local glob_str = path.gsub(" ", "\\ ") .. "/" .. (typed_cmd or "") .. "*"
       end
