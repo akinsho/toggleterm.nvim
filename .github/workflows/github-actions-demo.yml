@@ -1,5 +1,5 @@
 - name: Checkout
   uses: actions/checkout@v3
   with:
-    token: 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
+    token:  ${{ secrets.GITHUB_TOKEN }}
 
