@@ -93,7 +93,7 @@ local term_exec_options = {
 
     for _, path in ipairs(paths) do
       local glob_str
-      if string.match(path, '%s+') or #(path) == 0 then
+      if string.match(path, "%s+") or #path == 0 then
         -- path with spaces
         glob_str = path:gsub(" ", "\\ ") .. "/" .. (typed_cmd or "") .. "*"
       else
