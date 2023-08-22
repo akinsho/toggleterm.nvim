@@ -36,13 +36,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
       - uses: JohnnyMorganz/stylua-action@v2
         with:
           version: latest
-
-          token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           args: --config-path=stylua.toml lua/
 
       - uses: stefanzweifel/git-auto-commit-action@v4
@@ -53,7 +50,6 @@ jobs:
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
 
   docs:
@@ -71,7 +67,8 @@ jobs:
       - name: Push changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
+          token: ${{ secrets.PAT }}
+          opts.auth: token 
           commit_message: "chore(build): auto-generate vimdoc"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
