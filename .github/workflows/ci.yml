@@ -39,7 +39,7 @@ jobs:
       - uses: JohnnyMorganz/stylua-action@v2
         with:
           version: latest
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           args: --config-path=stylua.toml lua/
 
       - uses: stefanzweifel/git-auto-commit-action@v4
