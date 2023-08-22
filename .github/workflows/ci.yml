@@ -4,7 +4,7 @@ on:
   pull_request:
 
 permissions: read-all
-env: GITHUB_TOKEN: $ { { secrets.PAT }}
+
 jobs:
   tests:
     strategy:
@@ -40,7 +40,7 @@ jobs:
       - uses: JohnnyMorganz/stylua-action@v2
         with:
           version: latest
-
+          token: ${{ secrets.PAT }}
           args: --config-path=stylua.toml lua/
 
       - uses: stefanzweifel/git-auto-commit-action@v4
@@ -68,7 +68,7 @@ jobs:
       - name: Push changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          token: 
+          token: ${{ secrets.PAT }}
           commit_message: "chore(build): auto-generate vimdoc"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
