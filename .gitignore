@@ -1,1 +1,3 @@
 .tests/
+.github/workflows/ci.yml
+.github/.DS_Store
