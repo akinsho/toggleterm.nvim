@@ -194,7 +194,7 @@ function Terminal:new(term)
   local conf = config.get()
   self.__index = self
   term.direction = term.direction or conf.direction
-  term.id = id or next_id()
+  term.id = id
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
   term.clear_env = term.clear_env
   term.auto_scroll = vim.F.if_nil(term.auto_scroll, conf.auto_scroll)
@@ -452,6 +452,7 @@ end
 ---Spawn terminal background job in a buffer without a window
 function Terminal:spawn()
   if not self.bufnr or not api.nvim_buf_is_valid(self.bufnr) then self.bufnr = ui.create_buf() end
+  if not self.id then self.id = next_id() end
   self:__add()
   if api.nvim_get_current_buf() ~= self.bufnr then
     api.nvim_buf_call(self.bufnr, function() self:__spawn() end)
