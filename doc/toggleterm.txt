@@ -1,4 +1,4 @@
-*toggleterm.txt*        For Neovim >= 0.8.0        Last change: 2023 August 03
+*toggleterm.txt*       For Neovim >= 0.8.0      Last change: 2023 September 06
 
 ==============================================================================
 Table of Contents                               *toggleterm-table-of-contents*
@@ -257,8 +257,8 @@ terminal 2. note that the `cmd` argument **must be quoted**.
 _NOTE:_ the `dir` argument can also be _optionally_ quoted if it contains
 spaces.
 
-The `cmd` and `dir` arguments can also expand the same special keywords as `:h
-expand` e.g. `TermExec cmd="echo %"` will be expanded to `TermExec cmd="echo
+The `cmd` and `dir` arguments can also expand the same special keywords as
+|expand| e.g. `TermExec cmd="echo %"` will be expanded to `TermExec cmd="echo
 /file/example"`
 
 These special keywords can be escaped using the `\` character, if you want to
@@ -274,7 +274,7 @@ this behaviour.
 You can send commands to a terminal without opening its window by using the
 `open=0` argument.
 
-see `:h expand()` for more details
+see |expand()| for more details
 
 
 TERMSELECT ~
