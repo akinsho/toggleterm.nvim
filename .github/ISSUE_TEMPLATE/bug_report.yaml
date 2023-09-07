@@ -11,6 +11,10 @@ body:
         Do not open an issue using just a premade configuration, the most productive
         way to debug an issue is using a minimal init.lua that does nothing other than
         load this plugin and do the few other steps required to reproduce the issue.
+
+        Please note if you have not tested your issue with a minimal configuration I will close
+        it. Many problems are caused by misconfiguration and interactions this takes up a lot of
+        my time to narrow down. Please always use a minimal config when reporting bugs.
       options:
         - label: I have searched the existing issues
           required: true
