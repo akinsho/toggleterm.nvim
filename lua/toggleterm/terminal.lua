@@ -536,6 +536,20 @@ function M.get(id, include_hidden)
   return (term and (include_hidden == true or not term.hidden)) and term or nil
 end
 
+---Get the first terminal that matches a predicate
+---@param predicate fun(term: Terminal): boolean
+---@return Terminal?
+function M.find(predicate)
+  if type(predicate) ~= "function" then
+    utils.notify("terminal.find expects a function, got " .. type(predicate), "error")
+    return
+  end
+  for _, term in pairs(terminals) do
+    if predicate(term) then return term end
+  end
+  return nil
+end
+
 ---Return the potentially non contiguous map of terminals as a sorted array
 ---@param include_hidden boolean? whether or nor to filter out hidden
 ---@return Terminal[]
