@@ -1,5 +1,25 @@
 # Changelog
 
+## [2.8.0](https://github.com/akinsho/toggleterm.nvim/compare/v2.7.1...v2.8.0) (2023-09-11)
+
+
+### Features
+
+* add `Terminal.find` function ([#486](https://github.com/akinsho/toggleterm.nvim/issues/486)) ([01a84bc](https://github.com/akinsho/toggleterm.nvim/commit/01a84bc642484681933140537c3ff99b10b8a866))
+* add name param to ToggleTerm and TermExec ([#479](https://github.com/akinsho/toggleterm.nvim/issues/479)) ([81ea9f7](https://github.com/akinsho/toggleterm.nvim/commit/81ea9f71a3fd7621fd02b2c74861595378a3c938))
+
+
+### Bug Fixes
+
+* **#487:** avoid terminal id collisions in __add ([#490](https://github.com/akinsho/toggleterm.nvim/issues/490)) ([6bec54e](https://github.com/akinsho/toggleterm.nvim/commit/6bec54e73807919b15fc92824fb48be32fb7e8ea))
+* determine custom terminal ids on spawn ([#488](https://github.com/akinsho/toggleterm.nvim/issues/488)) ([8572917](https://github.com/akinsho/toggleterm.nvim/commit/8572917413dd039d1a53b007df5c571e2a3b8ad7))
+* TermExec cmd with config.shell as function ([#467](https://github.com/akinsho/toggleterm.nvim/issues/467)) ([83871e3](https://github.com/akinsho/toggleterm.nvim/commit/83871e3c34837117644d83f422ee6c869b61891f))
+
+
+### Reverts
+
+* determine custom terminal ids on spawn ([#488](https://github.com/akinsho/toggleterm.nvim/issues/488)) ([0e4dcb8](https://github.com/akinsho/toggleterm.nvim/commit/0e4dcb8f0914bd191f732cae826df59f174359fe))
+
 ## [2.7.1](https://github.com/akinsho/toggleterm.nvim/compare/v2.7.0...v2.7.1) (2023-07-10)
 
 
