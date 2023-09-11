@@ -3,7 +3,7 @@ describe("command-complete", function()
   it("should return the default options", function()
     local results = command_complete.term_exec_complete("", "TermExec ", 9)
 
-    assert.is_equal("cmd=, dir=, direction=, size=", table.concat(results, ", "))
+    assert.is_equal("cmd=, dir=, direction=, name=, size=", table.concat(results, ", "))
   end)
 
   describe("helpers", function()

@@ -195,6 +195,7 @@ function Terminal:new(term)
   self.__index = self
   term.direction = term.direction or conf.direction
   term.id = id or next_id()
+  term.display_name = term.display_name
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
   term.clear_env = term.clear_env
   term.auto_scroll = vim.F.if_nil(term.auto_scroll, conf.auto_scroll)
@@ -519,13 +520,14 @@ end
 ---@param num number?
 ---@param dir string?
 ---@param direction string?
+---@param name string?
 ---@return Terminal
 ---@return boolean
-function M.get_or_create_term(num, dir, direction)
+function M.get_or_create_term(num, dir, direction, name)
   local term = M.get(num)
   if term then return term, false end
   if dir and fn.isdirectory(fn.expand(dir)) == 0 then dir = nil end
-  return Terminal:new({ id = num, dir = dir, direction = direction }), true
+  return Terminal:new({ id = num, dir = dir, direction = direction, display_name = name }), true
 end
 
 ---Get a single terminal by id, unless it is hidden

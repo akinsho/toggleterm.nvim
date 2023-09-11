@@ -55,12 +55,13 @@ end
 ---@param size number?
 ---@param dir string?
 ---@param direction string?
-local function smart_toggle(size, dir, direction)
+---@param name string?
+local function smart_toggle(size, dir, direction, name)
   local has_open, windows = ui.find_open_windows()
   if not has_open then
     if not ui.open_terminal_view(size, direction) then
       local term_id = terms.get_toggled_id()
-      terms.get_or_create_term(term_id, dir, direction):open(size, direction)
+      terms.get_or_create_term(term_id, dir, direction, name):open(size, direction)
     end
   else
     ui.close_and_save_terminal_view(windows)
@@ -71,8 +72,9 @@ end
 --- @param size number?
 --- @param dir string?
 --- @param direction string?
-local function toggle_nth_term(num, size, dir, direction)
-  local term = terms.get_or_create_term(num, dir, direction)
+--- @param name string?
+local function toggle_nth_term(num, size, dir, direction, name)
+  local term = terms.get_or_create_term(num, dir, direction, name)
   ui.update_origin_window(term.window)
   term:toggle(size, direction)
   -- Save the terminal in view if it was last closed terminal.
@@ -149,10 +151,20 @@ function M.exec_command(args, count)
     size = { parsed.size, "number", true },
     dir = { parsed.dir, "string", true },
     direction = { parsed.direction, "string", true },
+    name = { parsed.name, "string", true },
     go_back = { parsed.go_back, "boolean", true },
     open = { parsed.open, "boolean", true },
   })
-  M.exec(parsed.cmd, count, parsed.size, parsed.dir, parsed.direction, parsed.go_back, parsed.open)
+  M.exec(
+    parsed.cmd,
+    count,
+    parsed.size,
+    parsed.dir,
+    parsed.direction,
+    parsed.name,
+    parsed.go_back,
+    parsed.open
+  )
 end
 
 --- @param cmd string
@@ -160,21 +172,23 @@ end
 --- @param size number?
 --- @param dir string?
 --- @param direction string?
+--- @param name string?
 --- @param go_back boolean? whether or not to return to original window
 --- @param open boolean? whether or not to open terminal window
-function M.exec(cmd, num, size, dir, direction, go_back, open)
+function M.exec(cmd, num, size, dir, direction, name, go_back, open)
   vim.validate({
     cmd = { cmd, "string" },
     num = { num, "number", true },
     size = { size, "number", true },
     dir = { dir, "string", true },
     direction = { direction, "string", true },
+    name = { name, "string", true },
     go_back = { go_back, "boolean", true },
     open = { open, "boolean", true },
   })
   num = (num and num >= 1) and num or terms.get_toggled_id()
   open = open == nil or open
-  local term = terms.get_or_create_term(num, dir, direction)
+  local term = terms.get_or_create_term(num, dir, direction, name)
   if not term:is_open() then term:open(size, direction) end
   -- going back from floating window closes it
   if term:is_float() then go_back = false end
@@ -235,9 +249,10 @@ function M.toggle_command(args, count)
     size = { parsed.size, "number", true },
     dir = { parsed.dir, "string", true },
     direction = { parsed.direction, "string", true },
+    name = { parsed.name, "string", true },
   })
   if parsed.size then parsed.size = tonumber(parsed.size) end
-  M.toggle(count, parsed.size, parsed.dir, parsed.direction)
+  M.toggle(count, parsed.size, parsed.dir, parsed.direction, parsed.name)
 end
 
 function _G.___toggleterm_winbar_click(id)
@@ -259,11 +274,12 @@ end
 --- @param size number?
 --- @param dir string?
 --- @param direction string?
-function M.toggle(count, size, dir, direction)
+--- @param name string?
+function M.toggle(count, size, dir, direction, name)
   if count and count >= 1 then
-    toggle_nth_term(count, size, dir, direction)
+    toggle_nth_term(count, size, dir, direction, name)
   else
-    smart_toggle(size, dir, direction)
+    smart_toggle(size, dir, direction, name)
   end
 end
 
