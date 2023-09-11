@@ -216,6 +216,7 @@ end
 ---@package
 ---Add a terminal to the list of terminals
 function Terminal:__add()
+  if terminals[self.id] and terminals[self.id] ~= self then self.id = next_id() end
   if not terminals[self.id] then terminals[self.id] = self end
   return self
 end
