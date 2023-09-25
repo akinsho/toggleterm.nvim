@@ -1,4 +1,4 @@
-*toggleterm.txt*       For Neovim >= 0.8.0      Last change: 2023 September 11
+*toggleterm.txt*       For Neovim >= 0.8.0      Last change: 2023 September 25
 
 ==============================================================================
 Table of Contents                               *toggleterm-table-of-contents*
@@ -34,7 +34,7 @@ INSTALLATION                                         *toggleterm-installation*
 Using packer <https://github.com/wbthomason/packer.nvim> in lua
 
 >lua
-    use {"akinsho/toggleterm.nvim", tag = '', config = function()
+    use {"akinsho/toggleterm.nvim", tag = '*', config = function()
       require("toggleterm").setup()
     end}
 <
@@ -44,23 +44,23 @@ Using lazy.nvim <https://github.com/folke/lazy.nvim> in lua
 >lua
     {
       -- amongst your other plugins
-      {'akinsho/toggleterm.nvim', version = "", config = true}
+      {'akinsho/toggleterm.nvim', version = "*", config = true}
       -- or
-      {'akinsho/toggleterm.nvim', version = "", opts = {--[[ things you want to change go here]]}}
+      {'akinsho/toggleterm.nvim', version = "*", opts = {--[[ things you want to change go here]]}}
     }
 <
 
 Using vim-plug <https://github.com/junegunn/vim-plug> in vimscript
 
 >vim
-    Plug 'akinsho/toggleterm.nvim', {'tag' : ''}
+    Plug 'akinsho/toggleterm.nvim', {'tag' : '*'}
     
     lua require("toggleterm").setup()
 <
 
 You can/should specify a tag for the current major version of the plugin, to
 avoid breaking changes as this plugin evolves. To use a version of this plugin
-compatible with nvim versions less than 0.7 please use the tag `v1.`.
+compatible with nvim versions less than 0.7 please use the tag `v1.*`.
 
 
 NOTICES                                                   *toggleterm-notices*
@@ -121,7 +121,7 @@ alternatively you can do this manually (not recommended but, your prerogative)
 
 >vim
     " set
-    autocmd TermEnter term://toggleterm
+    autocmd TermEnter term://*toggleterm#*
           \ tnoremap <silent><c-t> <Cmd>exe v:count1 . "ToggleTerm"<CR>
     
     " By applying the mappings this way you can pass a count to your
@@ -144,7 +144,7 @@ what options are available. It is not written to be used as is.
         if term.direction == "horizontal" then
           return 15
         elseif term.direction == "vertical" then
-          return vim.o.columns  0.4
+          return vim.o.columns * 0.4
         end
       end,
       open_mapping = [[<c-\>]],
@@ -185,7 +185,7 @@ what options are available. It is not written to be used as is.
       auto_scroll = true, -- automatically scroll to the bottom on terminal output
       -- This field is only relevant if direction is set to 'float'
       float_opts = {
-        -- The border key is almost the same as 'nvim_open_win'
+        -- The border key is *almost* the same as 'nvim_open_win'
         -- see :h nvim_open_win for details on borders however
         -- the 'curved' border is a custom border type
         -- not natively supported but implemented in this plugin.
@@ -371,8 +371,8 @@ easier once toggled, whilst still keeping it open.
       vim.keymap.set('t', '<C-w>', [[<C-\><C-n><C-w>]], opts)
     end
     
-    -- if you only want these mappings for toggle term use term://toggleterm instead
-    vim.cmd('autocmd! TermOpen term:// lua set_terminal_keymaps()')
+    -- if you only want these mappings for toggle term use term://*toggleterm#* instead
+    vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
 <
 
 
