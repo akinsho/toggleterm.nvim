@@ -436,7 +436,9 @@ local function setup_commands()
     if no_count and no_name then
       get_subject_terminal(request_term_name)
     elseif no_name then
-      request_term_name()
+      local term = terms.get(opts.count)
+      if not term then return end
+      request_term_name(term)
     elseif no_count then
       get_subject_terminal(function(t) set_term_name(opts.args, t) end)
     else
@@ -444,7 +446,7 @@ local function setup_commands()
       if not term then return end
       set_term_name(opts.args, term)
     end
-  end, { nargs = "?" })
+  end, { nargs = "?", count = true })
 end
 
 function M.setup(user_prefs)
