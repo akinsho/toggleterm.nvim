@@ -249,6 +249,11 @@ when using `TermSelect` command to indicate the specific terminal.
 
 `size` and `direction` are ignored if the command closes a terminal.
 
+_NOTE_: Once a terminal has been toggled, you have left the nvim context window. This means there is
+no way for this plugin to provide a convinent way to "untoggle" or hide a terminal. You will need to
+add your own mappings (just as if you were using :term) for enterting and exiting a terminal. See [Terminal window mappings](terminal-window-mappings) 
+for an example on how to do this.
+
 #### Caveats
 
 - Having multiple terminals with different directions open at the same time is unsupported.
