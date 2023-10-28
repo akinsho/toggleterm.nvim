@@ -294,6 +294,8 @@ function M._get_float_config(term, opening)
     height = height,
     border = opening and border or nil,
     zindex = opts.zindex or nil,
+    title = opts.title and (term.display_name or ("Terminal "..term.id)),
+    title_pos = opts.title and (opts.title_pos or "center"),
   }
 end
 
