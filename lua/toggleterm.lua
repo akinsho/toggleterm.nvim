@@ -221,21 +221,31 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, cmd_data)
   if selection_type == "single_line" then
     start_line, start_col = unpack(api.nvim_win_get_cursor(0))
     table.insert(lines, fn.getline(start_line))
-  elseif selection_type == "visual_lines" then
-    local res = utils.get_line_selection("visual")
+  else
+    local res = nil
+    if string.match(selection_type, "visual") then
+      res = utils.get_line_selection("visual")
+    else
+      res = utils.get_line_selection("motion")
+    end
     start_line, start_col = unpack(res.start_pos)
-    lines = res.selected_lines
-  elseif selection_type == "visual_selection" then
-    local res = utils.get_line_selection("visual")
-    start_line, start_col = unpack(res.start_pos)
-    lines = utils.get_visual_selection(res)
+    -- char, line and block are used for motion/operatorfunc. 'block' is ignored
+    if selection_type == "visual_lines" or selection_type == "line" then
+      lines = res.selected_lines
+    elseif selection_type == "visual_selection" or selection_type == "char" then
+      lines = utils.get_visual_selection(res, true)
+    end
   end
 
   if not lines or not next(lines) then return end
 
-  for _, line in ipairs(lines) do
-    local l = trim_spaces and line:gsub("^%s+", ""):gsub("%s+$", "") or line
-    M.exec(l, id)
+  if not trim_spaces then
+    M.exec(table.concat(lines, "\n"))
+  else
+    for _, line in ipairs(lines) do
+      local l = trim_spaces and line:gsub("^%s+", ""):gsub("%s+$", "") or line
+      M.exec(l, id)
+    end
   end
 
   -- Jump back with the cursor where we were at the beginning of the selection

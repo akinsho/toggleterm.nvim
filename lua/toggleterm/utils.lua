@@ -72,8 +72,11 @@ function M.get_line_selection(mode)
   }
 end
 
-function M.get_visual_selection(res)
+function M.get_visual_selection(res, motion)
+  motion = motion or false
   local mode = fn.visualmode()
+  if motion then mode = "v" end
+
   -- line-visual
   -- return lines encompassed by the selection; already in res object
   if mode == "V" then return res.selected_lines end
