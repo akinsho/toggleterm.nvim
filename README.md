@@ -297,6 +297,21 @@ You can "send lines" to the toggled terminals with the following commands:
 (`<T_ID` is an optional terminal ID parameter, which defines where should we send the lines.
 If the parameter is not provided, then the default is the `first terminal`)
 
+Alternatively, for more fine-grained control and use in mappings, in lua:
+
+```lua
+local trim_spaces = true
+vim.keymap.set("v", "<space>s", function()
+    require("toggleterm").send_lines_to_terminal("single_line", trim_spaces, { args = vim.v.count })
+end
+    -- Replace with these for the other two options
+    -- require("toggleterm").send_lines_to_terminal("visual_line", trim_spaces, { args = vim.v.count })
+    -- require("toggleterm").send_lines_to_terminal("visual_selection", trim_spaces, { args = vim.v.count })
+```
+
+Set `trim_spaces=false` for sending to REPLs for whitespace-sensitive languages like python.
+(For python, you probably want to start ipython with `ipython --no-autoindent`.)
+
 <!-- panvimdoc-ignore-start -->
 
 Example:
