@@ -323,14 +323,21 @@ function Terminal:send(cmd, go_back)
   end
 end
 
-function Terminal:clear() self:send("clear") end
+-- Clear the terminal
+function Terminal:clear() 
+	if vim.fn.has('win32') == 1 then
+		self:send("cls")
+	else
+		self:send("clear")
+	end
+end
 
 ---Update the directory of an already opened terminal
 ---@param dir string
 function Terminal:change_dir(dir, go_back)
   dir = _get_dir(dir)
   if self.dir == dir then return end
-  self:send({ fmt("cd %s", dir), "clear" }, go_back)
+  self:send({ fmt("cd %s", dir), self.clear() }, go_back)
   self.dir = dir
 end
 
