@@ -55,6 +55,11 @@ function M.get_line_selection(mode)
     visual = { "'<", "'>" },
     motion = { "'[", "']" },
   })[mode])
+  -- '< marks are only updated when one leaves visual mode.
+  -- When calling lua functions directly from a mapping, need to
+  -- explicitly exit visual with the escape key to ensure those marks are
+  -- accurate.
+  vim.cmd("normal! ")
 
   -- Get the start and the end of the selection
   local start_line, start_col = unpack(fn.getpos(start_char), 2, 3)
@@ -67,8 +72,11 @@ function M.get_line_selection(mode)
   }
 end
 
-function M.get_visual_selection(res)
+function M.get_visual_selection(res, motion)
+  motion = motion or false
   local mode = fn.visualmode()
+  if motion then mode = "v" end
+
   -- line-visual
   -- return lines encompassed by the selection; already in res object
   if mode == "V" then return res.selected_lines end
