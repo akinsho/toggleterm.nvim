@@ -323,14 +323,18 @@ function Terminal:send(cmd, go_back)
   end
 end
 
-function Terminal:clear() self:send("clear") end
+--check for os type and perform os specific clear command
+function Terminal:clear() 
+	local clear = is_windows and "cls" or "clear"	
+	self:send(term)
+end
 
 ---Update the directory of an already opened terminal
 ---@param dir string
 function Terminal:change_dir(dir, go_back)
   dir = _get_dir(dir)
   if self.dir == dir then return end
-  self:send({ fmt("cd %s", dir), "clear" }, go_back)
+  self:send({ fmt("cd %s", dir), self:clear() }, go_back)
   self.dir = dir
 end
 
