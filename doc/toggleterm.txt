@@ -478,7 +478,7 @@ using the current count e.g. `:5ToggleTerm<CR>`
 <
 
 You can also set several options for the custom terminal including layout,
-opening and closing functions, and the newline charcter used when sending text
+opening and closing functions, and the newline character used when sending text
 to the terminal. The `newline_chr` defaults to "\r" on powershell, "\r\n" on
 cmd.exe, and "\n" otherwise.
 
