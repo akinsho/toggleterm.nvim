@@ -478,7 +478,7 @@ using the current count e.g. `:5ToggleTerm<CR>`
 <
 
 You can also set several options for the custom terminal including layout,
-opening and closing functions, and the newline charcter used when sending text
+opening and closing functions, and the newline character used when sending text
 to the terminal. The `newline_chr` defaults to "\r" on powershell, "\r\n" on
 cmd.exe, and "\n" otherwise.
 
@@ -487,7 +487,6 @@ cmd.exe, and "\n" otherwise.
       cmd = "lazygit",
       dir = "git_dir",
       direction = "float",
-      -- Try changing if you get too many/few blank lines when sending to terminal
       newline_chr = "\n" 
       float_opts = {
         border = "double",
