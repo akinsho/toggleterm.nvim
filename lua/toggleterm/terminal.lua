@@ -294,7 +294,6 @@ end
 ---@return string
 local function with_cr(newline_chr, ...)
   local result = {}
-  -- local newline_chr = get_newline_chr()
   for _, str in ipairs({ ... }) do
     table.insert(result, str .. newline_chr)
   end
