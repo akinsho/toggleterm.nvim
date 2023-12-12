@@ -303,7 +303,7 @@ Alternatively, for more fine-grained control and use in mappings, in lua:
 local trim_spaces = true
 vim.keymap.set("v", "<space>s", function()
     require("toggleterm").send_lines_to_terminal("single_line", trim_spaces, { args = vim.v.count })
-end
+end)
     -- Replace with these for the other two options
     -- require("toggleterm").send_lines_to_terminal("visual_line", trim_spaces, { args = vim.v.count })
     -- require("toggleterm").send_lines_to_terminal("visual_selection", trim_spaces, { args = vim.v.count })

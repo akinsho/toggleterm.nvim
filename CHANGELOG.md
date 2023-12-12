@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.9.0](https://github.com/akinsho/toggleterm.nvim/compare/v2.8.0...v2.9.0) (2023-12-06)
+
+
+### Features
+
+* allow operator mapping to send to terminal ([#507](https://github.com/akinsho/toggleterm.nvim/issues/507)) ([5b84866](https://github.com/akinsho/toggleterm.nvim/commit/5b848664989b6deb2c28dad5135c89720915675a))
+
+
+### Bug Fixes
+
+* **commands:** call ToggleTermSetName with count ([#497](https://github.com/akinsho/toggleterm.nvim/issues/497)) ([ef1bbff](https://github.com/akinsho/toggleterm.nvim/commit/ef1bbff59c9ab5b468062c33ca183541a3849547)), closes [#496](https://github.com/akinsho/toggleterm.nvim/issues/496)
+* **terminal:** clear correctly on windows ([#513](https://github.com/akinsho/toggleterm.nvim/issues/513)) ([0731e99](https://github.com/akinsho/toggleterm.nvim/commit/0731e99de590fb7451eb4fee99470506e012b34d))
+
 ## [2.8.0](https://github.com/akinsho/toggleterm.nvim/compare/v2.7.1...v2.8.0) (2023-09-11)
 
 
