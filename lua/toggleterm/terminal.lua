@@ -46,6 +46,7 @@ end
 local terminals = {}
 
 --- @class TermCreateArgs
+--- @field newline_chr? string user specified newline chararacter
 --- @field cmd? string a custom command to run
 --- @field direction? string the layout style for the terminal
 --- @field id number?
@@ -65,6 +66,7 @@ local terminals = {}
 --- @field on_close fun(term:Terminal)?
 
 --- @class Terminal
+--- @field newline_chr string
 --- @field cmd string
 --- @field direction string the layout style for the terminal
 --- @field id number
@@ -193,6 +195,7 @@ function Terminal:new(term)
   if id and terminals[id] then return terminals[id] end
   local conf = config.get()
   self.__index = self
+  term.newline_chr = term.newline_chr or get_newline_chr()
   term.direction = term.direction or conf.direction
   term.id = id or next_id()
   term.display_name = term.display_name
@@ -287,10 +290,10 @@ end
 
 ---Combine arguments into strings separated by new lines
 ---@vararg string
+---@param newline_chr string
 ---@return string
-local function with_cr(...)
+local function with_cr(newline_chr, ...)
   local result = {}
-  local newline_chr = get_newline_chr()
   for _, str in ipairs({ ... }) do
     table.insert(result, str .. newline_chr)
   end
@@ -312,7 +315,7 @@ end
 ---@param cmd string|string[]
 ---@param go_back boolean? whether or not to return to original window
 function Terminal:send(cmd, go_back)
-  cmd = type(cmd) == "table" and with_cr(unpack(cmd)) or with_cr(cmd --[[@as string]])
+  cmd = type(cmd) == "table" and with_cr(self.newline_chr, unpack(cmd)) or with_cr(self.newline_chr, cmd --[[@as string]])
   fn.chansend(self.job_id, cmd)
   self:scroll_bottom()
   if go_back and self:is_focused() then
