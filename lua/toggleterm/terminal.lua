@@ -315,7 +315,8 @@ end
 ---@param cmd string|string[]
 ---@param go_back boolean? whether or not to return to original window
 function Terminal:send(cmd, go_back)
-  cmd = type(cmd) == "table" and with_cr(self.newline_chr, unpack(cmd)) or with_cr(self.newline_chr, cmd --[[@as string]])
+  cmd = type(cmd) == "table" and with_cr(self.newline_chr, unpack(cmd))
+    or with_cr(self.newline_chr, cmd --[[@as string]])
   fn.chansend(self.job_id, cmd)
   self:scroll_bottom()
   if go_back and self:is_focused() then
