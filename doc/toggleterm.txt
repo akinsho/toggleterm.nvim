@@ -1,4 +1,4 @@
-*toggleterm.txt*       For Neovim >= 0.8.0       Last change: 2023 December 06
+*toggleterm.txt*       For Neovim >= 0.8.0       Last change: 2023 December 13
 
 ==============================================================================
 Table of Contents                               *toggleterm-table-of-contents*
@@ -477,17 +477,13 @@ using the current count e.g. `:5ToggleTerm<CR>`
     local lazygit = Terminal:new({ cmd = "lazygit", count = 5 })
 <
 
-You can also set several options for the custom terminal including layout,
-opening and closing functions, and the newline character used when sending text
-to the terminal. The `newline_chr` defaults to "\r" on powershell, "\r\n" on
-cmd.exe, and "\n" otherwise.
+You can also set a custom layout for a terminal.
 
 >lua
     local lazygit = Terminal:new({
       cmd = "lazygit",
       dir = "git_dir",
       direction = "float",
-      newline_chr = "\n" 
       float_opts = {
         border = "double",
       },
