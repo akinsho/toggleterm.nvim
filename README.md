@@ -122,7 +122,7 @@ I won't be turning this into a REPL plugin or doing a bunch of complex stuff.
 If you find any issues, _please_ consider a _pull request_ not an issue.
 I'm also going to be pretty conservative about what I add.
 
-### Setup
+## Setup
 
 This plugin must be explicitly enabled by using `require("toggleterm").setup{}`
 
@@ -219,7 +219,7 @@ require("toggleterm").setup{
 }
 ```
 
-### Usage
+## Usage
 
 ### `ToggleTerm`
 
@@ -280,7 +280,7 @@ You can send commands to a terminal without opening its window by using the `ope
 
 see `:h expand()` for more details
 
-### TermSelect
+### `TermSelect`
 
 This command uses `vim.ui.select` to allow a user to select a terminal to open
 or to focus it if it's already open. This can be useful if you have a lot of
@@ -347,7 +347,7 @@ Example:
 
 <!-- panvimdoc-ignore-end -->
 
-### ToggleTermSetName
+### `ToggleTermSetName`
 
 This function allows setting a display name for a terminal. This name is primarily used inside the winbar, and can be a more descriptive way
 to remember, which terminal is for what.
@@ -541,6 +541,31 @@ Explain:
 
 - `2`: this is the terminal's number (or ID), your first terminal is `1` (e.g. your 3rd terminal will be `3<C-\>`, so on).
 - <kbd>C-\\</kbd>: this is the combined key mapping to the command `:ToggleTerm`.
+
+### Always be in insert mode (mouse)
+
+If you want your terminals to always be in the insert mode when you click the pane with your mouse, then you'll need to capture the `*Release` event.
+
+```lua
+vim.api.nvim_command "augroup terminal_setup | au!"
+vim.api.nvim_command "autocmd TermOpen * nnoremap <buffer><LeftRelease> <LeftRelease>i"
+vim.api.nvim_command "augroup end"
+
+require('toggleterm').setup(usual_opts)
+```
+
+combined with `start_in_insert` and `persist_mode` this should give you a fairly `1:1` experience with how terminal windows behave everywhere else in the known universe.
+
+```lua
+vim.api.nvim_command "augroup terminal_setup | au!"
+vim.api.nvim_command "autocmd TermOpen * nnoremap <buffer><LeftRelease> <LeftRelease>i"
+vim.api.nvim_command "augroup end"
+
+require('toggleterm').setup({
+  start_in_insert = true,
+  persist_mode = true,
+})
+```
 
 ### FAQ
 
