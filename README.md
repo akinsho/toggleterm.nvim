@@ -305,7 +305,7 @@ vim.keymap.set("v", "<space>s", function()
     require("toggleterm").send_lines_to_terminal("single_line", trim_spaces, { args = vim.v.count })
 end)
     -- Replace with these for the other two options
-    -- require("toggleterm").send_lines_to_terminal("visual_line", trim_spaces, { args = vim.v.count })
+    -- require("toggleterm").send_lines_to_terminal("visual_lines", trim_spaces, { args = vim.v.count })
     -- require("toggleterm").send_lines_to_terminal("visual_selection", trim_spaces, { args = vim.v.count })
 
 -- For use as an operator map:
