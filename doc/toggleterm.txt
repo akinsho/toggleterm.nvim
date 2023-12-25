@@ -1,4 +1,4 @@
-*toggleterm.txt*       For Neovim >= 0.8.0       Last change: 2023 December 13
+*toggleterm.txt*       For Neovim >= 0.8.0       Last change: 2023 December 25
 
 ==============================================================================
 Table of Contents                               *toggleterm-table-of-contents*
@@ -308,7 +308,7 @@ Alternatively, for more fine-grained control and use in mappings, in lua:
         require("toggleterm").send_lines_to_terminal("single_line", trim_spaces, { args = vim.v.count })
     end)
         -- Replace with these for the other two options
-        -- require("toggleterm").send_lines_to_terminal("visual_line", trim_spaces, { args = vim.v.count })
+        -- require("toggleterm").send_lines_to_terminal("visual_lines", trim_spaces, { args = vim.v.count })
         -- require("toggleterm").send_lines_to_terminal("visual_selection", trim_spaces, { args = vim.v.count })
     
     -- For use as an operator map:
