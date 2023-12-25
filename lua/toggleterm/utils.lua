@@ -6,7 +6,7 @@ local levels = vim.log.levels
 
 function M.is_nightly()
   local v = vim.version()
-  return v.minor >= 8
+  return v.minor >= 9
 end
 
 ---@alias error_types 'error' | 'info' | 'warn'
