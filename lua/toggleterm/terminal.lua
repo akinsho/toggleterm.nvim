@@ -313,7 +313,7 @@ end
 ---@param go_back boolean? whether or not to return to original window
 function Terminal:send(cmd, go_back)
   cmd = type(cmd) == "table" and with_cr(unpack(cmd)) or with_cr(cmd --[[@as string]])
-  fn.chansend(self.job_id, cmd)
+  api.nvim_chan_send(self.job_id, cmd)
   self:scroll_bottom()
   if go_back and self:is_focused() then
     ui.goto_previous()
