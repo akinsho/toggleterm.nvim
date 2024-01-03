@@ -107,11 +107,22 @@ local function next_id()
 end
 
 ---Get an opened (valid) toggle terminal by id, defaults to the first opened
+---one which does not satisfy the skip_toggle function
 ---@param position number?
 ---@return number?
 function M.get_toggled_id(position)
-  position = position or 1
+  if position then
+    specified = true
+  else
+    specified = false
+    position = 1
+  end
   local t = M.get_all()
+  if not specified and config.skip_toggle then
+    while t[position] and config.skip_toggle(t[position]) do
+        position = position + 1
+    end
+  end
   return t[position] and t[position].id or nil
 end
 
