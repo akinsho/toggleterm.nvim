@@ -285,7 +285,9 @@ function M._get_float_config(term, opening)
   row = vim.F.if_nil(M._resolve_size(opts.row, term), row)
   col = vim.F.if_nil(M._resolve_size(opts.col, term), col)
 
-  return {
+  local version = vim.version()
+
+  local float_config = {
     row = row,
     col = col,
     relative = opts.relative or "editor",
@@ -295,6 +297,11 @@ function M._get_float_config(term, opening)
     border = opening and border or nil,
     zindex = opts.zindex or nil,
   }
+  if version.major > 0 or version.minor >= 9 then
+    float_config.title_pos = term.display_name and opts.title_pos or nil
+    float_config.title = term.display_name
+  end
+  return float_config
 end
 
 --- @param size number

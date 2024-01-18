@@ -34,6 +34,7 @@ local function shade(color, factor) return colors.shade_color(color, factor) end
 --- @field highlights ToggleTermHighlights
 --- @field winbar WinbarOpts
 --- @field autochdir boolean
+--- @field title_pos '"left"' | '"center"' | '"right"'
 
 ---@type ToggleTermConfig
 local config = {
@@ -58,6 +59,7 @@ local config = {
   },
   float_opts = {
     winblend = 0,
+    title_pos = 'left'
   },
 }
 
