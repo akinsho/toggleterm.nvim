@@ -209,6 +209,7 @@ require("toggleterm").setup{
     height = <value>,
     winblend = 3,
     zindex = <value>,
+    title_pos = 'left' | 'center' | 'right', position of the title of the floating window
   },
   winbar = {
     enabled = false,
