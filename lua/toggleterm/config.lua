@@ -59,7 +59,7 @@ local config = {
   },
   float_opts = {
     winblend = 0,
-    title_pos = 'left'
+    title_pos = "left",
   },
 }
 
