@@ -253,7 +253,16 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, cmd_data)
   api.nvim_win_set_cursor(current_window, { start_line, start_col })
 end
 
+local last_toggle_sec = 0
+local last_toggle_nano_sec = 0
 function M.toggle_command(args, count)
+  local sec, nano_sec = vim.loop.gettimeofday()
+  local diff = (sec - last_toggle_sec) * 1000000 + nano_sec - last_toggle_nano_sec
+  -- less then 150ms
+  if diff < 150 * 1000 then
+    return
+  end
+
   local parsed = commandline.parse(args)
   vim.validate({
     size = { parsed.size, "number", true },
@@ -263,6 +272,7 @@ function M.toggle_command(args, count)
   })
   if parsed.size then parsed.size = tonumber(parsed.size) end
   M.toggle(count, parsed.size, parsed.dir, parsed.direction, parsed.name)
+  last_toggle_sec, last_toggle_nano_sec = vim.loop.gettimeofday()
 end
 
 function _G.___toggleterm_winbar_click(id)
