@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.10.0](https://github.com/akinsho/toggleterm.nvim/compare/v2.9.0...v2.10.0) (2024-02-12)
+
+
+### Features
+
+* enable title for floating terminals ([#534](https://github.com/akinsho/toggleterm.nvim/issues/534)) ([d3aa6e8](https://github.com/akinsho/toggleterm.nvim/commit/d3aa6e88c2dcbefd240ffb77a2c77b486a19fa5f))
+
+
+### Bug Fixes
+
+* send_lines_to_terminal now honours ID variable when trim_spaces = false ([#541](https://github.com/akinsho/toggleterm.nvim/issues/541)) ([63ac4c8](https://github.com/akinsho/toggleterm.nvim/commit/63ac4c8529604ad247d9426644128de6ebb1f43a))
+
 ## [2.9.0](https://github.com/akinsho/toggleterm.nvim/compare/v2.8.0...v2.9.0) (2023-12-06)
 
 
