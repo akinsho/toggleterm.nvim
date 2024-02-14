@@ -127,7 +127,7 @@ I'm also going to be pretty conservative about what I add.
 This plugin must be explicitly enabled by using `require("toggleterm").setup{}`
 
 Setting the `open_mapping` key to use for toggling the terminal(s) will set up mappings for _normal_ mode.
-If you prefix the mapping with a number that particular terminal will be opened. Otherwise if a prefix is not set, then the last toggled terminal will be opened. In case there are multiple terminals opened they'll all be closed, and on the next mapping key they'll be restored.
+If you prefix the mapping with a number that particular terminal will be opened. Otherwise if a prefix is not set, then the last toggled terminal will be opened. Without a prefix and if the `skip_toggle(t: Terminal)` function is set, terminals with the function returning `true` will be skipped and the first one with `false` will be toggled. In case there are multiple terminals opened they'll all be closed, and on the next mapping key they'll be restored.
 
 If you set the `insert_mappings` key to `true`, the mapping will also take effect in insert mode; similarly setting `terminal_mappings` to `true` will have the mappings take effect in the opened terminal.
 
@@ -162,6 +162,7 @@ require("toggleterm").setup{
     end
   end,
   open_mapping = [[<c-\>]],
+  skip_toggle = function (t: Terminal) -> bool, -- function to filter terminals to avoid toggling unwanted one(s)
   on_create = fun(t: Terminal), -- function to run when the terminal is first created
   on_open = fun(t: Terminal), -- function to run when the terminal opens
   on_close = fun(t: Terminal), -- function to run when the terminal closes
