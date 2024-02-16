@@ -24,6 +24,8 @@ local function shade(color, factor) return colors.shade_color(color, factor) end
 --- @field terminal_mappings boolean
 --- @field start_in_insert boolean
 --- @field persist_size boolean
+--- @field winfixwidth boolean
+--- @field winfixheight boolean
 --- @field persist_mode boolean
 --- @field close_on_exit boolean
 --- @field direction  '"horizontal"' | '"vertical"' | '"float"'
@@ -45,6 +47,8 @@ local config = {
   insert_mappings = true,
   terminal_mappings = true,
   start_in_insert = true,
+  winfixwidth = true,
+  winfixheight = true,
   persist_size = true,
   persist_mode = true,
   close_on_exit = true,

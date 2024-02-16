@@ -426,8 +426,19 @@ end
 ---@package
 function Terminal:__set_win_options()
   if self:is_split() then
-    local field = self.direction == "vertical" and "winfixwidth" or "winfixheight"
-    utils.wo_setlocal(self.window, field, true)
+    if self.direction == "vertical" then
+      utils.wo_setlocal(
+        self.window,
+        "winfixwidth",
+        config.winfixwidth
+      )
+    else
+      utils.wo_setlocal(
+        self.window,
+        "winfixheight",
+        config.winfixheight
+      )
+    end
   end
 
   if config.hide_numbers then
