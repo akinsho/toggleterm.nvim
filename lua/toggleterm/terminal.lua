@@ -477,7 +477,8 @@ end
 ---@param size number?
 ---@param direction string?
 function Terminal:open(size, direction)
-  self.dir = _get_dir(self.dir)
+  local cwd = fn.getcwd()
+  self.dir = _get_dir(config.autochdir and cwd or self.dir)
   ui.set_origin_window()
   if direction then self:change_direction(direction) end
   if not self.bufnr or not api.nvim_buf_is_valid(self.bufnr) then
@@ -489,7 +490,6 @@ function Terminal:open(size, direction)
     if not ok and err then return utils.notify(err, "error") end
     ui.switch_buf(self.bufnr)
     if config.autochdir then
-      local cwd = fn.getcwd()
       if self.dir ~= cwd then self:change_dir(cwd) end
     end
   end
