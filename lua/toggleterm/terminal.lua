@@ -489,9 +489,7 @@ function Terminal:open(size, direction)
     local ok, err = pcall(opener, size, self)
     if not ok and err then return utils.notify(err, "error") end
     ui.switch_buf(self.bufnr)
-    if config.autochdir then
-      if self.dir ~= cwd then self:change_dir(cwd) end
-    end
+    if config.autochdir and self.dir ~= cwd then self:change_dir(cwd) end
   end
   ui.hl_term(self)
   -- NOTE: it is important that this function is called at this point. i.e. the buffer has been correctly assigned
