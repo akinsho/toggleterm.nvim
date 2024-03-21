@@ -253,7 +253,7 @@ when using `TermSelect` command to indicate the specific terminal.
 `size` and `direction` are ignored if the command closes a terminal.
 
 
-### `TOGGLETERMBUFFERDIR`
+### `ToggleTermBufferDir`
 
 This command switches the buffer directory in the terminal.
 If a terminal instance with a buffer directory wasn't already there,
