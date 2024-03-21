@@ -255,6 +255,8 @@ when using `TermSelect` command to indicate the specific terminal.
 
 ### `ToggleTermBufferDir`
 
+https://github.com/TimaSv-Uk/toggleterm.nvim/assets/116874286/85269561-8d7c-4e8d-8571-c43ac625dd59
+
 This command switches the buffer directory in the terminal.
 If a terminal instance with a buffer directory wasn't already there,
 one is created.You are unable to change the buffer terminal name or
