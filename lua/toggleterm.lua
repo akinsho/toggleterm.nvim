@@ -124,15 +124,15 @@ local function on_term_open()
   if not term then
     local buf = api.nvim_get_current_buf()
     terms.Terminal
-      :new({
-        id = id,
-        bufnr = buf,
-        window = api.nvim_get_current_win(),
-        highlights = config.highlights,
-        job_id = vim.b[buf].terminal_job_id,
-        direction = ui.guess_direction(),
-      })
-      :__resurrect()
+        :new({
+          id = id,
+          bufnr = buf,
+          window = api.nvim_get_current_win(),
+          highlights = config.highlights,
+          job_id = vim.b[buf].terminal_job_id,
+          direction = ui.guess_direction(),
+        })
+        :__resurrect()
   end
   ui.set_winbar(term)
 end
@@ -404,6 +404,36 @@ local function select_terminal(opts)
   end)
 end
 
+--Adds and toggles a terminal to the buffer. If there’s already a terminal for this buffer, it only toggles the terminal.”
+---@param direction? string
+---@param name? string
+local function toggle_or_create_term_for_current_buffer(direction, name)
+  local path_to_buffer = vim.fn.expand('%:p:h')
+  if not direction then
+    direction = "float"
+  end
+  if not name then
+    name = path_to_buffer
+  end
+  local _, term = require('toggleterm.terminal').identify(path_to_buffer)
+  if term then
+    term:toggle()
+  else
+    local path_convert_to_id = 0
+    for i = 1, #path_to_buffer do
+      local c = path_to_buffer:sub(i, i)
+      path_convert_to_id = (path_convert_to_id + i * string.byte(c)) % 10000
+    end
+    local Term = require('toggleterm.terminal').Terminal:new({
+      display_name = name,
+      direction = direction,
+      id = path_convert_to_id,
+      dir = path_to_buffer,
+    })
+    Term:toggle()
+  end
+end
+
 local function setup_commands()
   local command = api.nvim_create_user_command
   command("TermSelect", select_terminal, { bang = true })
@@ -457,6 +487,25 @@ local function setup_commands()
       set_term_name(opts.args, term)
     end
   end, { nargs = "?", count = true })
+
+  command(
+    "ToggleTermToBufferDir",
+    function(opts)
+      local function splitKeyValuePairs(inputstr)
+        local result = {}
+        for pair in string.gmatch(inputstr, "([^%s]+)") do
+          local key, value = string.match(pair, "(%w+)=(%w+)")
+          if key and value then
+            result[key] = value
+          end
+        end
+        return result
+      end
+      local args = splitKeyValuePairs(opts.args)
+      toggle_or_create_term_for_current_buffer(args.direction, args.name)
+    end,
+    { nargs = "*" }
+  )
 end
 
 function M.setup(user_prefs)

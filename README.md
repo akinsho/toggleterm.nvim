@@ -252,6 +252,29 @@ when using `TermSelect` command to indicate the specific terminal.
 
 `size` and `direction` are ignored if the command closes a terminal.
 
+
+### `TOGGLETERMTOBUFFERDIR`
+
+This command switches the buffer directory in the terminal.
+If a terminal instance with a buffer directory wasn't already there,
+one is created.You are unable to change the buffer terminal name or
+direction after creating a terminal instance.
+
+You can use `:TermSelect` to utilize toggleterm from another buffer in the current buffer.
+
+Default `name=PATH_TO_CURRENT_BUFFER` and `direction=float`,size if taken from
+setup function.
+
+```vim
+:ToggleTermToBufferDir name=desctop direction=horizontal
+```
+If `direction` is specified, and the command opens a terminal, the terminal
+will be changed to the specified direction.
+
+If `name` is specified, the display name is set for the toggled terminal. This
+name will be visible when using `TermSelect` command to indicate the specific
+terminal.
+
 #### Caveats
 
 - Having multiple terminals with different directions open at the same time is unsupported.
