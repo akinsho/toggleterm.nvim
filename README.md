@@ -253,7 +253,7 @@ when using `TermSelect` command to indicate the specific terminal.
 `size` and `direction` are ignored if the command closes a terminal.
 
 
-### `TOGGLETERMTOBUFFERDIR`
+### `TOGGLETERMBUFFERDIR`
 
 This command switches the buffer directory in the terminal.
 If a terminal instance with a buffer directory wasn't already there,
@@ -266,7 +266,7 @@ Default `name=PATH_TO_CURRENT_BUFFER` and `direction=float`,size if taken from
 setup function.
 
 ```vim
-:ToggleTermToBufferDir name=desctop direction=horizontal
+:ToggleTermBufferDir name=desctop direction=horizontal
 ```
 If `direction` is specified, and the command opens a terminal, the terminal
 will be changed to the specified direction.

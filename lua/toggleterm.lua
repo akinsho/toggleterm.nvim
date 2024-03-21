@@ -489,7 +489,7 @@ local function setup_commands()
   end, { nargs = "?", count = true })
 
   command(
-    "ToggleTermToBufferDir",
+    "ToggleTermBufferDir",
     function(opts)
       local function splitKeyValuePairs(inputstr)
         local result = {}
