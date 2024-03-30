@@ -18,7 +18,7 @@ local function shade(color, factor) return colors.shade_color(color, factor) end
 --- @field size number
 --- @field shade_filetypes string[]
 --- @field hide_numbers boolean
---- @field open_mapping string
+--- @field open_mapping string | string[]
 --- @field shade_terminals boolean
 --- @field insert_mappings boolean
 --- @field terminal_mappings boolean
