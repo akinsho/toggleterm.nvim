@@ -27,6 +27,8 @@ local function is_cmd(shell) return shell:find("cmd") end
 
 local function is_pwsh(shell) return shell:find("pwsh") or shell:find("powershell") end
 
+local function is_nushell(shell) return shell:find("nu") end
+
 local function get_command_sep() return is_windows and is_cmd(vim.o.shell) and "&" or ";" end
 
 local function get_comment_sep() return is_windows and is_cmd(vim.o.shell) and "::" or "#" end
@@ -34,7 +36,13 @@ local function get_comment_sep() return is_windows and is_cmd(vim.o.shell) and "
 local function get_newline_chr()
   local shell = config.get("shell")
   if type(shell) == "function" then shell = shell() end
-  return is_windows and (is_pwsh(shell) and "\r" or "\r\n") or "\n"
+  if is_windows then
+    return is_pwsh(shell) and "\r" or "\r\n"
+  elseif is_nushell(shell) then
+    return "\r"
+  else
+    return "\n"
+  end
 end
 
 ---@alias Mode "n" | "i" | "?"
