@@ -184,6 +184,36 @@ local function _get_dir(dir)
   end
 end
 
+---Convert the togglterm `buffer` to a text representation.
+---
+---We use this to be able to save and restore terminals later.
+---
+---@param bufnr number A 0-or-more buffer identifier to change.
+---@return string[] # Lines of code which can be saved to a session file, later.
+function Terminal:serialize_to_static_lua(bufnr)
+  local fields = {
+    auto_scroll = self.auto_scroll,
+    bufnr = bufnr,
+    clear_env = self.env,
+    close_on_exit = self.close_on_exit,
+    cmd = self.cmd,
+    count = self.count,
+    dir = self.dir,
+    direction = self.direction,
+    display_name = self.display_name,
+    env = self.env,
+    hidden = self.hidden,
+    highlights = self.highlights,
+    id = self.id,
+    name = self.name,
+    newline_chr = self.newline_chr,
+  }
+
+  return {
+    string.format("terminal.apply_terminal_to_buffer(%s, %s)", bufnr, vim.inspect(fields)),
+  }
+end
+
 ---Create a new terminal object
 ---@param term TermCreateArgs?
 ---@return Terminal
@@ -524,6 +554,37 @@ function M.identify(name)
   return id, terminals[id]
 end
 
+---@return string[]? # The raw Lua commands needed to store/restore toggleterm buffers.
+function M.get_all_terminal_commands()
+  local commands = {}
+
+  for _, buffer in ipairs(vim.api.nvim_list_bufs()) do
+    local number = vim.b[buffer].toggle_number
+
+    if number then
+      local terminal = M.get(number)
+
+      if terminal then
+        for _, line in ipairs(terminal:serialize_to_static_lua(buffer)) do
+          table.insert(commands, line)
+        end
+      end
+    end
+  end
+
+  if vim.tbl_isempty(commands) then return commands end
+
+  local output = { "lua << EOF", 'local terminal = require("toggleterm.terminal")' }
+
+  for _, line in ipairs(commands) do
+    table.insert(output, line)
+  end
+
+  table.insert(output, "EOF")
+
+  return output
+end
+
 ---get existing terminal or create an empty term table
 ---@param num number?
 ---@param dir string?
@@ -545,6 +606,15 @@ end
 function M.get(id, include_hidden)
   local term = terminals[id]
   return (term and (include_hidden == true or not term.hidden)) and term or nil
+end
+
+---Change terminal `buffer` into toggleterm buffer.
+---
+---@param bufnr number A 0-or-more buffer identifier to change.
+---@param options TermCreateArgs? Settings to apply to the terminal, on-create.
+function M.apply_terminal_to_buffer(bufnr, options)
+  local terminal = Terminal:new(options)
+  terminal:spawn()
 end
 
 ---Get the first terminal that matches a predicate
