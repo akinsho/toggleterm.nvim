@@ -394,7 +394,8 @@ local function select_terminal(opts)
   vim.ui.select(terminals, {
     prompt = "Please select a terminal to open (or focus): ",
     format_item = function(term) return term.id .. ": " .. term:_display_name() end,
-  }, function(term)
+  }, function(_, idx)
+    local term = terminals[idx]
     if not term then return end
     if term:is_open() then
       term:focus()
