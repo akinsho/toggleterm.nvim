@@ -429,6 +429,7 @@ Each terminal can take the following arguments:
 ```lua
 Terminal:new {
   cmd = string -- command to execute when creating the terminal e.g. 'top'
+  display_name = string -- the name of the terminal
   direction = string -- the layout for the terminal, same as the main config options
   dir = string -- the directory for the terminal
   close_on_exit = bool -- close the terminal window when the process exits
