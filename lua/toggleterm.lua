@@ -250,7 +250,7 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, cmd_data)
 
   -- Jump back with the cursor where we were at the beginning of the selection
   api.nvim_set_current_win(current_window)
-  api.nvim_win_set_cursor(current_window, { start_line, start_col-1 })
+  api.nvim_win_set_cursor(current_window, { start_line, start_col - 1 })
 end
 
 function M.toggle_command(args, count)
