@@ -338,7 +338,7 @@ end
 --check for os type and perform os specific clear command
 function Terminal:clear()
   local clear = is_windows and "cls" or "clear"
-  self:send(term)
+  self:send(clear)
 end
 
 ---Update the directory of an already opened terminal
