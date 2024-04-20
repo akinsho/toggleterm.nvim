@@ -38,7 +38,7 @@ local function setup_global_mappings()
 
   -- Key mapping function
   ---@param key string
-  local map = function(key)
+  local function map(key)
     -- v:count defaults the count to 0 but if a count is passed in uses that instead
     vim.keymap.set("n", key, '<Cmd>execute v:count . "ToggleTerm"<CR>', {
       desc = "Toggle Terminal",
@@ -52,8 +52,9 @@ local function setup_global_mappings()
     end
   end
 
-  if type(mapping) == "string" then map(mapping) end
-  if type(mapping) == "table" then
+  if type(mapping) == "string" then
+    map(mapping)
+  elseif type(mapping) == "table" then
     for _, key in pairs(mapping) do
       map(key)
     end

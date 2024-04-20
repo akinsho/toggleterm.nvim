@@ -140,8 +140,9 @@ local function setup_buffer_mappings(bufnr)
   end
 
   if config.terminal_mappings then
-    if type(mapping) == "string" then map(mapping) end
-    if type(mapping) == "table" then
+    if type(mapping) == "string" then
+      map(mapping)
+    elseif type(mapping) == "table" then
       for _, key in pairs(mapping) do
         map(key)
       end
