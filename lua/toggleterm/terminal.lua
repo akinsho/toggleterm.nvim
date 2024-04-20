@@ -132,21 +132,8 @@ end
 --- @param bufnr number
 local function setup_buffer_mappings(bufnr)
   local mapping = config.open_mapping
-
-  -- Key mapping function
-  ---@param key string
-  local map = function(key)
-    vim.keymap.set("t", key, "<Cmd>ToggleTerm<CR>", { buffer = bufnr, silent = true })
-  end
-
-  if config.terminal_mappings then
-    if type(mapping) == "string" then
-      map(mapping)
-    elseif type(mapping) == "table" then
-      for _, key in pairs(mapping) do
-        map(key)
-      end
-    end
+  if mapping and config.terminal_mappings then
+    utils.key_map("t", mapping, "<Cmd>ToggleTerm<CR>", { buffer = bufnr, silent = true })
   end
 end
 
