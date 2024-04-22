@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.11.0](https://github.com/akinsho/toggleterm.nvim/compare/v2.10.0...v2.11.0) (2024-04-22)
+
+
+### Features
+
+* add string array support to `open_mapping` setting. ([#557](https://github.com/akinsho/toggleterm.nvim/issues/557)) ([5ec59c3](https://github.com/akinsho/toggleterm.nvim/commit/5ec59c3a8ae4f220e40f0d37e1732354ee3ba181))
+* support the CR for nushell ([#561](https://github.com/akinsho/toggleterm.nvim/issues/561)) ([72d2aa2](https://github.com/akinsho/toggleterm.nvim/commit/72d2aa290a8bcd3155d851b3d7a28ea20a1dc1f1))
+
+
+### Bug Fixes
+
+* autochdir for custom terminals ([#553](https://github.com/akinsho/toggleterm.nvim/issues/553)) ([dca1c80](https://github.com/akinsho/toggleterm.nvim/commit/dca1c80fb8ec41c97e7c3ef308719d8143fbbb05))
+* clear command ([#565](https://github.com/akinsho/toggleterm.nvim/issues/565)) ([fef08f3](https://github.com/akinsho/toggleterm.nvim/commit/fef08f32b9ca7d08eefc5af34dc416a3ac259bc8))
+* cmd and path now work with paths containing spaces ([#483](https://github.com/akinsho/toggleterm.nvim/issues/483)) ([f059a52](https://github.com/akinsho/toggleterm.nvim/commit/f059a52c3f8adb285cff66882462f67603c1f9ba))
+* column indexing ([#572](https://github.com/akinsho/toggleterm.nvim/issues/572)) ([9e65d60](https://github.com/akinsho/toggleterm.nvim/commit/9e65d60cfa0c33a9ddc9cc9ec77471753f1984df))
+* cursor position after motion ([#563](https://github.com/akinsho/toggleterm.nvim/issues/563)) ([75d3de9](https://github.com/akinsho/toggleterm.nvim/commit/75d3de9d261431dd4d6a68134bb46907c91c2023))
+* ensure `on_choice` operates on exact `items` element ([#566](https://github.com/akinsho/toggleterm.nvim/issues/566)) ([d3fff44](https://github.com/akinsho/toggleterm.nvim/commit/d3fff44252b57da0dc918b5eb7aeee258603a2a7))
+
 ## [2.10.0](https://github.com/akinsho/toggleterm.nvim/compare/v2.9.0...v2.10.0) (2024-02-12)
 
 
