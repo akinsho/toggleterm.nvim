@@ -226,10 +226,10 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, cmd_data)
   else
     local res = nil
     if string.match(selection_type, "visual") then
-      -- This calls vim.fn.getpos, while uses 1-based indexing for columns
+      -- This calls vim.fn.getpos, which uses 1-based indexing for columns
       res = utils.get_line_selection("visual")
     else
-      -- This calls vim.fn.getpos, while uses 1-based indexing for columns
+      -- This calls vim.fn.getpos, which uses 1-based indexing for columns
       res = utils.get_line_selection("motion")
     end
     start_line, start_col = unpack(res.start_pos)
