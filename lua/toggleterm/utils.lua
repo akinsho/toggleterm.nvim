@@ -48,6 +48,21 @@ end
 ---@param sep string
 function M.concat_without_empty(tbl, sep) return table.concat(M.tbl_filter_empty(tbl), sep) end
 
+-- Key mapping function
+---@param mod string | string[]
+---@param lhs string | string[]
+---@param rhs string | function
+---@param opts table?
+function M.key_map(mod, lhs, rhs, opts)
+  if type(lhs) == "string" then
+    vim.keymap.set(mod, lhs, rhs, opts)
+  elseif type(lhs) == "table" then
+    for _, key in pairs(lhs) do
+      vim.keymap.set(mod, key, rhs, opts)
+    end
+  end
+end
+
 ---@param mode "visual" | "motion"
 ---@return table
 function M.get_line_selection(mode)
