@@ -220,12 +220,16 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, cmd_data)
   local start_line, start_col
   if selection_type == "single_line" then
     start_line, start_col = unpack(api.nvim_win_get_cursor(0))
+    -- nvim_win_get_cursor uses 0-based indexing for columns, while we use 1-based indexing
+    start_col = start_col + 1
     table.insert(lines, fn.getline(start_line))
   else
     local res = nil
     if string.match(selection_type, "visual") then
+      -- This calls vim.fn.getpos, while uses 1-based indexing for columns
       res = utils.get_line_selection("visual")
     else
+      -- This calls vim.fn.getpos, while uses 1-based indexing for columns
       res = utils.get_line_selection("motion")
     end
     start_line, start_col = unpack(res.start_pos)
@@ -250,6 +254,7 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, cmd_data)
 
   -- Jump back with the cursor where we were at the beginning of the selection
   api.nvim_set_current_win(current_window)
+  -- nvim_win_set_cursor() uses 0-based indexing for columns, while we use 1-based indexing
   api.nvim_win_set_cursor(current_window, { start_line, start_col - 1 })
 end
 
