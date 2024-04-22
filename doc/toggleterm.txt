@@ -1,4 +1,4 @@
-*toggleterm.txt*         For Neovim >= 0.8.0        Last change: 2024 April 19
+*toggleterm.txt*         For Neovim >= 0.8.0        Last change: 2024 April 22
 
 ==============================================================================
 Table of Contents                               *toggleterm-table-of-contents*
