@@ -29,7 +29,7 @@ local function apply_colors()
   local is_enabled_ft = vim.tbl_contains(allow_list, ft)
   if vim.bo.buftype == "terminal" and is_enabled_ft then
     local _, term = terms.identify()
-    ui.hl_term(term)
+    --ui.hl_term(term)
   end
 end
 
