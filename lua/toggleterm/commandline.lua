@@ -15,6 +15,7 @@ local is_windows = vim.loop.os_uname().version:match("Windows")
 ---@field cmd string?
 ---@field dir string?
 ---@field size number?
+---@field name string?
 ---@field go_back boolean?
 ---@field open boolean?
 
@@ -92,7 +93,14 @@ local term_exec_options = {
     local commands = {}
 
     for _, path in ipairs(paths) do
-      local glob_str = path .. "/" .. (typed_cmd or "") .. "*"
+      local glob_str
+      if string.match(path, "%s*") then
+        --path with spaces
+        glob_str = path:gsub(" ", "\\ ") .. "/" .. (typed_cmd or "") .. "*"
+      else
+        -- path without spaces
+        glob_str = path .. "/" .. (typed_cmd or "") .. "*"
+      end
       local dir_cmds = vim.split(vim.fn.glob(glob_str), "\n")
 
       for _, cmd in ipairs(dir_cmds) do
@@ -144,12 +152,16 @@ local term_exec_options = {
   --- The size param takes in arbitrary numbers, we keep this function only to
   --- match the signature of other options
   size = function() return {} end,
+  --- The name param takes in arbitrary strings, we keep this function only to
+  --- match the signature of other options
+  name = function() return {} end,
 }
 
 local toggle_term_options = {
   dir = term_exec_options.dir,
   direction = term_exec_options.direction,
   size = term_exec_options.size,
+  name = term_exec_options.name,
 }
 
 ---@param options table a dictionary of key to function

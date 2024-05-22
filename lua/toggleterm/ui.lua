@@ -97,14 +97,15 @@ function M.set_winbar(term)
   if
     not config.winbar.enabled
     or not term
-    or term:is_float()
+    or term:is_float() -- TODO: make this configurable
     or fn.exists("+winbar") ~= 1
     or not term.window
     or not api.nvim_win_is_valid(term.window)
   then
     return
   end
-  vim.wo[term.window].winbar = fmt('%%{%%v:lua.require("toggleterm.ui").winbar(%d)%%}', term.id)
+  local value = fmt('%%{%%v:lua.require("toggleterm.ui").winbar(%d)%%}', term.id)
+  utils.wo_setlocal(term.window, "winbar", value)
 end
 
 ---apply highlights to a terminal
@@ -139,7 +140,7 @@ function M.hl_term(term)
     return hi_target
   end, hl_names)
 
-  vim.wo[window].winhighlight = table.concat(highlights, ",")
+  utils.wo_setlocal(window, "winhighlight", table.concat(highlights, ","))
 end
 
 ---Create a terminal buffer with the correct buffer/window options
@@ -151,13 +152,11 @@ local function create_term_buf_if_needed(term)
   -- If the buffer doesn't exist create a new one
   local valid_buf = term.bufnr and api.nvim_buf_is_valid(term.bufnr)
   local bufnr = valid_buf and term.bufnr or api.nvim_create_buf(false, false)
-
+  -- Assign buf to window to ensure window options are set correctly
+  api.nvim_win_set_buf(window, bufnr)
   term.window, term.bufnr = window, bufnr
   term:__set_options()
-  if valid_buf then return end
-  -- If the buffer didn't previously exist then assign it the window
   api.nvim_set_current_buf(bufnr)
-  api.nvim_win_set_buf(window, bufnr)
 end
 
 function M.create_buf() return api.nvim_create_buf(false, false) end
@@ -286,7 +285,9 @@ function M._get_float_config(term, opening)
   row = vim.F.if_nil(M._resolve_size(opts.row, term), row)
   col = vim.F.if_nil(M._resolve_size(opts.col, term), col)
 
-  return {
+  local version = vim.version()
+
+  local float_config = {
     row = row,
     col = col,
     relative = opts.relative or "editor",
@@ -294,7 +295,13 @@ function M._get_float_config(term, opening)
     width = width,
     height = height,
     border = opening and border or nil,
+    zindex = opts.zindex or nil,
   }
+  if version.major > 0 or version.minor >= 9 then
+    float_config.title_pos = term.display_name and opts.title_pos or nil
+    float_config.title = term.display_name
+  end
+  return float_config
 end
 
 --- @param size number
@@ -361,8 +368,10 @@ function M.open_float(term)
   local win = api.nvim_open_win(buf, true, M._get_float_config(term, true))
 
   term.window, term.bufnr = win, buf
+  -- partial fix for #391
+  utils.wo_setlocal(win, "sidescrolloff", 0)
 
-  if opts.winblend then vim.wo[win].winblend = opts.winblend end
+  if opts.winblend then utils.wo_setlocal(win, "winblend", opts.winblend) end
   term:__set_options()
 end
 

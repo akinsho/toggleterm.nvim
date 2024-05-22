@@ -126,7 +126,7 @@ I'm also going to be pretty conservative about what I add.
 
 This plugin must be explicitly enabled by using `require("toggleterm").setup{}`
 
-Setting the `open_mapping` key to use for toggling the terminal(s) will set up mappings for _normal_ mode.
+Setting the `open_mapping` key to use for toggling the terminal(s) will set up mappings for _normal_ mode. The `open_mapping` can be a key string or an array of key strings. 
 If you prefix the mapping with a number that particular terminal will be opened. Otherwise if a prefix is not set, then the last toggled terminal will be opened. In case there are multiple terminals opened they'll all be closed, and on the next mapping key they'll be restored.
 
 If you set the `insert_mappings` key to `true`, the mapping will also take effect in insert mode; similarly setting `terminal_mappings` to `true` will have the mappings take effect in the opened terminal.
@@ -161,7 +161,7 @@ require("toggleterm").setup{
       return vim.o.columns * 0.4
     end
   end,
-  open_mapping = [[<c-\>]],
+  open_mapping = [[<c-\>]], -- or { [[<c-\>]], [[<c-¥>]] } if you also use a Japanese keyboard.
   on_create = fun(t: Terminal), -- function to run when the terminal is first created
   on_open = fun(t: Terminal), -- function to run when the terminal opens
   on_close = fun(t: Terminal), -- function to run when the terminal closes
@@ -194,7 +194,8 @@ require("toggleterm").setup{
   persist_mode = true, -- if set to true (default) the previous terminal mode will be remembered
   direction = 'vertical' | 'horizontal' | 'tab' | 'float',
   close_on_exit = true, -- close the terminal window when the process exits
-  shell = vim.o.shell, -- change the default shell
+   -- Change the default shell. Can be a string or a function returning a string
+  shell = vim.o.shell,
   quote_command = false, -- put quotes arround the command sent to the terminal, required for Windows using git bash
   auto_scroll = true, -- automatically scroll to the bottom on terminal output
   -- This field is only relevant if direction is set to 'float'
@@ -204,10 +205,14 @@ require("toggleterm").setup{
     -- the 'curved' border is a custom border type
     -- not natively supported but implemented in this plugin.
     border = 'single' | 'double' | 'shadow' | 'curved' | ... other options supported by win open
-    -- like `size`, width and height can be a number or function which is passed the current terminal
+    -- like `size`, width, height, row, and col can be a number or function which is passed the current terminal
     width = <value>,
     height = <value>,
+    row = <value>,
+    col = <value>,
     winblend = 3,
+    zindex = <value>,
+    title_pos = 'left' | 'center' | 'right', position of the title of the floating window
   },
   winbar = {
     enabled = false,
@@ -224,10 +229,10 @@ require("toggleterm").setup{
 
 This is the command the mappings call under the hood. You can use it directly
 and prefix it with a count to target a specific terminal. This function also takes
-arguments `size`, `dir` and `direction`. e.g.
+arguments `size`, `dir`, `direction` and `name`. e.g.
 
 ```vim
-:ToggleTerm size=40 dir=~/Desktop direction=horizontal
+:ToggleTerm size=40 dir=~/Desktop direction=horizontal name=desktop
 ```
 
 If `dir` is specified on creation toggle term will open at the specified directory.
@@ -242,6 +247,9 @@ the height/width of all terminals in the same direction will be changed to `size
 
 If `direction` is specified, and the command opens a terminal,
 the terminal will be changed to the specified direction.
+
+If `name` is specified, the display name is set for the toggled terminal. This name will be visible
+when using `TermSelect` command to indicate the specific terminal.
 
 `size` and `direction` are ignored if the command closes a terminal.
 
@@ -267,7 +275,7 @@ The `cmd` and `dir` arguments can also expand the same special keywords as `:h e
 
 These special keywords can be escaped using the `\` character, if you want to print character as is.
 
-The `size` and `direction` arguments are like the `size` and `direction` arguments of `ToggleTerm`.
+The `size`, `direction` and `name` arguments are like the `size`, `direction` and `name` arguments of `ToggleTerm`.
 
 By default, focus is returned to the original window after executing the command
 (except for floating terminals). Use argument `go_back=0` to disable this behaviour.
@@ -275,6 +283,12 @@ By default, focus is returned to the original window after executing the command
 You can send commands to a terminal without opening its window by using the `open=0` argument.
 
 see `:h expand()` for more details
+
+### TermSelect
+
+This command uses `vim.ui.select` to allow a user to select a terminal to open
+or to focus it if it's already open. This can be useful if you have a lot of
+terminals and want to open a specific one.
 
 ### Sending lines to the terminal
 
@@ -286,6 +300,44 @@ You can "send lines" to the toggled terminals with the following commands:
 
 (`<T_ID` is an optional terminal ID parameter, which defines where should we send the lines.
 If the parameter is not provided, then the default is the `first terminal`)
+
+Alternatively, for more fine-grained control and use in mappings, in lua:
+
+```lua
+local trim_spaces = true
+vim.keymap.set("v", "<space>s", function()
+    require("toggleterm").send_lines_to_terminal("single_line", trim_spaces, { args = vim.v.count })
+end)
+    -- Replace with these for the other two options
+    -- require("toggleterm").send_lines_to_terminal("visual_lines", trim_spaces, { args = vim.v.count })
+    -- require("toggleterm").send_lines_to_terminal("visual_selection", trim_spaces, { args = vim.v.count })
+
+-- For use as an operator map:
+-- Send motion to terminal
+vim.keymap.set("n", [[<leader><c-\>]], function()
+  set_opfunc(function(motion_type)
+    require("toggleterm").send_lines_to_terminal(motion_type, false, { args = vim.v.count })
+  end)
+  vim.api.nvim_feedkeys("g@", "n", false)
+end)
+-- Double the command to send line to terminal
+vim.keymap.set("n", [[<leader><c-\><c-\>]], function()
+  set_opfunc(function(motion_type)
+    require("toggleterm").send_lines_to_terminal(motion_type, false, { args = vim.v.count })
+  end)
+  vim.api.nvim_feedkeys("g@_", "n", false)
+end)
+-- Send whole file
+vim.keymap.set("n", [[<leader><leader><c-\>]], function()
+  set_opfunc(function(motion_type)
+    require("toggleterm").send_lines_to_terminal(motion_type, false, { args = vim.v.count })
+  end)
+  vim.api.nvim_feedkeys("ggg@G''", "n", false)
+end)
+```
+
+Set `trim_spaces=false` for sending to REPLs for whitespace-sensitive languages like python.
+(For python, you probably want to start ipython with `ipython --no-autoindent`.)
 
 <!-- panvimdoc-ignore-start -->
 
@@ -378,6 +430,7 @@ Each terminal can take the following arguments:
 ```lua
 Terminal:new {
   cmd = string -- command to execute when creating the terminal e.g. 'top'
+  display_name = string -- the name of the terminal
   direction = string -- the layout for the terminal, same as the main config options
   dir = string -- the directory for the terminal
   close_on_exit = bool -- close the terminal window when the process exits
@@ -393,6 +446,8 @@ Terminal:new {
   on_exit = fun(t: Terminal, job: number, exit_code: number, name: string) -- function to run when terminal process exits
 }
 ```
+
+If you want to spawn a custom terminal without running any command, you can omit the `cmd` option.
 
 #### Custom terminal usage
 

@@ -27,13 +27,22 @@ local function is_cmd(shell) return shell:find("cmd") end
 
 local function is_pwsh(shell) return shell:find("pwsh") or shell:find("powershell") end
 
+local function is_nushell(shell) return shell:find("nu") end
+
 local function get_command_sep() return is_windows and is_cmd(vim.o.shell) and "&" or ";" end
 
 local function get_comment_sep() return is_windows and is_cmd(vim.o.shell) and "::" or "#" end
 
 local function get_newline_chr()
   local shell = config.get("shell")
-  return is_windows and (is_pwsh(shell) and "\r" or "\r\n") or "\n"
+  if type(shell) == "function" then shell = shell() end
+  if is_windows then
+    return is_pwsh(shell) and "\r" or "\r\n"
+  elseif is_nushell(shell) then
+    return "\r"
+  else
+    return "\n"
+  end
 end
 
 ---@alias Mode "n" | "i" | "?"
@@ -45,7 +54,8 @@ end
 local terminals = {}
 
 --- @class TermCreateArgs
---- @field cmd string
+--- @field newline_chr? string user specified newline chararacter
+--- @field cmd? string a custom command to run
 --- @field direction? string the layout style for the terminal
 --- @field id number?
 --- @field highlights table<string, table<string, string>>?
@@ -64,6 +74,7 @@ local terminals = {}
 --- @field on_close fun(term:Terminal)?
 
 --- @class Terminal
+--- @field newline_chr string
 --- @field cmd string
 --- @field direction string the layout style for the terminal
 --- @field id number
@@ -130,13 +141,13 @@ end
 local function setup_buffer_mappings(bufnr)
   local mapping = config.open_mapping
   if mapping and config.terminal_mappings then
-    vim.keymap.set("t", mapping, "<Cmd>ToggleTerm<CR>", { buffer = bufnr, silent = true })
+    utils.key_map("t", mapping, "<Cmd>ToggleTerm<CR>", { buffer = bufnr, silent = true })
   end
 end
 
 ---@param id number terminal id
 local function on_vim_resized(id)
-  local term = M.get(id)
+  local term = M.get(id, true)
   if not term or not term:is_float() or not term:is_open() then return end
   ui.update_float(term)
 end
@@ -150,7 +161,6 @@ end
 ---Terminal buffer autocommands
 ---@param term Terminal
 local function setup_buffer_autocommands(term)
-  local conf = config.get()
   api.nvim_create_autocmd("TermClose", {
     buffer = term.bufnr,
     group = AUGROUP,
@@ -164,7 +174,7 @@ local function setup_buffer_autocommands(term)
     })
   end
 
-  if conf.start_in_insert then
+  if config.start_in_insert then
     -- Avoid entering insert mode when spawning terminal in the background
     if term.window == api.nvim_get_current_win() then vim.cmd("startinsert") end
   end
@@ -193,8 +203,10 @@ function Terminal:new(term)
   if id and terminals[id] then return terminals[id] end
   local conf = config.get()
   self.__index = self
+  term.newline_chr = term.newline_chr or get_newline_chr()
   term.direction = term.direction or conf.direction
   term.id = id or next_id()
+  term.display_name = term.display_name
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
   term.clear_env = term.clear_env
   term.auto_scroll = vim.F.if_nil(term.auto_scroll, conf.auto_scroll)
@@ -216,6 +228,7 @@ end
 ---@package
 ---Add a terminal to the list of terminals
 function Terminal:__add()
+  if terminals[self.id] and terminals[self.id] ~= self then self.id = next_id() end
   if not terminals[self.id] then terminals[self.id] = self end
   return self
 end
@@ -285,10 +298,10 @@ end
 
 ---Combine arguments into strings separated by new lines
 ---@vararg string
+---@param newline_chr string
 ---@return string
-local function with_cr(...)
+local function with_cr(newline_chr, ...)
   local result = {}
-  local newline_chr = get_newline_chr()
   for _, str in ipairs({ ... }) do
     table.insert(result, str .. newline_chr)
   end
@@ -310,9 +323,8 @@ end
 ---@param cmd string|string[]
 ---@param go_back boolean? whether or not to return to original window
 function Terminal:send(cmd, go_back)
-  cmd = type(cmd) == "table" and with_cr(unpack(cmd)) or with_cr(
-      cmd --[[@as string]]
-    )
+  cmd = type(cmd) == "table" and with_cr(self.newline_chr, unpack(cmd))
+    or with_cr(self.newline_chr, cmd --[[@as string]])
   fn.chansend(self.job_id, cmd)
   self:scroll_bottom()
   if go_back and self:is_focused() then
@@ -323,14 +335,18 @@ function Terminal:send(cmd, go_back)
   end
 end
 
-function Terminal:clear() self:send("clear") end
+--check for os type and perform os specific clear command
+function Terminal:clear()
+  local clear = is_windows and "cls" or "clear"
+  self:send(clear)
+end
 
 ---Update the directory of an already opened terminal
 ---@param dir string
-function Terminal:change_dir(dir)
+function Terminal:change_dir(dir, go_back)
   dir = _get_dir(dir)
   if self.dir == dir then return end
-  self:send({ fmt("cd %s", dir), "clear" })
+  self:send({ fmt("cd %s", dir), self:clear() }, go_back)
   self.dir = dir
 end
 
@@ -373,6 +389,7 @@ end
 ---@private
 function Terminal:__spawn()
   local cmd = self.cmd or config.get("shell")
+  if type(cmd) == "function" then cmd = cmd() end
   local command_sep = get_command_sep()
   local comment_sep = get_comment_sep()
   local quote = config.get("quote_command") and "\"" or ""
@@ -419,15 +436,14 @@ end
 
 ---@package
 function Terminal:__set_win_options()
-  local win = vim.wo[self.window]
   if self:is_split() then
     local field = self.direction == "vertical" and "winfixwidth" or "winfixheight"
-    win[field] = true
+    utils.wo_setlocal(self.window, field, true)
   end
 
   if config.hide_numbers then
-    win.number = false
-    win.relativenumber = false
+    utils.wo_setlocal(self.window, "number", false)
+    utils.wo_setlocal(self.window, "relativenumber", false)
   end
 end
 
@@ -456,39 +472,35 @@ end
 
 ---Spawn terminal background job in a buffer without a window
 function Terminal:spawn()
-  if not (self.bufnr and api.nvim_buf_is_valid(self.bufnr)) then
-    self.bufnr = ui.create_buf()
-    self:__add()
+  if not self.bufnr or not api.nvim_buf_is_valid(self.bufnr) then self.bufnr = ui.create_buf() end
+  self:__add()
+  if api.nvim_get_current_buf() ~= self.bufnr then
     api.nvim_buf_call(self.bufnr, function() self:__spawn() end)
-    setup_buffer_autocommands(self)
-    setup_buffer_mappings(self.bufnr)
-    if self.on_create then self:on_create() end
+  else
+    self:__spawn()
   end
+  setup_buffer_autocommands(self)
+  setup_buffer_mappings(self.bufnr)
+  if self.on_create then self:on_create() end
 end
 
 ---Open a terminal window
 ---@param size number?
 ---@param direction string?
 function Terminal:open(size, direction)
-  self.dir = _get_dir(self.dir)
+  local cwd = fn.getcwd()
+  self.dir = _get_dir(config.autochdir and cwd or self.dir)
   ui.set_origin_window()
   if direction then self:change_direction(direction) end
   if not self.bufnr or not api.nvim_buf_is_valid(self.bufnr) then
     local ok, err = pcall(opener, size, self)
     if not ok and err then return utils.notify(err, "error") end
-    self:__add()
-    self:__spawn()
-    setup_buffer_autocommands(self)
-    setup_buffer_mappings(self.bufnr)
-    if self.on_create then self:on_create() end
+    self:spawn()
   else
     local ok, err = pcall(opener, size, self)
     if not ok and err then return utils.notify(err, "error") end
     ui.switch_buf(self.bufnr)
-    if config.autochdir then
-      local cwd = fn.getcwd()
-      if self.dir ~= cwd then self:change_dir(cwd) end
-    end
+    if config.autochdir and self.dir ~= cwd then self:change_dir(cwd) end
   end
   ui.hl_term(self)
   -- NOTE: it is important that this function is called at this point. i.e. the buffer has been correctly assigned
@@ -525,13 +537,14 @@ end
 ---@param num number?
 ---@param dir string?
 ---@param direction string?
+---@param name string?
 ---@return Terminal
 ---@return boolean
-function M.get_or_create_term(num, dir, direction)
+function M.get_or_create_term(num, dir, direction, name)
   local term = M.get(num)
   if term then return term, false end
   if dir and fn.isdirectory(fn.expand(dir)) == 0 then dir = nil end
-  return Terminal:new({ id = num, dir = dir, direction = direction }), true
+  return Terminal:new({ id = num, dir = dir, direction = direction, display_name = name }), true
 end
 
 ---Get a single terminal by id, unless it is hidden
@@ -541,6 +554,20 @@ end
 function M.get(id, include_hidden)
   local term = terminals[id]
   return (term and (include_hidden == true or not term.hidden)) and term or nil
+end
+
+---Get the first terminal that matches a predicate
+---@param predicate fun(term: Terminal): boolean
+---@return Terminal?
+function M.find(predicate)
+  if type(predicate) ~= "function" then
+    utils.notify("terminal.find expects a function, got " .. type(predicate), "error")
+    return
+  end
+  for _, term in pairs(terminals) do
+    if predicate(term) then return term end
+  end
+  return nil
 end
 
 ---Return the potentially non contiguous map of terminals as a sorted array

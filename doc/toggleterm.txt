@@ -1,4 +1,4 @@
-*toggleterm.txt*                         persist and toggle multiple terminals
+*toggleterm.txt*          For Neovim >= 0.8.0         Last change: 2024 May 19
 
 ==============================================================================
 Table of Contents                               *toggleterm-table-of-contents*
@@ -8,15 +8,13 @@ Table of Contents                               *toggleterm-table-of-contents*
   - Notices                                               |toggleterm-notices|
   - Why?                                                     |toggleterm-why?|
   - Roadmap                                               |toggleterm-roadmap|
+1. Links                                                    |toggleterm-links|
 
 MULTIPLE ORIENTATIONS ~
 
-
 - **Float**
 
-
 - **Vertical**
-
 
 - **Tab**
 
@@ -68,7 +66,6 @@ compatible with nvim versions less than 0.7 please use the tag `v1.*`.
 
 NOTICES                                                   *toggleterm-notices*
 
-
 - **28/07/1990** — If using `persist_mode` terminal mappings should be changed to use `wincmd` instead otherwise persist mode will not work correctly. See |toggleterm-here| for details.
 
 
@@ -106,11 +103,11 @@ SETUP ~
 This plugin must be explicitly enabled by using `require("toggleterm").setup{}`
 
 Setting the `open_mapping` key to use for toggling the terminal(s) will set up
-mappings for _normal_ mode. If you prefix the mapping with a number that
-particular terminal will be opened. Otherwise if a prefix is not set, then the
-last toggled terminal will be opened. In case there are multiple terminals
-opened they’ll all be closed, and on the next mapping key they’ll be
-restored.
+mappings for _normal_ mode. The `open_mapping` can be a key string or an array
+of key strings. If you prefix the mapping with a number that particular
+terminal will be opened. Otherwise if a prefix is not set, then the last
+toggled terminal will be opened. In case there are multiple terminals opened
+they’ll all be closed, and on the next mapping key they’ll be restored.
 
 If you set the `insert_mappings` key to `true`, the mapping will also take
 effect in insert mode; similarly setting `terminal_mappings` to `true` will
@@ -135,11 +132,11 @@ alternatively you can do this manually (not recommended but, your prerogative)
     inoremap <silent><c-t> <Esc><Cmd>exe v:count1 . "ToggleTerm"<CR>
 <
 
-**NOTE**: Please ensure you have set `hidden` in your neovim config, otherwise
+**NOTE**Please ensure you have set `hidden` in your neovim config, otherwise
 the terminals will be discarded when closed.
 
-**WARNING**: Please do not copy and paste this configuration! It is here to
-show what options are available. It is not written to be used as is.
+**WARNING**Please do not copy and paste this configuration! It is here to show
+what options are available. It is not written to be used as is.
 
 >lua
     require("toggleterm").setup{
@@ -151,7 +148,7 @@ show what options are available. It is not written to be used as is.
           return vim.o.columns * 0.4
         end
       end,
-      open_mapping = [[<c-\>]],
+      open_mapping = [[<c-\>]], -- or { [[<c-\>]], [[<c-¥>]] } if you also use a Japanese keyboard.
       on_create = fun(t: Terminal), -- function to run when the terminal is first created
       on_open = fun(t: Terminal), -- function to run when the terminal opens
       on_close = fun(t: Terminal), -- function to run when the terminal closes
@@ -184,7 +181,8 @@ show what options are available. It is not written to be used as is.
       persist_mode = true, -- if set to true (default) the previous terminal mode will be remembered
       direction = 'vertical' | 'horizontal' | 'tab' | 'float',
       close_on_exit = true, -- close the terminal window when the process exits
-      shell = vim.o.shell, -- change the default shell
+       -- Change the default shell. Can be a string or a function returning a string
+      shell = vim.o.shell,
       quote_command = false -- put quotes around the command being sent to the terminal. Required for Windows using git bash
       auto_scroll = true, -- automatically scroll to the bottom on terminal output
       -- This field is only relevant if direction is set to 'float'
@@ -194,10 +192,14 @@ show what options are available. It is not written to be used as is.
         -- the 'curved' border is a custom border type
         -- not natively supported but implemented in this plugin.
         border = 'single' | 'double' | 'shadow' | 'curved' | ... other options supported by win open
-        -- like `size`, width and height can be a number or function which is passed the current terminal
+        -- like `size`, width, height, row, and col can be a number or function which is passed the current terminal
         width = <value>,
         height = <value>,
+        row = <value>,
+        col = <value>,
         winblend = 3,
+        zindex = <value>,
+        title_pos = 'left' | 'center' | 'right', position of the title of the floating window
       },
       winbar = {
         enabled = false,
@@ -216,10 +218,10 @@ TOGGLETERM ~
 
 This is the command the mappings call under the hood. You can use it directly
 and prefix it with a count to target a specific terminal. This function also
-takes arguments `size`, `dir` and `direction`. e.g.
+takes arguments `size`, `dir`, `direction` and `name`. e.g.
 
 >vim
-    :ToggleTerm size=40 dir=~/Desktop direction=horizontal
+    :ToggleTerm size=40 dir=~/Desktop direction=horizontal name=desktop
 <
 
 If `dir` is specified on creation toggle term will open at the specified
@@ -227,7 +229,7 @@ directory. If the terminal has already been opened at a particular directory it
 will remain in that directory.
 
 The directory can also be specified as `git_dir` which toggleterm will then use
-to try and derive the git repo directory. _NOTE_: This will not work for
+to try and derive the git repo directory. _NOTE_This will not work for
 `git-worktrees` or other more complex setups.
 
 If `size` is specified, and the command opens a split (horizontal/vertical)
@@ -237,11 +239,14 @@ changed to `size`.
 If `direction` is specified, and the command opens a terminal, the terminal
 will be changed to the specified direction.
 
+If `name` is specified, the display name is set for the toggled terminal. This
+name will be visible when using `TermSelect` command to indicate the specific
+terminal.
+
 `size` and `direction` are ignored if the command closes a terminal.
 
 
 CAVEATS
-
 
 - Having multiple terminals with different directions open at the same time is unsupported.
 
@@ -261,15 +266,15 @@ terminal 2. note that the `cmd` argument **must be quoted**.
 _NOTE:_ the `dir` argument can also be _optionally_ quoted if it contains
 spaces.
 
-The `cmd` and `dir` arguments can also expand the same special keywords as `:h
-expand` e.g. `TermExec cmd="echo %"` will be expanded to `TermExec cmd="echo
+The `cmd` and `dir` arguments can also expand the same special keywords as
+|expand| e.g. `TermExec cmd="echo %"` will be expanded to `TermExec cmd="echo
 /file/example"`
 
 These special keywords can be escaped using the `\` character, if you want to
 print character as is.
 
-The `size` and `direction` arguments are like the `size` and `direction`
-arguments of `ToggleTerm`.
+The `size`, `direction` and `name` arguments are like the `size`, `direction`
+and `name` arguments of `ToggleTerm`.
 
 By default, focus is returned to the original window after executing the
 command (except for floating terminals). Use argument `go_back=0` to disable
@@ -278,21 +283,66 @@ this behaviour.
 You can send commands to a terminal without opening its window by using the
 `open=0` argument.
 
-see `:h expand()` for more details
+see |expand()| for more details
+
+
+TERMSELECT ~
+
+This command uses `vim.ui.select` to allow a user to select a terminal to open
+or to focus it if it’s already open. This can be useful if you have a lot of
+terminals and want to open a specific one.
 
 
 SENDING LINES TO THE TERMINAL ~
 
 You can "send lines" to the toggled terminals with the following commands:
 
-
-- `:ToggleTermSendCurrentLine <T_ID>`: sends the whole line where you are standing with your cursor
-- `:ToggleTermSendVisualLines <T_ID>`: sends all the (whole) lines in your visual selection
-- `:ToggleTermSendVisualSelection <T_ID>`: sends only the visually selected text (this can be a block of text or a selection in a single line)
+- `:ToggleTermSendCurrentLine <T_ID>`sends the whole line where you are standing with your cursor
+- `:ToggleTermSendVisualLines <T_ID>`sends all the (whole) lines in your visual selection
+- `:ToggleTermSendVisualSelection <T_ID>`sends only the visually selected text (this can be a block of text or a selection in a single line)
 
 (`<T_ID` is an optional terminal ID parameter, which defines where should we
 send the lines. If the parameter is not provided, then the default is the
 `first terminal`)
+
+Alternatively, for more fine-grained control and use in mappings, in lua:
+
+>lua
+    local trim_spaces = true
+    vim.keymap.set("v", "<space>s", function()
+        require("toggleterm").send_lines_to_terminal("single_line", trim_spaces, { args = vim.v.count })
+    end)
+        -- Replace with these for the other two options
+        -- require("toggleterm").send_lines_to_terminal("visual_lines", trim_spaces, { args = vim.v.count })
+        -- require("toggleterm").send_lines_to_terminal("visual_selection", trim_spaces, { args = vim.v.count })
+    
+    -- For use as an operator map:
+    -- Send motion to terminal
+    vim.keymap.set("n", [[<leader><c-\>]], function()
+      set_opfunc(function(motion_type)
+        require("toggleterm").send_lines_to_terminal(motion_type, false, { args = vim.v.count })
+      end)
+      vim.api.nvim_feedkeys("g@", "n", false)
+    end)
+    -- Double the command to send line to terminal
+    vim.keymap.set("n", [[<leader><c-\><c-\>]], function()
+      set_opfunc(function(motion_type)
+        require("toggleterm").send_lines_to_terminal(motion_type, false, { args = vim.v.count })
+      end)
+      vim.api.nvim_feedkeys("g@_", "n", false)
+    end)
+    -- Send whole file
+    vim.keymap.set("n", [[<leader><leader><c-\>]], function()
+      set_opfunc(function(motion_type)
+        require("toggleterm").send_lines_to_terminal(motion_type, false, { args = vim.v.count })
+      end)
+      vim.api.nvim_feedkeys("ggg@G''", "n", false)
+    end)
+<
+
+Set `trim_spaces=false` for sending to REPLs for whitespace-sensitive languages
+like python. (For python, you probably want to start ipython with `ipython
+--no-autoindent`.)
 
 
 TOGGLETERMSETNAME ~
@@ -382,6 +432,7 @@ Each terminal can take the following arguments:
 >lua
     Terminal:new {
       cmd = string -- command to execute when creating the terminal e.g. 'top'
+      display_name = string -- the name of the terminal
       direction = string -- the layout for the terminal, same as the main config options
       dir = string -- the directory for the terminal
       close_on_exit = bool -- close the terminal window when the process exits
@@ -397,6 +448,9 @@ Each terminal can take the following arguments:
       on_exit = fun(t: Terminal, job: number, exit_code: number, name: string) -- function to run when terminal process exits
     }
 <
+
+If you want to spawn a custom terminal without running any command, you can
+omit the `cmd` option.
 
 
 CUSTOM TERMINAL USAGE
@@ -457,8 +511,8 @@ You can also set a custom layout for a terminal.
     vim.api.nvim_set_keymap("n", "<leader>g", "<cmd>lua _lazygit_toggle()<CR>", {noremap = true, silent = true})
 <
 
-**WARNING**: do not use any of the private functionality of the terminal or
-other non-public parts of the API as these can change in the future.
+**WARNING**do not use any of the private functionality of the terminal or other
+non-public parts of the API as these can change in the future.
 
 
 STATUSLINE ~
@@ -487,20 +541,19 @@ OPEN MULTIPLE TERMINALS SIDE-BY-SIDE ~
 
   Direction    Supported
   ------------ -----------
-  vertical     ✔️
-  horizontal   ✔️
-  tab          ✖️
-  float        ✖️
-In your first terminal, you need to leave the `TERMINAL` mode using C-\C-N
-which can be remapped to Esc for ease of use.
+  vertical     
+  horizontal   
+  tab          
+  float        
+Inyour first terminal, you need to leave the `TERMINAL` mode using C-\C-N which
+can be remapped to Esc for ease of use.
 
 Then you type on: `2<C-\>`, and the result:
 
 Explain:
 
-
-- `2`: this is the terminal’s number (or ID), your first terminal is `1` (e.g. your 3rd terminal will be `3<C-\>`, so on).
-- C-\: this is the combined key mapping to the command `:ToggleTerm`.
+- `2`this is the terminal’s number (or ID), your first terminal is `1` (e.g. your 3rd terminal will be `3<C-\>`, so on).
+- C-\this is the combined key mapping to the command `:ToggleTerm`.
 
 
 FAQ ~

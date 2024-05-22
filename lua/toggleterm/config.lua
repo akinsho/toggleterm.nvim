@@ -18,7 +18,7 @@ local function shade(color, factor) return colors.shade_color(color, factor) end
 --- @field size number
 --- @field shade_filetypes string[]
 --- @field hide_numbers boolean
---- @field open_mapping string
+--- @field open_mapping string | string[]
 --- @field shade_terminals boolean
 --- @field insert_mappings boolean
 --- @field terminal_mappings boolean
@@ -28,12 +28,13 @@ local function shade(color, factor) return colors.shade_color(color, factor) end
 --- @field close_on_exit boolean
 --- @field direction  '"horizontal"' | '"vertical"' | '"float"'
 --- @field shading_factor number
---- @field shell string
+--- @field shell string|fun():string
 --- @field auto_scroll boolean
 --- @field float_opts table<string, any>
 --- @field highlights ToggleTermHighlights
 --- @field winbar WinbarOpts
 --- @field autochdir boolean
+--- @field title_pos '"left"' | '"center"' | '"right"'
 
 ---@type ToggleTermConfig
 local config = {
@@ -59,6 +60,7 @@ local config = {
   },
   float_opts = {
     winblend = 0,
+    title_pos = "left",
   },
 }
 

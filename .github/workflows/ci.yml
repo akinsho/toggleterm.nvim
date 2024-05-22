@@ -1,0 +1,98 @@
+name: CI
+on:
+  push:
+  pull_request:
+
+
+jobs:
+  tests:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+    runs-on: ${{ matrix.os }}
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Neovim
+        shell: bash
+        run: |
+          mkdir -p /tmp/nvim
+          wget -q https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage -O /tmp/nvim/nvim.appimage
+          cd /tmp/nvim
+          chmod a+x ./nvim.appimage
+          ./nvim.appimage --appimage-extract
+          echo "/tmp/nvim/squashfs-root/usr/bin/" >> $GITHUB_PATH
+      - name: Run Tests
+        run: |
+          nvim --version
+          [ ! -d tests ] && exit 0
+          nvim --headless -u tests/minimal_init.lua -c "PlenaryBustedDirectory tests/ {minimal_init = 'tests/minimal_init.lua', sequential = true}"
+
+  stylua:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
+      - uses: JohnnyMorganz/stylua-action@v2
+        with:
+          version: latest
+          token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
+          args: --config-path=stylua.toml lua/
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "style(format): run stylua"
+          branch: ${{ github.head_ref }}
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+
+  docs:
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/main' }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: panvimdoc
+        uses: kdheepak/panvimdoc@main
+        with:
+          vimdoc: toggleterm
+          version: "Neovim >= 0.8.0"
+          demojify: true
+          treesitter: true
+      - name: Push changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
+          commit_message: "chore(build): auto-generate vimdoc"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+
+  release:
+    name: release
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs:
+      - docs
+      - tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          release-type: simple
+          package-name: toggleterm.nvim
+      - uses: actions/checkout@v3
+      - name: tag stable versions
+        if: ${{ steps.release.outputs.release_created }}
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email github-actions[bot]@users.noreply.github.com
+          git remote add gh-token "https://${{ secrets.GITHUB_TOKEN }}@github.com/google-github-actions/release-please-action.git"

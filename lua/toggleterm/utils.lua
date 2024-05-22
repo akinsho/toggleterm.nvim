@@ -48,6 +48,21 @@ end
 ---@param sep string
 function M.concat_without_empty(tbl, sep) return table.concat(M.tbl_filter_empty(tbl), sep) end
 
+-- Key mapping function
+---@param mod string | string[]
+---@param lhs string | string[]
+---@param rhs string | function
+---@param opts table?
+function M.key_map(mod, lhs, rhs, opts)
+  if type(lhs) == "string" then
+    vim.keymap.set(mod, lhs, rhs, opts)
+  elseif type(lhs) == "table" then
+    for _, key in pairs(lhs) do
+      vim.keymap.set(mod, key, rhs, opts)
+    end
+  end
+end
+
 ---@param mode "visual" | "motion"
 ---@return table
 function M.get_line_selection(mode)
@@ -55,6 +70,11 @@ function M.get_line_selection(mode)
     visual = { "'<", "'>" },
     motion = { "'[", "']" },
   })[mode])
+  -- '< marks are only updated when one leaves visual mode.
+  -- When calling lua functions directly from a mapping, need to
+  -- explicitly exit visual with the escape key to ensure those marks are
+  -- accurate.
+  vim.cmd("normal! ")
 
   -- Get the start and the end of the selection
   local start_line, start_col = unpack(fn.getpos(start_char), 2, 3)
@@ -67,8 +87,11 @@ function M.get_line_selection(mode)
   }
 end
 
-function M.get_visual_selection(res)
+function M.get_visual_selection(res, motion)
+  motion = motion or false
   local mode = fn.visualmode()
+  if motion then mode = "v" end
+
   -- line-visual
   -- return lines encompassed by the selection; already in res object
   if mode == "V" then return res.selected_lines end
@@ -98,6 +121,15 @@ function M.get_visual_selection(res)
     -- iterate over lines, truncating each one
     return vim.tbl_map(function(line) return line:sub(start_col, end_col) end, res.selected_lines)
   end
+end
+
+--- Sets a local window option, like `:setlocal`
+--- TODO: replace with double-indexing on `vim.wo` when neovim/neovim#20288 (hopefully) merges
+---@param win number
+---@param option string
+---@param value any
+function M.wo_setlocal(win, option, value)
+  api.nvim_set_option_value(option, value, { scope = "local", win = win })
 end
 
 return M
