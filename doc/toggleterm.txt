@@ -1,4 +1,4 @@
-*toggleterm.txt*          For Neovim >= 0.8.0         Last change: 2024 May 19
+*toggleterm.txt*         For Neovim >= 0.8.0         Last change: 2024 June 25
 
 ==============================================================================
 Table of Contents                               *toggleterm-table-of-contents*
@@ -173,7 +173,8 @@ what options are available. It is not written to be used as is.
         },
       },
       shade_terminals = true, -- NOTE: this option takes priority over highlights specified so if you specify Normal highlights you should set this to false
-      shading_factor = '<number>', -- the percentage by which to lighten terminal background, default: -30 (gets multiplied by -3 if background is light)
+      shading_factor = '<number>', -- the percentage by which to lighten dark terminal background, default: -30
+      shading_ratio = '<number>', -- the ratio of shading factor for light/dark terminal background, default: -3
       start_in_insert = true,
       insert_mappings = true, -- whether or not the open mapping applies in insert mode
       terminal_mappings = true, -- whether or not the open mapping applies in the opened terminals
