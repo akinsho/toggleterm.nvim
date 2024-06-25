@@ -28,6 +28,7 @@ local function shade(color, factor) return colors.shade_color(color, factor) end
 --- @field close_on_exit boolean
 --- @field direction  '"horizontal"' | '"vertical"' | '"float"'
 --- @field shading_factor number
+--- @field shading_ratio number
 --- @field shell string|fun():string
 --- @field auto_scroll boolean
 --- @field float_opts table<string, any>
@@ -50,6 +51,7 @@ local config = {
   close_on_exit = true,
   direction = "horizontal",
   shading_factor = constants.shading_amount,
+  shading_ratio = constants.shading_ratio,
   shell = vim.o.shell,
   autochdir = false,
   auto_scroll = true,
@@ -91,7 +93,7 @@ local function get_highlights(conf)
 
   if conf.shade_terminals then
     local is_bright = colors.is_bright_background()
-    local degree = is_bright and -3 or 1
+    local degree = is_bright and conf.shading_ratio or 1
     local amount = conf.shading_factor * degree
     local normal_bg = colors.get_hex("Normal", "bg")
     local terminal_bg = conf.shade_terminals and shade(normal_bg, amount) or normal_bg
