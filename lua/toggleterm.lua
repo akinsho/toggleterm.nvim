@@ -175,7 +175,7 @@ end
 --- @param name string?
 --- @param go_back boolean? whether or not to return to original window
 --- @param open boolean? whether or not to open terminal window
-function M.exec(cmd, num, size, dir, direction, name, go_back, open)
+function M.exec(cmd, num, size, dir, direction, name, go_back, open, use_bracketed_paste)
   vim.validate({
     cmd = { cmd, "string" },
     num = { num, "number", true },
@@ -197,13 +197,14 @@ function M.exec(cmd, num, size, dir, direction, name, go_back, open)
     term:close()
     go_back = false
   end
-  term:send(cmd, go_back)
+  term:send(cmd, go_back, use_bracketed_paste)
 end
 
 --- @param selection_type string
 --- @param trim_spaces boolean
 --- @param cmd_data table<string, any>
-function M.send_lines_to_terminal(selection_type, trim_spaces, cmd_data)
+--- @param use_bracketed_paste boolean?
+function M.send_lines_to_terminal(selection_type, trim_spaces, cmd_data, use_bracketed_paste)
   local id = tonumber(cmd_data.args) or 1
   trim_spaces = trim_spaces == nil or trim_spaces
 
@@ -244,11 +245,11 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, cmd_data)
   if not lines or not next(lines) then return end
 
   if not trim_spaces then
-    M.exec(table.concat(lines, "\n"), id)
+    M.exec(table.concat(lines, "\n"), id, nil, nil, nil, nil, nil, nil, use_bracketed_paste)
   else
     for _, line in ipairs(lines) do
       local l = trim_spaces and line:gsub("^%s+", ""):gsub("%s+$", "") or line
-      M.exec(l, id)
+      M.exec(l, id, nil, nil, nil, nil, nil, nil, use_bracketed_paste)
     end
   end
 
