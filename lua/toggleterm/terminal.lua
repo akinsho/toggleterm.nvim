@@ -329,7 +329,7 @@ function Terminal:send(cmd, go_back, use_bracketed_paste)
   
   cmd = type(cmd) == "table" and with_cr(self.newline_chr, unpack(cmd))
     or with_cr(self.newline_chr, cmd --[[@as string]])
-  fn.chansend(self.job_id, start_seq .. cmd .. end_seq)
+  fn.chansend(self.job_id, start_seq .. cmd .. end_seq .. self.newline_chr)
   self:scroll_bottom()
   if go_back and self:is_focused() then
     ui.goto_previous()
