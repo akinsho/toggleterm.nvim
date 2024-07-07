@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.12.0](https://github.com/akinsho/toggleterm.nvim/compare/...
+
+### Features
+
+* add bracketed paste support to `send_lines_to_terminal` and Terminal:send.
+
 ## [2.11.0](https://github.com/akinsho/toggleterm.nvim/compare/v2.10.0...v2.11.0) (2024-04-22)
 
 
