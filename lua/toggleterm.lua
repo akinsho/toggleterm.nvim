@@ -175,6 +175,7 @@ end
 --- @param name string?
 --- @param go_back boolean? whether or not to return to original window
 --- @param open boolean? whether or not to open terminal window
+--- @param use_bracketed_paste boolean? whether or not to use bracketed paste mode for send
 function M.exec(cmd, num, size, dir, direction, name, go_back, open, use_bracketed_paste)
   vim.validate({
     cmd = { cmd, "string" },
@@ -185,6 +186,7 @@ function M.exec(cmd, num, size, dir, direction, name, go_back, open, use_bracket
     name = { name, "string", true },
     go_back = { go_back, "boolean", true },
     open = { open, "boolean", true },
+    use_bracketed_paste = { use_bracketed_paste, "boolean", true },
   })
   num = (num and num >= 1) and num or terms.get_toggled_id()
   open = open == nil or open

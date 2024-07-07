@@ -305,9 +305,25 @@ describe("ToggleTerm tests:", function()
       local test1 = Terminal:new():toggle()
       local _ = match._
       spy.on(test1, "send")
+      spy.on(vim.fn, "chansend")
       toggleterm.exec('echo "hello world"', 1)
       assert.spy(test1.send).was_called()
       assert.spy(test1.send).was_called_with(_, 'echo "hello world"', true, match.is_nil())
+      assert.spy(vim.fn.chansend).was_called_with(test1.job_id,  'echo "hello world"\n')
+      assert.is_true(vim.tbl_contains(api.nvim_list_wins(), test1.window))
+    end)
+
+    it("should send commands to a terminal with bracketed paste characters when specified", function()
+      local start_seq = "\x1b[200~"
+      local end_seq = "\x1b[201~"
+      local test1 = Terminal:new():toggle()
+      local _ = match._
+      spy.on(test1, "send")
+      spy.on(vim.fn, "chansend")
+      toggleterm.exec("def hello():\n  print('foo')", 1, nil, nil, nil, nil, nil, nil, true)
+      assert.spy(test1.send).was_called()
+      assert.spy(test1.send).was_called_with(_, "def hello():\n  print('foo')", true, true)
+      assert.spy(vim.fn.chansend).was_called_with(test1.job_id, start_seq .. "def hello():\n  print('foo')\n" .. end_seq .. "\n")
       assert.is_true(vim.tbl_contains(api.nvim_list_wins(), test1.window))
     end)
 
