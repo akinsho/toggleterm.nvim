@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.12.0](https://github.com/akinsho/toggleterm.nvim/compare/v2.11.0...v2.12.0) (2024-06-25)
+
+
+### Features
+
+* add shading_ratio option ([#580](https://github.com/akinsho/toggleterm.nvim/issues/580)) ([74ce690](https://github.com/akinsho/toggleterm.nvim/commit/74ce6904e10e9bf2b7ffde598afc106c1d61e59c))
+
 ## [2.11.0](https://github.com/akinsho/toggleterm.nvim/compare/v2.10.0...v2.11.0) (2024-04-22)
 
 
