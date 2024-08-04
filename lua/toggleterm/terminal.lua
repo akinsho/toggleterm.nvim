@@ -208,7 +208,7 @@ function Terminal:new(term)
   term.id = id or next_id()
   term.display_name = term.display_name
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
-  term.clear_env = term.clear_env
+  term.clear_env = vim.F.if_nil(term.clear_env, conf.clear_env)
   term.auto_scroll = vim.F.if_nil(term.auto_scroll, conf.auto_scroll)
   term.env = vim.F.if_nil(term.env, conf.env)
   term.hidden = vim.F.if_nil(term.hidden, false)

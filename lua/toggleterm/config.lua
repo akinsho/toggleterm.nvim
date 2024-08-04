@@ -26,6 +26,7 @@ local function shade(color, factor) return colors.shade_color(color, factor) end
 --- @field persist_size boolean
 --- @field persist_mode boolean
 --- @field close_on_exit boolean
+--- @field clear_env boolean
 --- @field direction  '"horizontal"' | '"vertical"' | '"float"'
 --- @field shading_factor number
 --- @field shading_ratio number
@@ -49,6 +50,7 @@ local config = {
   persist_size = true,
   persist_mode = true,
   close_on_exit = true,
+  clear_env = false,
   direction = "horizontal",
   shading_factor = constants.shading_amount,
   shading_ratio = constants.shading_ratio,
