@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.13.0](https://github.com/akinsho/toggleterm.nvim/compare/v2.12.0...v2.13.0) (2024-08-08)
+
+
+### Features
+
+* add clear_env option ([#598](https://github.com/akinsho/toggleterm.nvim/issues/598)) ([16a2873](https://github.com/akinsho/toggleterm.nvim/commit/16a2873e674b17b67a399db657c359e0a0c906ff))
+
+
+### Bug Fixes
+
+* set_mode may not be taken into account ([#596](https://github.com/akinsho/toggleterm.nvim/issues/596)) ([137d06f](https://github.com/akinsho/toggleterm.nvim/commit/137d06fb103952a0fb567882bb8527e2f92d327d))
+
 ## [2.12.0](https://github.com/akinsho/toggleterm.nvim/compare/v2.11.0...v2.12.0) (2024-06-25)
 
 
