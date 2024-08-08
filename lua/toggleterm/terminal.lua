@@ -261,11 +261,11 @@ function Terminal:__restore_mode() self:set_mode(self.__state.mode) end
 ---@param m Mode
 function Terminal:set_mode(m)
   if m == mode.INSERT then
-    vim.cmd("startinsert")
+    vim.schedule(function() vim.cmd("startinsert") end)
   elseif m == mode.NORMAL then
-    vim.cmd("stopinsert")
+    vim.schedule(function() vim.cmd("stopinsert") end)
   elseif m == mode.UNSUPPORTED and config.get("start_in_insert") then
-    vim.cmd("startinsert")
+    vim.schedule(function() vim.cmd("startinsert") end)
   end
 end
 
