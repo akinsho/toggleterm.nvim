@@ -1,4 +1,4 @@
-*toggleterm.txt*         For Neovim >= 0.8.0         Last change: 2024 July 17
+*toggleterm.txt*        For Neovim >= 0.8.0        Last change: 2024 August 08
 
 ==============================================================================
 Table of Contents                               *toggleterm-table-of-contents*
@@ -182,6 +182,7 @@ what options are available. It is not written to be used as is.
       persist_mode = true, -- if set to true (default) the previous terminal mode will be remembered
       direction = 'vertical' | 'horizontal' | 'tab' | 'float',
       close_on_exit = true, -- close the terminal window when the process exits
+      clear_env = false, -- use only environmental variables from `env`, passed to jobstart()
        -- Change the default shell. Can be a string or a function returning a string
       shell = vim.o.shell,
       auto_scroll = true, -- automatically scroll to the bottom on terminal output
