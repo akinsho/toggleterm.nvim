@@ -224,6 +224,7 @@ end
 local split_commands = {
   horizontal = {
     existing = "rightbelow vsplit",
+    existing_stacked = "rightbelow split",
     new = "botright split",
     resize = "resize",
   },
@@ -316,7 +317,13 @@ function M.open_split(size, term)
     local split_win = windows[#windows]
     if config.persist_size then M.save_window_size(term.direction, split_win.window) end
     api.nvim_set_current_win(split_win.window)
-    vim.cmd(commands.existing)
+    local window_width = vim.o.columns
+    local horizontal_breakpoint = require("toggleterm.config").get("responsiveness_settings").horizontal_breakpoint
+    if term.direction == "horizontal" and window_width < horizontal_breakpoint then
+      vim.cmd(commands.existing_stacked)
+    else
+      vim.cmd(commands.existing)
+    end
   else
     vim.cmd(commands.new)
   end
