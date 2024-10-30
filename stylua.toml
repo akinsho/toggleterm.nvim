@@ -2,4 +2,4 @@ column_width = 100
 indent_type = "Spaces"
 quote_style = "AutoPreferDouble"
 indent_width = 2
-collapse_simple_statement = 'Always'
+collapse_simple_statement = "Always"

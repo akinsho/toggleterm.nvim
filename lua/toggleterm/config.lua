@@ -71,7 +71,7 @@ local config = {
   },
   responsiveness_settings = {
     horizontal_breakpoint = 135,
-  }
+  },
 }
 
 ---Derive the highlights for a toggleterm and merge these with the user's preferences
