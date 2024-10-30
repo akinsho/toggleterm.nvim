@@ -221,6 +221,11 @@ require("toggleterm").setup{
       return term.name
     end
   },
+  responsiveness_settings = {
+    -- breakpoint in terms of `vim.o.columns` at which terminals will start to stack on top of each other
+    -- instead of next to each other
+    horizontal_breakpoint = 135,
+  }
 }
 ```
 
