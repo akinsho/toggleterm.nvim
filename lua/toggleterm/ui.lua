@@ -318,7 +318,7 @@ function M.open_split(size, term)
     if config.persist_size then M.save_window_size(term.direction, split_win.window) end
     api.nvim_set_current_win(split_win.window)
     local window_width = vim.o.columns
-    local horizontal_breakpoint = config.get("responsiveness").horizontal_breakpoint
+    local horizontal_breakpoint = config.responsiveness.horizontal_breakpoint
     if term.direction == "horizontal" and window_width < horizontal_breakpoint then
       vim.cmd(commands.existing_stacked)
     else
