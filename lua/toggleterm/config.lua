@@ -14,6 +14,9 @@ local function shade(color, factor) return colors.shade_color(color, factor) end
 ---@field name_formatter fun(term: Terminal):string
 ---@field enabled boolean
 
+--- @class Responsiveness
+--- @field horizontal_breakpoint number
+
 --- @class ToggleTermConfig
 --- @field size number
 --- @field shade_filetypes string[]
@@ -37,6 +40,7 @@ local function shade(color, factor) return colors.shade_color(color, factor) end
 --- @field winbar WinbarOpts
 --- @field autochdir boolean
 --- @field title_pos '"left"' | '"center"' | '"right"'
+--- @field responsiveness Responsiveness
 
 ---@type ToggleTermConfig
 local config = {
@@ -64,6 +68,9 @@ local config = {
   float_opts = {
     winblend = 0,
     title_pos = "left",
+  },
+  responsiveness = {
+    horizontal_breakpoint = 0,
   },
 }
 
