@@ -351,7 +351,7 @@ local function setup_autocommands(_)
     callback = function()
       config.reset_highlights()
       for _, term in pairs(terms.get_all()) do
-        if api.nvim_win_is_valid(term.window) then
+        if term.window and api.nvim_win_is_valid(term.window) then
           api.nvim_win_call(term.window, function() ui.hl_term(term) end)
         end
       end
