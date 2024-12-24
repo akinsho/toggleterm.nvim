@@ -371,13 +371,7 @@ end
 
 ---@param callback fun(t: Terminal?)
 local function get_subject_terminal(callback)
-  local items = terms.get_all(true)
-  if #items == 0 then return utils.notify("No toggleterms are open yet") end
-
-  vim.ui.select(items, {
-    prompt = "Please select a terminal to name: ",
-    format_item = function(term) return term.id .. ": " .. term:_display_name() end,
-  }, function(term)
+  terms.select_terminal(true, "Please select a terminal to name: ", function(term)
     if not term then return end
     callback(term)
   end)
@@ -387,6 +381,15 @@ end
 ---@param term Terminal
 local function set_term_name(name, term) term.display_name = name end
 
+---@param selection string
+---@param trim_spaces boolean
+local function select_terminal_and_send_selection(selection, trim_spaces)
+  terms.select_terminal(trim_spaces, "Please select a terminal to send text to: ", function(term)
+    if not term then return end
+    M.send_lines_to_terminal(selection, trim_spaces, { args = term.id })
+  end)
+end
+
 local function request_term_name(term)
   vim.ui.input({ prompt = "Please set a name for the terminal" }, function(name)
     if name and #name > 0 then set_term_name(name, term) end
@@ -394,13 +397,7 @@ local function request_term_name(term)
 end
 
 local function select_terminal(opts)
-  local terminals = terms.get_all(opts.bang)
-  if #terminals == 0 then return utils.notify("No toggleterms are open yet", "info") end
-  vim.ui.select(terminals, {
-    prompt = "Please select a terminal to open (or focus): ",
-    format_item = function(term) return term.id .. ": " .. term:_display_name() end,
-  }, function(_, idx)
-    local term = terminals[idx]
+  terms.select_terminal(true, "Please select a terminal to open (or focus): ", function(term)
     if not term then return end
     if term:is_open() then
       term:focus()
@@ -427,6 +424,24 @@ local function setup_commands()
   )
 
   command("ToggleTermToggleAll", function(opts) M.toggle_all(opts.bang) end, { bang = true })
+
+  command(
+    "TermSend",
+    function(opts)
+      local selection = nil
+      if opts.range == 0 then
+        selection = "single_line"
+      else
+        if vim.fn.visualmode() == "V" then
+          selection = "visual_lines"
+        else
+          selection = "visual_selection"
+        end
+      end
+      select_terminal_and_send_selection(selection, true)
+    end,
+    { range = true }
+  )
 
   command(
     "ToggleTermSendVisualLines",
