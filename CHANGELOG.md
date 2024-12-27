@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.1](https://github.com/akinsho/toggleterm.nvim/compare/v2.13.0...v2.13.1) (2024-12-27)
+
+
+### Bug Fixes
+
+* check for terminal win before check if is valid ([#622](https://github.com/akinsho/toggleterm.nvim/issues/622)) ([22aefd4](https://github.com/akinsho/toggleterm.nvim/commit/22aefd4445570ae2a0145aeeb6388caa88dfd7af)), closes [#435](https://github.com/akinsho/toggleterm.nvim/issues/435)
+
 ## [2.13.0](https://github.com/akinsho/toggleterm.nvim/compare/v2.12.0...v2.13.0) (2024-11-01)
 
 
