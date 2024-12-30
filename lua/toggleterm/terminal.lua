@@ -106,7 +106,7 @@ local Terminal = {}
 --- hasn't already been allocated e.g. in a list of {1,2,5,6} the next id should
 --- be 3 then 4 then 7
 ---@return integer
-local function next_id()
+function M.next_id()
   local all = M.get_all(true)
   for index, term in pairs(all) do
     if index ~= term.id then return index end
