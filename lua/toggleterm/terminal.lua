@@ -579,6 +579,26 @@ function M.get_all(include_hidden)
   return result
 end
 
+-- Prompts to select an open terminal
+--
+-- It will short circuit to the given callback if there is only one terminal open
+--
+-- @param include_hidden boolean whether or not to include hidden terminals
+-- @param prompt string the prompt to display
+-- @param callback fun the function to call with the selected terminal
+function M.select_terminal(include_hidden, prompt, callback)
+  local terminals = terminals or M.get_all(include_hidden)
+  if #terminals == 0 then return utils.notify("No toggleterms are open yet", "info") end
+  if #terminals == 1 then return callback(terminals[1]) end
+  vim.ui.select(terminals, {
+    prompt = prompt,
+    format_item = function(term) return term.id .. ": " .. term:_display_name() end,
+  }, function(term)
+    if not term then return end
+    callback(term)
+  end)
+end
+
 if _G.IS_TEST then
   function M.__reset()
     for _, term in pairs(terminals) do

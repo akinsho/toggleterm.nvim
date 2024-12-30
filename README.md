@@ -304,6 +304,10 @@ You can "send lines" to the toggled terminals with the following commands:
 - `:ToggleTermSendCurrentLine <T_ID>`: sends the whole line where you are standing with your cursor
 - `:ToggleTermSendVisualLines <T_ID>`: sends all the (whole) lines in your visual selection
 - `:ToggleTermSendVisualSelection <T_ID>`: sends only the visually selected text (this can be a block of text or a selection in a single line)
+- `:TermSend`: will prompt you to select the terminal to send the lines to and will infer what to send based on the current mode:
+  - `n`: the current line
+  - `V`: the visual line selection
+  - `v`: the visual selection
 
 (`<T_ID` is an optional terminal ID parameter, which defines where should we send the lines.
 If the parameter is not provided, then the default is the `first terminal`)
