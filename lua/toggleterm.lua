@@ -334,7 +334,7 @@ local function setup_autocommands(_)
     callback = handle_term_enter,
   })
 
-  api.nvim_create_autocmd("WinLeave", {
+  api.nvim_create_autocmd("BufLeave", {
     pattern = toggleterm_pattern,
     group = AUGROUP,
     callback = handle_term_leave,
