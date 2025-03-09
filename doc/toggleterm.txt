@@ -1,4 +1,4 @@
-*toggleterm.txt*       For Neovim >= 0.8.0       Last change: 2024 December 30
+*toggleterm.txt*         For Neovim >= 0.8.0        Last change: 2025 March 09
 
 ==============================================================================
 Table of Contents                               *toggleterm-table-of-contents*
@@ -292,12 +292,14 @@ You can send commands to a terminal without opening its window by using the
 
 see |expand()| for more details
 
+
 TERMNEW ~
 
 This command allows you to open a new terminal at the next available count.
-It's helpful in combination with `TermSelect` (see below) to work with
+It’s helpful in combination with `TermSelect` (see below) to work with
 terminals without needing to remember numbers. The `size`, `dir`, `direction`
 and `name` arguments work the same as in `ToggleTerm`.
+
 
 TERMSELECT ~
 
