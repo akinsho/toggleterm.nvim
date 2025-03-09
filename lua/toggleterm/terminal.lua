@@ -64,6 +64,7 @@ local terminals = {}
 --- @field display_name string?
 --- @field hidden boolean? whether or not to include this terminal in the terminals list
 --- @field close_on_exit boolean? whether or not to close the terminal window when the process exits
+--- @field close_on_exit_success boolean? whether or not to close the terminal window only when the process exits with 0
 --- @field auto_scroll boolean? whether or not to scroll down on terminal output
 --- @field float_opts table<string, any>?
 --- @field on_stdout fun(t: Terminal, job: number, data: string[]?, name: string?)?
@@ -87,6 +88,7 @@ local terminals = {}
 --- @field count number the count that triggers that specific terminal
 --- @field hidden boolean whether or not to include this terminal in the terminals list
 --- @field close_on_exit boolean? whether or not to close the terminal window when the process exits
+--- @field close_on_exit_success boolean? whether or not to close the terminal window only when the process exits with 0
 --- @field auto_scroll boolean? whether or not to scroll down on terminal output
 --- @field float_opts table<string, any>?
 --- @field display_name string?
@@ -220,6 +222,9 @@ function Terminal:new(term)
   term.on_exit = vim.F.if_nil(term.on_exit, conf.on_exit)
   term.__state = { mode = "?" }
   if term.close_on_exit == nil then term.close_on_exit = conf.close_on_exit end
+  if term.close_on_exit_success == nil then
+    term.close_on_exit_success = conf.close_on_exit_success
+  end
   -- Add the newly created terminal to the list of all terminals
   ---@diagnostic disable-next-line: return-type-mismatch
   return setmetatable(term, self)
@@ -360,13 +365,17 @@ end
 --- Handle when a terminal process exits
 ---@param term Terminal
 local function __handle_exit(term)
-  return function(...)
-    if term.on_exit then term:on_exit(...) end
-    if term.close_on_exit then
-      term:close()
-      if api.nvim_buf_is_loaded(term.bufnr) then
-        api.nvim_buf_delete(term.bufnr, { force = true })
-      end
+  local function close()
+    term:close()
+    if api.nvim_buf_is_loaded(term.bufnr) then api.nvim_buf_delete(term.bufnr, { force = true }) end
+  end
+
+  return function(job, exit_code, name)
+    if term.on_exit then term:on_exit(job, exit_code, name) end
+    if term.close_on_exit_success then
+      if exit_code == 0 then close() end
+    elseif term.close_on_exit then
+      close()
     end
   end
 end

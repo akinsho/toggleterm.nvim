@@ -182,6 +182,7 @@ what options are available. It is not written to be used as is.
       persist_mode = true, -- if set to true (default) the previous terminal mode will be remembered
       direction = 'vertical' | 'horizontal' | 'tab' | 'float',
       close_on_exit = true, -- close the terminal window when the process exits
+      close_on_exit_success = true, -- close the terminal window only when the process exits with 0
       clear_env = false, -- use only environmental variables from `env`, passed to jobstart()
        -- Change the default shell. Can be a string or a function returning a string
       shell = vim.o.shell,
@@ -451,6 +452,7 @@ Each terminal can take the following arguments:
       direction = string -- the layout for the terminal, same as the main config options
       dir = string -- the directory for the terminal
       close_on_exit = bool -- close the terminal window when the process exits
+      close_on_exit_success = bool, -- close the terminal window only when the process exits with 0
       highlights = table -- a table with highlights
       env = table -- key:value table with environmental variables passed to jobstart()
       clear_env = bool -- use only environmental variables from `env`, passed to jobstart()
