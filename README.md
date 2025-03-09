@@ -126,7 +126,7 @@ I'm also going to be pretty conservative about what I add.
 
 This plugin must be explicitly enabled by using `require("toggleterm").setup{}`
 
-Setting the `open_mapping` key to use for toggling the terminal(s) will set up mappings for _normal_ mode. The `open_mapping` can be a key string or an array of key strings. 
+Setting the `open_mapping` key to use for toggling the terminal(s) will set up mappings for _normal_ mode. The `open_mapping` can be a key string or an array of key strings.
 If you prefix the mapping with a number that particular terminal will be opened. Otherwise if a prefix is not set, then the last toggled terminal will be opened. In case there are multiple terminals opened they'll all be closed, and on the next mapping key they'll be restored.
 
 If you set the `insert_mappings` key to `true`, the mapping will also take effect in insert mode; similarly setting `terminal_mappings` to `true` will have the mappings take effect in the opened terminal.
@@ -473,7 +473,7 @@ function _lazygit_toggle()
   lazygit:toggle()
 end
 
-vim.api.nvim_set_keymap("n", "<leader>g", "<cmd>lua _lazygit_toggle()<CR>", {noremap = true, silent = true})
+vim.api.nvim_set_keymap({ "n", "t" }, "<leader>g", "<cmd>lua _lazygit_toggle()<CR>", {noremap = true, silent = true})
 ```
 
 This will create a new terminal, but the specified command is not being run immediately.
@@ -516,7 +516,7 @@ function _lazygit_toggle()
   lazygit:toggle()
 end
 
-vim.api.nvim_set_keymap("n", "<leader>g", "<cmd>lua _lazygit_toggle()<CR>", {noremap = true, silent = true})
+vim.api.nvim_set_keymap({ "n", "t" }, "<leader>g", "<cmd>lua _lazygit_toggle()<CR>", {noremap = true, silent = true})
 ```
 
 **WARNING**: do not use any of the private functionality of the terminal or other non-public parts of the API as these

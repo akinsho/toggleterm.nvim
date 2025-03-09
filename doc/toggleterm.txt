@@ -55,7 +55,7 @@ Using vim-plug <https://github.com/junegunn/vim-plug> in vimscript
 
 >vim
     Plug 'akinsho/toggleterm.nvim', {'tag' : '*'}
-    
+
     lua require("toggleterm").setup()
 <
 
@@ -124,7 +124,7 @@ alternatively you can do this manually (not recommended but, your prerogative)
     " set
     autocmd TermEnter term://*toggleterm#*
           \ tnoremap <silent><c-t> <Cmd>exe v:count1 . "ToggleTerm"<CR>
-    
+
     " By applying the mappings this way you can pass a count to your
     " mapping to open a specific window.
     " For example: 2<C-t> will open terminal 2
@@ -330,7 +330,7 @@ Alternatively, for more fine-grained control and use in mappings, in lua:
         -- Replace with these for the other two options
         -- require("toggleterm").send_lines_to_terminal("visual_lines", trim_spaces, { args = vim.v.count })
         -- require("toggleterm").send_lines_to_terminal("visual_selection", trim_spaces, { args = vim.v.count })
-    
+
     -- For use as an operator map:
     -- Send motion to terminal
     vim.keymap.set("n", [[<leader><c-\>]], function()
@@ -429,7 +429,7 @@ easier once toggled, whilst still keeping it open.
       vim.keymap.set('t', '<C-l>', [[<Cmd>wincmd l<CR>]], opts)
       vim.keymap.set('t', '<C-w>', [[<C-\><C-n><C-w>]], opts)
     end
-    
+
     -- if you only want these mappings for toggle term use term://*toggleterm#* instead
     vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
 <
@@ -473,12 +473,12 @@ CUSTOM TERMINAL USAGE
 >lua
     local Terminal  = require('toggleterm.terminal').Terminal
     local lazygit = Terminal:new({ cmd = "lazygit", hidden = true })
-    
+
     function _lazygit_toggle()
       lazygit:toggle()
     end
-    
-    vim.api.nvim_set_keymap("n", "<leader>g", "<cmd>lua _lazygit_toggle()<CR>", {noremap = true, silent = true})
+
+    vim.api.nvim_set_keymap({ "n", "t" }, "<leader>g", "<cmd>lua _lazygit_toggle()<CR>", {noremap = true, silent = true})
 <
 
 This will create a new terminal, but the specified command is not being run
@@ -518,12 +518,12 @@ You can also set a custom layout for a terminal.
         vim.cmd("startinsert!")
       end,
     })
-    
+
     function _lazygit_toggle()
       lazygit:toggle()
     end
-    
-    vim.api.nvim_set_keymap("n", "<leader>g", "<cmd>lua _lazygit_toggle()<CR>", {noremap = true, silent = true})
+
+    vim.api.nvim_set_keymap({ "n", "t" }, "<leader>g", "<cmd>lua _lazygit_toggle()<CR>", {noremap = true, silent = true})
 <
 
 **WARNING**do not use any of the private functionality of the terminal or other
@@ -556,10 +556,10 @@ OPEN MULTIPLE TERMINALS SIDE-BY-SIDE ~
 
   Direction    Supported
   ------------ -----------
-  vertical     
-  horizontal   
-  tab          
-  float        
+  vertical
+  horizontal
+  tab
+  float
 Inyour first terminal, you need to leave the `TERMINAL` mode using C-\C-N which
 can be remapped to Esc for ease of use.
 
