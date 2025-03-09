@@ -258,6 +258,18 @@ function M.send_lines_to_terminal(selection_type, trim_spaces, cmd_data)
   api.nvim_win_set_cursor(current_window, { start_line, start_col - 1 })
 end
 
+function M.new_command(args)
+  local parsed = commandline.parse(args)
+  vim.validate({
+    size = { parsed.size, "number", true },
+    dir = { parsed.dir, "string", true },
+    direction = { parsed.direction, "string", true },
+    name = { parsed.name, "string", true },
+  })
+  if parsed.size then parsed.size = tonumber(parsed.size) end
+  M.new(parsed.size, parsed.dir, parsed.direction, parsed.name)
+end
+
 function M.toggle_command(args, count)
   local parsed = commandline.parse(args)
   vim.validate({
@@ -276,6 +288,15 @@ function _G.___toggleterm_winbar_click(id)
     if not term then return end
     term:toggle()
   end
+end
+
+--- Creates new terminal at the first available id
+--- @param size number?
+--- @param dir string?
+--- @param direction string?
+--- @param name string?
+function M.new(size, dir, direction, name)
+  toggle_nth_term(terms.next_id(), size, dir, direction, name)
 end
 
 --- If a count is provided we operate on the specific terminal buffer
@@ -418,6 +439,12 @@ local function setup_commands()
     "TermExec",
     function(opts) M.exec_command(opts.args, opts.count) end,
     { count = true, complete = commandline.term_exec_complete, nargs = "*" }
+  )
+
+  command(
+    "TermNew",
+    function(opts) M.new_command(opts.args) end,
+    { count = true, complete = commandline.toggle_term_complete, nargs = "*" }
   )
 
   command(

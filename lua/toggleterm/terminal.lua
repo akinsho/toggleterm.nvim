@@ -106,7 +106,7 @@ local Terminal = {}
 --- hasn't already been allocated e.g. in a list of {1,2,5,6} the next id should
 --- be 3 then 4 then 7
 ---@return integer
-local function next_id()
+function M.next_id()
   local all = M.get_all(true)
   for index, term in pairs(all) do
     if index ~= term.id then return index end
@@ -205,7 +205,7 @@ function Terminal:new(term)
   self.__index = self
   term.newline_chr = term.newline_chr or get_newline_chr()
   term.direction = term.direction or conf.direction
-  term.id = id or next_id()
+  term.id = id or M.next_id()
   term.display_name = term.display_name
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
   term.clear_env = vim.F.if_nil(term.clear_env, conf.clear_env)
@@ -228,7 +228,7 @@ end
 ---@package
 ---Add a terminal to the list of terminals
 function Terminal:__add()
-  if terminals[self.id] and terminals[self.id] ~= self then self.id = next_id() end
+  if terminals[self.id] and terminals[self.id] ~= self then self.id = M.next_id() end
   if not terminals[self.id] then terminals[self.id] = self end
   return self
 end
@@ -586,7 +586,7 @@ if _G.IS_TEST then
     end
   end
 
-  M.__next_id = next_id
+  M.__next_id = M.next_id
 end
 
 M.Terminal = Terminal
