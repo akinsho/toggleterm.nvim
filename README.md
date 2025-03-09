@@ -126,7 +126,7 @@ I'm also going to be pretty conservative about what I add.
 
 This plugin must be explicitly enabled by using `require("toggleterm").setup{}`
 
-Setting the `open_mapping` key to use for toggling the terminal(s) will set up mappings for _normal_ mode. The `open_mapping` can be a key string or an array of key strings. 
+Setting the `open_mapping` key to use for toggling the terminal(s) will set up mappings for _normal_ mode. The `open_mapping` can be a key string or an array of key strings.
 If you prefix the mapping with a number that particular terminal will be opened. Otherwise if a prefix is not set, then the last toggled terminal will be opened. In case there are multiple terminals opened they'll all be closed, and on the next mapping key they'll be restored.
 
 If you set the `insert_mappings` key to `true`, the mapping will also take effect in insert mode; similarly setting `terminal_mappings` to `true` will have the mappings take effect in the opened terminal.
@@ -195,6 +195,7 @@ require("toggleterm").setup{
   persist_mode = true, -- if set to true (default) the previous terminal mode will be remembered
   direction = 'vertical' | 'horizontal' | 'tab' | 'float',
   close_on_exit = true, -- close the terminal window when the process exits
+  close_on_exit_success = true, -- close the terminal window only when the process exits with 0
   clear_env = false, -- use only environmental variables from `env`, passed to jobstart()
    -- Change the default shell. Can be a string or a function returning a string
   shell = vim.o.shell,
@@ -448,6 +449,7 @@ Terminal:new {
   direction = string -- the layout for the terminal, same as the main config options
   dir = string -- the directory for the terminal
   close_on_exit = bool -- close the terminal window when the process exits
+  close_on_exit_success = bool -- close the terminal window only when the process exits with 0
   highlights = table -- a table with highlights
   env = table -- key:value table with environmental variables passed to jobstart()
   clear_env = bool -- use only environmental variables from `env`, passed to jobstart()
