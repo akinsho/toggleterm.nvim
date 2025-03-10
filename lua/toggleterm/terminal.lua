@@ -161,7 +161,7 @@ end
 ---Terminal buffer autocommands
 ---@param term Terminal
 local function setup_buffer_autocommands(term)
-  api.nvim_create_autocmd("TermClose", {
+  api.nvim_create_autocmd("BufDelete", {
     buffer = term.bufnr,
     group = AUGROUP,
     callback = function() delete(term.id) end,
