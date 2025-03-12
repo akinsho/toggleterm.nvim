@@ -59,6 +59,7 @@ local config = {
   shading_factor = constants.shading_amount,
   shading_ratio = constants.shading_ratio,
   shell = vim.o.shell,
+  quote_command = false,
   autochdir = false,
   auto_scroll = true,
   winbar = {

@@ -198,6 +198,7 @@ require("toggleterm").setup{
   clear_env = false, -- use only environmental variables from `env`, passed to jobstart()
    -- Change the default shell. Can be a string or a function returning a string
   shell = vim.o.shell,
+  quote_command = false, -- put quotes arround the command sent to the terminal, required for Windows using git bash
   auto_scroll = true, -- automatically scroll to the bottom on terminal output
   -- This field is only relevant if direction is set to 'float'
   float_opts = {
