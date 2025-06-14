@@ -116,7 +116,9 @@ local function handle_term_leave()
   local _, term = terms.identify()
   if not term then return end
   if config.persist_mode then term:persist_mode() end
-  if term:is_float() then term:close() end
+  if config.sticky_floats == false then
+      if term:is_float() then term:close() end
+  end
 end
 
 local function on_term_open()
