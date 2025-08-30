@@ -16,6 +16,8 @@ local commandline = lazy.require("toggleterm.commandline")
 local terms = require("toggleterm.terminal")
 
 local AUGROUP = "ToggleTermCommands"
+
+if not vim.g.__toggleterm_start_time then vim.g.__toggleterm_start_time = os.time() end
 -----------------------------------------------------------
 -- Export
 -----------------------------------------------------------
@@ -97,19 +99,33 @@ end
 
 local function handle_term_enter()
   local _, term = terms.identify()
-  if term then
-    --- FIXME: we have to reset the filetype here because it is reset by other plugins
-    --- i.e. telescope.nvim
-    if vim.bo[term.bufnr] ~= constants.FILETYPE then term:__set_ft_options() end
+  if not term then return end
+  --- FIXME: we have to reset the filetype here because it is reset by other plugins
+  --- i.e. telescope.nvim
+  if vim.bo[term.bufnr] ~= constants.FILETYPE then term:__set_ft_options() end
 
-    local closed = close_last_window(term)
-    if closed then return end
-    if config.persist_mode then
-      term:__restore_mode()
-    elseif config.start_in_insert then
-      term:set_mode(terms.mode.INSERT)
-    end
+  local closed = close_last_window(term)
+  if closed then return end
+  if config.persist_mode then
+    term:__restore_mode()
+    return
   end
+  if not config.start_in_insert then return end
+  -- When nvim starts up and restores a session including a toggle-term window,
+  -- we reach this condition, even if it will not be focused when startup
+  -- completes. For some reason, the mode change here would apply to the
+  -- eventually-focused window. So we need a further guard to prevent that.
+  -- Checking focused window doesn't work because the term window is briefly
+  -- focused as the plugin loads.
+  --
+  -- Thus: If the plugin has been loading for less than 2 seconds, assume it's
+  -- startup and don't change modes. Drawback is that we can't load a session
+  -- with focus on the terminal and have it start in insert mode.
+  --
+  -- FIXME: Find a better way to differentiate this situation.
+  if os.time() - (vim.g.__toggleterm_start_time or 0) < 2 then return end
+
+  term:set_mode(terms.mode.INSERT)
 end
 
 local function handle_term_leave()
