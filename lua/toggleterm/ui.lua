@@ -272,7 +272,8 @@ local curved = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
 --- @param opening boolean
 function M._get_float_config(term, opening)
   local opts = term.float_opts or {}
-  local border = opts.border == "curved" and curved or opts.border or "single"
+  local border = opts.border == "curved" and curved or opts.border
+  if vim.fn.has("nvim-0.11") == 0 and not border then border = "single" end
 
   local width = math.ceil(math.min(vim.o.columns, math.max(80, vim.o.columns - 20)))
   local height = math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 10)))
