@@ -233,14 +233,20 @@ function Terminal:__add()
   return self
 end
 
-function Terminal:is_float() return self.direction == "float" and ui.is_float(self.window) end
+function Terminal:is_float()
+  return self.direction == "float"
+    and (not self.window or ui.is_float(self.window))
+end
 
 function Terminal:is_split()
   return (self.direction == "vertical" or self.direction == "horizontal")
-    and not ui.is_float(self.window)
+    and not (self.window and ui.is_float(self.window))
 end
 
-function Terminal:is_tab() return self.direction == "tab" and not ui.is_float(self.window) end
+function Terminal:is_tab()
+  return self.direction == "tab"
+    and not (self.window and ui.is_float(self.window))
+end
 
 function Terminal:resize(size)
   if self:is_split() then ui.resize_split(self, size) end
