@@ -345,6 +345,7 @@ end
 
 ---@param term Terminal
 local function close_tab(term)
+  if not term.window or not api.nvim_win_is_valid(term.window) then return end
   if #vim.api.nvim_list_tabpages() == 1 then
     return utils.notify("You cannot close the last tab! This will exit neovim", "error")
   end
