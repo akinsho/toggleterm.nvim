@@ -18,6 +18,7 @@ local api = vim.api
 
 local origin_window
 local persistent = {}
+local backdrops = {}
 
 ---@alias TerminalView {terminals: number[], focus_term_id: number}
 
@@ -296,7 +297,7 @@ function M._get_float_config(term, opening)
     width = width,
     height = height,
     border = opening and border or nil,
-    zindex = opts.zindex or nil,
+    zindex = opts.zindex or 50,
   }
   if version.major > 0 or version.minor >= 9 then
     float_config.title_pos = term.display_name and opts.title_pos or nil
@@ -366,12 +367,77 @@ local function close_split(term)
   end
 end
 
+---@param term Terminal
+-- Adapted from `lazy.nvim`
+local function create_backdrop(term)
+  local opts = term.float_opts or {}
+  local backdrop_opacity = opts.backdrop
+
+  if not backdrop_opacity or not vim.o.termguicolors then return end
+
+  local normal, has_bg
+  if vim.fn.has("nvim-0.9.0") == 0 then
+    normal = vim.api.nvim_get_hl_by_name("Normal", true)
+    has_bg = normal and normal.background ~= nil
+  else
+    normal = vim.api.nvim_get_hl(0, { name = "Normal" })
+    has_bg = normal and normal.bg ~= nil
+  end
+
+  if not has_bg or backdrop_opacity >= 100 then return end
+
+  local buf = api.nvim_create_buf(false, true)
+  local win = api.nvim_open_win(buf, false, {
+    relative = "editor",
+    width = vim.o.columns,
+    height = vim.o.lines,
+    row = 0,
+    col = 0,
+    style = "minimal",
+    focusable = false,
+    zindex = (opts.zindex or 50) - 1,
+  })
+
+  vim.api.nvim_set_hl(0, "ToggleTermBackdrop", { bg = "#000000", default = true })
+  utils.wo_setlocal(win, "winhighlight", "Normal:ToggleTermBackdrop")
+  utils.wo_setlocal(win, "winblend", backdrop_opacity)
+  vim.bo[buf].buftype = "nofile"
+  vim.bo[buf].filetype = "toggleterm_backdrop"
+
+  backdrops[term.id] = { buf = buf, win = win }
+end
+
+---@param term Terminal
+local function destroy_backdrop(term)
+  local b = backdrops[term.id]
+  if not b then return end
+  backdrops[term.id] = nil
+
+  vim.schedule(function()
+    if b.win and api.nvim_win_is_valid(b.win) then api.nvim_win_close(b.win, true) end
+    if b.buf and api.nvim_buf_is_valid(b.buf) then api.nvim_buf_delete(b.buf, { force = true }) end
+  end)
+end
+
+---@param term Terminal
+local function resize_backdrop(term)
+  local b = backdrops[term.id]
+  if not b then return end
+  if b.win and api.nvim_win_is_valid(b.win) then
+    api.nvim_win_set_config(b.win, {
+      width = vim.o.columns,
+      height = vim.o.lines,
+    })
+  end
+end
+
 ---Open a floating window
 ---@param term Terminal
 function M.open_float(term)
   local opts = term.float_opts or {}
   local valid_buf = term.bufnr and api.nvim_buf_is_valid(term.bufnr)
   local buf = valid_buf and term.bufnr or api.nvim_create_buf(false, false)
+  create_backdrop(term)
   local win = api.nvim_open_win(buf, true, M._get_float_config(term, true))
 
   term.window, term.bufnr = win, buf
@@ -387,6 +453,7 @@ end
 function M.update_float(term)
   if not vim.api.nvim_win_is_valid(term.window) then return end
   vim.api.nvim_win_set_config(term.window, M._get_float_config(term, false))
+  resize_backdrop(term)
 end
 
 ---Close given terminal's ui
@@ -399,6 +466,7 @@ function M.close(term)
   elseif term.window and api.nvim_win_is_valid(term.window) then
     api.nvim_win_close(term.window, true)
   end
+  destroy_backdrop(term)
 end
 
 ---Resize a split window
