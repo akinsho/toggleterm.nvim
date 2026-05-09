@@ -396,6 +396,7 @@ local function create_backdrop(term)
     style = "minimal",
     focusable = false,
     zindex = (opts.zindex or 50) - 1,
+    border = "none",
   })
 
   vim.api.nvim_set_hl(0, "ToggleTermBackdrop", { bg = "#000000", default = true })
