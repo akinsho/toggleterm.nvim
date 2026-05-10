@@ -61,6 +61,7 @@ local config = {
   shell = vim.o.shell,
   autochdir = false,
   auto_scroll = true,
+  conditional_auto_scroll = false,
   winbar = {
     enabled = false,
     name_formatter = function(term) return fmt("%d:%s", term.id, term:_display_name()) end,
