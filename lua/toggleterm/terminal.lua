@@ -313,7 +313,13 @@ end
 
 function Terminal:scroll_bottom()
   if not api.nvim_buf_is_loaded(self.bufnr) or not api.nvim_buf_is_valid(self.bufnr) then return end
-  if ui.term_has_open_win(self) then api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom) end
+  if ui.term_has_open_win(self) then
+    if self.conditional_auto_scroll then
+      local cursor = vim.api.nvim_win_get_cursor(self.window)
+      if cursor[1] < vim.api.nvim_buf_line_count(self.bufnr) then return end
+    end
+    api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom)
+  end
 end
 
 function Terminal:is_focused() return self.window == api.nvim_get_current_win() end
@@ -383,14 +389,7 @@ end
 function Terminal:__make_output_handler(handler)
   if self.auto_scroll or handler then
     return function(...)
-      if self.auto_scroll then
-        if self.conditional_auto_scroll then
-          local cursor = vim.api.nvim_win_get_cursor(self.window)
-          if cursor[1] == vim.api.nvim_buf_line_count(self.bufnr) then self:scroll_bottom() end
-        else
-          self:scroll_bottom()
-        end
-      end
+      if self.auto_scroll then self:scroll_bottom() end
       if handler then handler(self, ...) end
     end
   end
