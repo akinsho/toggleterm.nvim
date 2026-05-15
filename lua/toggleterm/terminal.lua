@@ -88,6 +88,7 @@ local terminals = {}
 --- @field hidden boolean whether or not to include this terminal in the terminals list
 --- @field close_on_exit boolean? whether or not to close the terminal window when the process exits
 --- @field auto_scroll boolean? whether or not to scroll down on terminal output
+--- @field conditional_auto_scroll boolean? whether to pause autoscrolling while navigating terminal buffer
 --- @field float_opts table<string, any>?
 --- @field display_name string?
 --- @field env table<string, string> environmental variables passed to jobstart()
@@ -210,6 +211,8 @@ function Terminal:new(term)
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
   term.clear_env = vim.F.if_nil(term.clear_env, conf.clear_env)
   term.auto_scroll = vim.F.if_nil(term.auto_scroll, conf.auto_scroll)
+  term.conditional_auto_scroll =
+    vim.F.if_nil(term.conditional_auto_scroll, conf.conditional_auto_scroll)
   term.env = vim.F.if_nil(term.env, conf.env)
   term.hidden = vim.F.if_nil(term.hidden, false)
   term.on_create = vim.F.if_nil(term.on_create, conf.on_create)
@@ -310,7 +313,13 @@ end
 
 function Terminal:scroll_bottom()
   if not api.nvim_buf_is_loaded(self.bufnr) or not api.nvim_buf_is_valid(self.bufnr) then return end
-  if ui.term_has_open_win(self) then api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom) end
+  if ui.term_has_open_win(self) then
+    if self.conditional_auto_scroll then
+      local cursor = vim.api.nvim_win_get_cursor(self.window)
+      if cursor[1] < vim.api.nvim_buf_line_count(self.bufnr) then return end
+    end
+    api.nvim_buf_call(self.bufnr, ui.scroll_to_bottom)
+  end
 end
 
 function Terminal:is_focused() return self.window == api.nvim_get_current_win() end
