@@ -5,6 +5,7 @@ local utils = require("toggleterm.utils")
 local M = {}
 
 local fmt = string.format
+local if_nil = vim.fn.has("nvim-0.13") == 1 and vim.nonnil or vim.F.if_nil
 
 local function shade(color, factor) return colors.shade_color(color, factor) end
 
@@ -86,8 +87,8 @@ local config = {
 local function get_highlights(conf)
   local user = conf.highlights
   local defaults = {
-    NormalFloat = vim.F.if_nil(user.NormalFloat, { link = "Normal" }),
-    FloatBorder = vim.F.if_nil(user.FloatBorder, { link = "Normal" }),
+    NormalFloat = if_nil(user.NormalFloat, { link = "Normal" }),
+    FloatBorder = if_nil(user.FloatBorder, { link = "Normal" }),
     StatusLine = { gui = "NONE" },
     StatusLineNC = { cterm = "italic", gui = "NONE" },
   }
