@@ -13,6 +13,7 @@ local constants = lazy.require("toggleterm.constants")
 local api = vim.api
 local fmt = string.format
 local fn = vim.fn
+local if_nil = vim.fn.has("nvim-0.13") == 1 and vim.nonnil or vim.F.if_nil
 
 local mode = {
   INSERT = "i",
@@ -208,16 +209,16 @@ function Terminal:new(term)
   term.id = id or M.next_id()
   term.display_name = term.display_name
   term.float_opts = vim.tbl_deep_extend("keep", term.float_opts or {}, conf.float_opts)
-  term.clear_env = vim.F.if_nil(term.clear_env, conf.clear_env)
-  term.auto_scroll = vim.F.if_nil(term.auto_scroll, conf.auto_scroll)
-  term.env = vim.F.if_nil(term.env, conf.env)
-  term.hidden = vim.F.if_nil(term.hidden, false)
-  term.on_create = vim.F.if_nil(term.on_create, conf.on_create)
-  term.on_open = vim.F.if_nil(term.on_open, conf.on_open)
-  term.on_close = vim.F.if_nil(term.on_close, conf.on_close)
-  term.on_stdout = vim.F.if_nil(term.on_stdout, conf.on_stdout)
-  term.on_stderr = vim.F.if_nil(term.on_stderr, conf.on_stderr)
-  term.on_exit = vim.F.if_nil(term.on_exit, conf.on_exit)
+  term.clear_env = if_nil(term.clear_env, conf.clear_env)
+  term.auto_scroll = if_nil(term.auto_scroll, conf.auto_scroll)
+  term.env = if_nil(term.env, conf.env)
+  term.hidden = if_nil(term.hidden, false)
+  term.on_create = if_nil(term.on_create, conf.on_create)
+  term.on_open = if_nil(term.on_open, conf.on_open)
+  term.on_close = if_nil(term.on_close, conf.on_close)
+  term.on_stdout = if_nil(term.on_stdout, conf.on_stdout)
+  term.on_stderr = if_nil(term.on_stderr, conf.on_stderr)
+  term.on_exit = if_nil(term.on_exit, conf.on_exit)
   term.__state = { mode = "?" }
   if term.close_on_exit == nil then term.close_on_exit = conf.close_on_exit end
   -- Add the newly created terminal to the list of all terminals

@@ -15,6 +15,7 @@ local terms = lazy.require("toggleterm.terminal")
 local fn = vim.fn
 local fmt = string.format
 local api = vim.api
+local if_nil = vim.fn.has("nvim-0.13") == 1 and vim.nonnil or vim.F.if_nil
 
 local origin_window
 local persistent = {}
@@ -277,14 +278,14 @@ function M._get_float_config(term, opening)
   local width = math.ceil(math.min(vim.o.columns, math.max(80, vim.o.columns - 20)))
   local height = math.ceil(math.min(vim.o.lines, math.max(20, vim.o.lines - 10)))
 
-  width = vim.F.if_nil(M._resolve_size(opts.width, term), width)
-  height = vim.F.if_nil(M._resolve_size(opts.height, term), height)
+  width = if_nil(M._resolve_size(opts.width, term), width)
+  height = if_nil(M._resolve_size(opts.height, term), height)
 
   local row = math.ceil(vim.o.lines - height) * 0.5 - 1
   local col = math.ceil(vim.o.columns - width) * 0.5 - 1
 
-  row = vim.F.if_nil(M._resolve_size(opts.row, term), row)
-  col = vim.F.if_nil(M._resolve_size(opts.col, term), col)
+  row = if_nil(M._resolve_size(opts.row, term), row)
+  col = if_nil(M._resolve_size(opts.col, term), col)
 
   local version = vim.version()
 
