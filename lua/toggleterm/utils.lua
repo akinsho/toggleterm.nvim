@@ -132,4 +132,55 @@ function M.wo_setlocal(win, option, value)
   api.nvim_set_option_value(option, value, { scope = "local", win = win })
 end
 
+---Returns the list of non-shell child processes running under a terminal process tree
+---@param root_pid number
+---@return table<{pid: number, name: string}>
+function M.get_child_processes(root_pid)
+  if not root_pid or fn.executable("pgrep") ~= 1 then return {} end
+  local procs = {}
+  local known_shells = {
+    bash = true,
+    zsh = true,
+    fish = true,
+    sh = true,
+    dash = true,
+    ksh = true,
+    csh = true,
+    tcsh = true,
+  }
+
+  local function scan(p)
+    local handle = io.popen("pgrep -P " .. p .. " -l 2>/dev/null")
+    if not handle then return end
+    local out = handle:read("*a")
+    handle:close()
+
+    for line in out:gmatch("[^\r\n]+") do
+      local cpid, cname = line:match("^(%d+)%s+(.+)$")
+      if cpid and cname then
+        local base_name = cname:match("[^/]+$") or cname
+        if known_shells[base_name] then
+          -- It's a shell process (wrapper or subshell), check its children
+          scan(cpid)
+        else
+          local is_zombie = false
+          local stat_file = io.open("/proc/" .. cpid .. "/status", "r")
+          if stat_file then
+            local stat = stat_file:read("*a")
+            stat_file:close()
+            if stat and stat:match("State:%s+[Zz]") then is_zombie = true end
+          end
+
+          if not is_zombie then
+            table.insert(procs, { pid = tonumber(cpid), name = cname })
+          end
+        end
+      end
+    end
+  end
+
+  scan(root_pid)
+  return procs
+end
+
 return M

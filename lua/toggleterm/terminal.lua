@@ -516,6 +516,23 @@ function Terminal:toggle(size, direction)
   return self
 end
 
+---Get child processes currently running inside this terminal
+---@return table<{pid: number, name: string}>
+function Terminal:get_child_processes()
+  local pid = self.job_id and fn.jobpid(self.job_id)
+  if not pid and self.bufnr and api.nvim_buf_is_valid(self.bufnr) then
+    pid = vim.b[self.bufnr].terminal_job_pid
+  end
+  if not pid then return {} end
+  return utils.get_child_processes(pid)
+end
+
+---Check if this terminal has active child processes running
+---@return boolean
+function Terminal:has_child_processes()
+  return #self:get_child_processes() > 0
+end
+
 --- get the toggle term number from
 --- the name e.g. term://~/.dotfiles//3371887:/usr/bin/zsh;#toggleterm#1
 --- the number in this case is 1
@@ -577,6 +594,20 @@ function M.get_all(include_hidden)
   end
   table.sort(result, function(a, b) return a.id < b.id end)
   return result
+end
+
+---Get all terminals that have active child processes running
+---@param include_hidden boolean?
+---@return table<{term: Terminal, processes: table<{pid: number, name: string}>}>
+function M.get_running_children(include_hidden)
+  local running = {}
+  for _, term in ipairs(M.get_all(include_hidden)) do
+    local procs = term:get_child_processes()
+    if #procs > 0 then
+      table.insert(running, { term = term, processes = procs })
+    end
+  end
+  return running
 end
 
 if _G.IS_TEST then

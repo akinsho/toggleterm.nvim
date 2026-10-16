@@ -226,11 +226,41 @@ require("toggleterm").setup{
     -- instead of next to each other
     -- default = 0 which means the feature is turned off
     horizontal_breakpoint = 135,
-  }
+  },
+  exit_protection = {
+    enabled = false, -- prevent accidentally closing neovim if terminal child processes are running
+    prompt_message = "Active processes detected in terminal. Really quit?",
+    mapping = "ZZ", -- normal mode mapping to safely save and quit (or nil to disable)
+    overwrite_commands = true, -- alias :q, :qa, :wq, :x, etc. to safe quit alternatives
+  },
 }
 ```
 
 ### Usage
+
+### Exit Protection
+
+If you run tasks in ToggleTerm (such as compilations, tests, dev servers), exiting Neovim (`:q`, `:qa`, `ZZ`) normally kills these background processes without warning.
+
+When `exit_protection.enabled = true`, ToggleTerm inspects the process tree of your active terminals. If an interactive shell has running child processes, it prompts for confirmation before closing Neovim:
+
+```lua
+require("toggleterm").setup({
+  exit_protection = {
+    enabled = true,
+    prompt_message = "Active processes detected in terminal. Really quit?",
+    mapping = "ZZ",
+    overwrite_commands = true,
+  },
+})
+```
+
+Commands provided:
+- `:ToggleTermSafeQuit` (`:q` alias)
+- `:ToggleTermSafeQuitAll` (`:qa` alias)
+- `:ToggleTermSafeWriteQuit` (`:wq` / `:x` alias)
+- `:ToggleTermSafeWriteQuitAll` (`:wqa` / `:xa` alias)
+Forced commands with bang (`!`) bypass confirmation.
 
 ### `ToggleTerm`
 

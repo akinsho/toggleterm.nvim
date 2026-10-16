@@ -14,8 +14,11 @@ local function shade(color, factor) return colors.shade_color(color, factor) end
 ---@field name_formatter fun(term: Terminal):string
 ---@field enabled boolean
 
---- @class Responsiveness
---- @field horizontal_breakpoint number
+--- @class ExitProtectionOpts
+--- @field enabled boolean
+--- @field prompt_message string?
+--- @field mapping string?
+--- @field overwrite_commands boolean?
 
 --- @class ToggleTermConfig
 --- @field size number
@@ -41,6 +44,7 @@ local function shade(color, factor) return colors.shade_color(color, factor) end
 --- @field autochdir boolean
 --- @field title_pos '"left"' | '"center"' | '"right"'
 --- @field responsiveness Responsiveness
+--- @field exit_protection ExitProtectionOpts
 
 ---@type ToggleTermConfig
 local config = {
@@ -71,6 +75,12 @@ local config = {
   },
   responsiveness = {
     horizontal_breakpoint = 0,
+  },
+  exit_protection = {
+    enabled = false,
+    prompt_message = "Active processes detected in terminal. Really quit?",
+    mapping = "ZZ",
+    overwrite_commands = true,
   },
 }
 

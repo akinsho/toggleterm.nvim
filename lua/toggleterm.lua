@@ -492,11 +492,129 @@ local function setup_commands()
   end, { nargs = "?", count = true })
 end
 
+local function is_last_window()
+  local count = 0
+  for _, win in ipairs(api.nvim_list_wins()) do
+    if api.nvim_win_is_valid(win) then
+      local cfg = api.nvim_win_get_config(win)
+      if cfg.relative == "" then count = count + 1 end
+    end
+  end
+  return count <= 1
+end
+
+---Safe quit handler that checks for running terminal child processes
+---@param opts { all: boolean?, write: boolean?, bang: boolean? }?
+function M.safe_quit(opts)
+  opts = opts or {}
+
+  if opts.bang then
+    if opts.write and vim.bo.modified and vim.bo.buftype == "" then vim.cmd("w") end
+    if opts.all then
+      vim.cmd("qa!")
+    else
+      vim.cmd("q!")
+    end
+    return
+  end
+
+  if not opts.all and not is_last_window() then
+    if opts.write and vim.bo.modified and vim.bo.buftype == "" then vim.cmd("update") end
+    vim.cmd("close")
+    return
+  end
+
+  local running = terms.get_running_children(true)
+  if #running > 0 then
+    local prompt = (config.exit_protection and config.exit_protection.prompt_message)
+      or "Active processes detected in terminal. Really quit?"
+    local msg = prompt .. "\n"
+    for _, item in ipairs(running) do
+      local proc_names = {}
+      for _, p in ipairs(item.processes) do
+        table.insert(proc_names, string.format("%s (PID %s)", p.name, p.pid))
+      end
+      local name = item.term.display_name or ("ToggleTerm #" .. item.term.id)
+      msg = msg .. string.format("\n  [%s] : %s", name, table.concat(proc_names, ", "))
+    end
+
+    local choice = fn.confirm(msg, "&Cancel\n&Quit anyway", 1, "Warning")
+    if choice ~= 2 then
+      utils.notify("Quit aborted to keep terminal processes running.", "info")
+      return
+    end
+  end
+
+  if opts.write then
+    vim.cmd("wqa")
+  elseif opts.all then
+    vim.cmd("qa")
+  else
+    vim.cmd("q")
+  end
+end
+
+local function setup_exit_protection(conf)
+  local ep = conf.exit_protection
+  if not ep or not ep.enabled then return end
+
+  local command = api.nvim_create_user_command
+  command("ToggleTermSafeQuit", function(opts)
+    M.safe_quit({ all = false, write = false, bang = opts.bang })
+  end, { bang = true, desc = "Quit window safely checking terminal processes" })
+
+  command("ToggleTermSafeQuitAll", function(opts)
+    M.safe_quit({ all = true, write = false, bang = opts.bang })
+  end, { bang = true, desc = "Quit all safely checking terminal processes" })
+
+  command("ToggleTermSafeWriteQuit", function(opts)
+    M.safe_quit({ all = false, write = true, bang = opts.bang })
+  end, { bang = true, desc = "Write and quit window safely" })
+
+  command("ToggleTermSafeWriteQuitAll", function(opts)
+    M.safe_quit({ all = true, write = true, bang = opts.bang })
+  end, { bang = true, desc = "Write and quit all safely" })
+
+  if ep.mapping then
+    utils.key_map("n", ep.mapping, "<Cmd>ToggleTermSafeWriteQuit<CR>", {
+      desc = "Save and quit safely",
+      silent = true,
+    })
+  end
+
+  if ep.overwrite_commands ~= false then
+    local abbrevs = {
+      q = "ToggleTermSafeQuit",
+      ["q!"] = "ToggleTermSafeQuit!",
+      qa = "ToggleTermSafeQuitAll",
+      ["qa!"] = "ToggleTermSafeQuitAll!",
+      qall = "ToggleTermSafeQuitAll",
+      ["qall!"] = "ToggleTermSafeQuitAll!",
+      wq = "ToggleTermSafeWriteQuit",
+      ["wq!"] = "ToggleTermSafeWriteQuit!",
+      wqa = "ToggleTermSafeWriteQuitAll",
+      ["wqa!"] = "ToggleTermSafeWriteQuitAll!",
+      x = "ToggleTermSafeWriteQuit",
+      xa = "ToggleTermSafeWriteQuitAll",
+    }
+    for from, to in pairs(abbrevs) do
+      vim.cmd(string.format(
+        [[cnoreabbrev <expr> %s (getcmdtype() == ':' && getcmdline() ==# '%s') ? '%s' : '%s']],
+        from,
+        from,
+        to,
+        from
+      ))
+    end
+  end
+end
+
 function M.setup(user_prefs)
   local conf = config.set(user_prefs)
   setup_global_mappings()
   setup_autocommands(conf)
   setup_commands()
+  setup_exit_protection(conf)
 end
 
 return M
