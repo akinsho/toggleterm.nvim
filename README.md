@@ -226,11 +226,49 @@ require("toggleterm").setup{
     -- instead of next to each other
     -- default = 0 which means the feature is turned off
     horizontal_breakpoint = 135,
-  }
+  },
+  navigation = {
+    enabled = false, -- enable file jumping under cursor in normal mode
+    use_picker = true, -- use s1n7ax/nvim-window-picker if installed
+    open_mapping = "gf", -- open file in target window
+    split_mapping = "gF", -- open file in split
+    direct_mapping = "<leader>gf", -- open directly in previous window without picker
+    split_direction = "vertical", -- "vertical" | "horizontal"
+    close_terminal = true, -- close/hide terminal after opening file
+  },
 }
 ```
 
 ### Usage
+
+### File Navigation
+
+ToggleTerm can automatically detect file paths, line numbers, and column numbers under the cursor in normal mode (such as compiler errors, test failures, or log files) and jump directly to them:
+
+```lua
+require("toggleterm").setup({
+  navigation = {
+    enabled = true,
+    use_picker = true, -- uses s1n7ax/nvim-window-picker if installed
+    open_mapping = "gf", -- open in target window
+    split_mapping = "gF", -- open in split
+    direct_mapping = "<leader>gf", -- open in previous window without picker
+    split_direction = "vertical", -- "vertical" or "horizontal"
+    close_terminal = true, -- close/hide terminal after opening
+  },
+})
+```
+
+Supported formats:
+- `path/to/file:line:col` (e.g., `src/main.rs:42:15`)
+- `path/to/file:line` (e.g., `src/main.rs:42`)
+- `path/to/file`
+- Python stack traces (`File "app.py", line 123`)
+- Git diff paths (`a/file`, `b/file`)
+
+Commands:
+- `:ToggleTermOpenFile` (opens file under cursor in target window)
+- `:ToggleTermOpenFileSplit` (opens file under cursor in a split, accepts optional "horizontal" or "vertical")
 
 ### `ToggleTerm`
 

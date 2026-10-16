@@ -143,6 +143,8 @@ local function setup_buffer_mappings(bufnr)
   if mapping and config.terminal_mappings then
     utils.key_map("t", mapping, "<Cmd>ToggleTerm<CR>", { buffer = bufnr, silent = true })
   end
+  local nav = require("toggleterm.navigation")
+  nav.setup_terminal_mappings(bufnr, config.navigation)
 end
 
 ---@param id number terminal id

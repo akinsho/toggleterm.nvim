@@ -17,6 +17,15 @@ local function shade(color, factor) return colors.shade_color(color, factor) end
 --- @class Responsiveness
 --- @field horizontal_breakpoint number
 
+--- @class FileNavigationOpts
+--- @field enabled boolean
+--- @field use_picker boolean?
+--- @field open_mapping string?
+--- @field split_mapping string?
+--- @field direct_mapping string?
+--- @field split_direction '"horizontal"' | '"vertical"'?
+--- @field close_terminal boolean?
+
 --- @class ToggleTermConfig
 --- @field size number
 --- @field shade_filetypes string[]
@@ -41,6 +50,7 @@ local function shade(color, factor) return colors.shade_color(color, factor) end
 --- @field autochdir boolean
 --- @field title_pos '"left"' | '"center"' | '"right"'
 --- @field responsiveness Responsiveness
+--- @field navigation FileNavigationOpts
 
 ---@type ToggleTermConfig
 local config = {
@@ -71,6 +81,15 @@ local config = {
   },
   responsiveness = {
     horizontal_breakpoint = 0,
+  },
+  navigation = {
+    enabled = false,
+    use_picker = true,
+    open_mapping = "gf",
+    split_mapping = "gF",
+    direct_mapping = "<leader>gf",
+    split_direction = "vertical",
+    close_terminal = true,
   },
 }
 

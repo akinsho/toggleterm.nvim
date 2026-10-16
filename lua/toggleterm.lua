@@ -490,6 +490,19 @@ local function setup_commands()
       set_term_name(opts.args, term)
     end
   end, { nargs = "?", count = true })
+
+  command("ToggleTermOpenFile", function()
+    require("toggleterm.navigation").open_file({ force_split = false })
+  end, { desc = "ToggleTerm: open file under cursor in target window" })
+
+  command("ToggleTermOpenFileSplit", function(opts)
+    local dir = opts.args ~= "" and opts.args or nil
+    require("toggleterm.navigation").open_file({ force_split = true, split_direction = dir })
+  end, { nargs = "?", desc = "ToggleTerm: open file under cursor in split (vertical or horizontal)" })
+end
+
+function M.open_file(opts)
+  require("toggleterm.navigation").open_file(opts)
 end
 
 function M.setup(user_prefs)
